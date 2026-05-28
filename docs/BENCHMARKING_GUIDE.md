@@ -46,13 +46,13 @@ Every result JSON should include:
 `counter-backed-measured`:
 rocprofiler/rocprof counters are available and the record links to summary artifacts.
 
-`timing-only-measured`:
+`timing-only`:
 HIP-event timing and correctness are available, but profiler counters are not.
 This is still useful, but claims must stay tied to timing.
 
 `profile-attempted-blocked`:
-Profiler execution was attempted and blocked, commonly by `ERR_NVGPUCTRPERM` on
-hosted GPU systems.
+Profiler execution was attempted and blocked by host permissions, missing
+counter support, unavailable profiler tools, or runtime/container restrictions.
 
 `unmeasured`:
 The example is a template or static code comparison only.

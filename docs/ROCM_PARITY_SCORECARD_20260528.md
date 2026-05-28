@@ -39,3 +39,6 @@ use `negative example` when a custom HIP optimization loses.
 4. Keep CUDA-origin Top-K, PyTorch, and architecture notes as algorithm context
    only until ROCm runs attach AMD hardware, ROCm version, compiler flags, gfx
    target, timing, correctness, and evidence labels.
+
+See `docs/ROCM_MEASUREMENT_QUEUE.md` for the first command queue to run on an
+AMD/ROCm host.

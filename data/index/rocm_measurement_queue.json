@@ -1,0 +1,33 @@
+{
+  "schema_version": "0.1.0",
+  "doc": "docs/ROCM_MEASUREMENT_QUEUE.md",
+  "status": "blocked-in-current-workspace-no-rocm-toolchain",
+  "required_environment_commands": [
+    "python tools/collect_env.py",
+    "python tools/inspect_rocm_arch.py"
+  ],
+  "first_timing_only_tasks": [
+    "memory-coalesced-matrix-copy",
+    "block-reduction-sum",
+    "rowwise-softmax",
+    "block-topk-sampling",
+    "rocwmma-mfma-gemm"
+  ],
+  "first_library_baseline": {
+    "task_id": "rocwmma-mfma-gemm",
+    "baseline": "hipblaslt-hgemm",
+    "command": "python tools/run_library_baseline.py rocwmma-mfma-gemm:hipblaslt-hgemm --arch <gfx-target> --write-result"
+  },
+  "first_counter_backed_candidates": [
+    "memory-coalesced-matrix-copy",
+    "block-reduction-sum",
+    "rowwise-softmax",
+    "rocwmma-mfma-gemm"
+  ],
+  "evidence_rules": [
+    "Use timing-only for HIP-event timings without rocprofiler/rocprof counters.",
+    "Use counter-backed-measured only when profiler artifacts are attached.",
+    "Use negative example when a valid custom optimization loses.",
+    "Do not cite CUDA-origin measurements as ROCm evidence."
+  ]
+}

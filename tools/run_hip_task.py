@@ -15,6 +15,12 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 
 TASK_CONFIG = {
+    "memory-coalesced-matrix-copy": {
+        "harness": "harnesses/matrix_transform_benchmark.hip",
+        "defines": ["-DOP_COPY"],
+        "default_args": ["4096", "4096", "5", "30"],
+        "shape_label": lambda args: f"{args[0]}x{args[1]}",
+    },
     "vectorized-saxpy": {
         "harness": "harnesses/vector_saxpy_benchmark.hip",
         "defines": [],
