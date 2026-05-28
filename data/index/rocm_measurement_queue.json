@@ -43,6 +43,50 @@
       "task_id": "shared-memory-tiled-transpose",
       "hardware_id": "rx9070xt_gfx1201_rocm721_windows_20260528",
       "record": "data/records/shared_memory_tiled_transpose_gfx1201_20260528.jsonl"
+    },
+    {
+      "task_id": "rowwise-layernorm-rmsnorm",
+      "shape": "rows=4096 cols=1024 mode=rmsnorm",
+      "hardware_id": "rx9070xt_gfx1201_rocm721_windows_20260528",
+      "record": "data/records/rowwise_layernorm_rmsnorm_rmsnorm_gfx1201_20260528.jsonl"
+    },
+    {
+      "task_id": "rowwise-layernorm-rmsnorm",
+      "shape": "rows=4096 cols=1024 mode=layernorm",
+      "hardware_id": "rx9070xt_gfx1201_rocm721_windows_20260528",
+      "record": "data/records/rowwise_layernorm_rmsnorm_layernorm_gfx1201_20260528.jsonl"
+    },
+    {
+      "task_id": "block-prefix-scan",
+      "shape": "segments=65536 segment_size=256",
+      "hardware_id": "rx9070xt_gfx1201_rocm721_windows_20260528",
+      "record": "data/records/block_prefix_scan_gfx1201_20260528.jsonl"
+    },
+    {
+      "task_id": "histogram-privatized-atomics",
+      "shape": "n=16777216 input_pattern=skewed",
+      "hardware_id": "rx9070xt_gfx1201_rocm721_windows_20260528",
+      "record": "data/records/histogram_privatized_atomics_gfx1201_20260528.jsonl"
+    },
+    {
+      "task_id": "online-attention-forward",
+      "shape": "batch=1 heads=4 query=128 key=128 head_dim=64 causal=1",
+      "hardware_id": "rx9070xt_gfx1201_rocm721_windows_20260528",
+      "record": "data/records/online_attention_forward_gfx1201_20260528.jsonl"
+    },
+    {
+      "task_id": "small-fixed-gemm",
+      "shape": "batch=4096 M=16 N=16 K=16",
+      "hardware_id": "rx9070xt_gfx1201_rocm721_windows_20260528",
+      "record": "data/records/small_fixed_gemm_negative_gfx1201_20260528.jsonl",
+      "outcome": "negative example"
+    },
+    {
+      "task_id": "select-filter-compact",
+      "shape": "n=16777216 density=medium",
+      "hardware_id": "rx9070xt_gfx1201_rocm721_windows_20260528",
+      "record": "data/records/select_filter_compact_negative_gfx1201_20260528.jsonl",
+      "outcome": "negative example"
     }
   ],
   "blocked_timing_only_tasks": [
@@ -105,10 +149,10 @@
     "task_id": "rocwmma-mfma-gemm",
     "baseline": "hipblaslt-hgemm",
     "command": "python tools/run_library_baseline.py rocwmma-mfma-gemm:hipblaslt-hgemm --arch <gfx-target> --write-result",
-    "status": "build-blocked-in-windows-rocm-venv",
-    "reason": "hipblasLt.h was not found",
-    "blocked_result": "corpus/tasks/rocwmma-mfma-gemm/results/hipblaslt-build-blocked-gfx1201-20260528T174630Z.json",
-    "record": "data/records/hipblaslt_hgemm_gfx1201_build_blocked_20260528.jsonl"
+    "status": "link-blocked-in-windows-rocm-venv",
+    "reason": "hipblasLt.lib was not found after the bundled ROCm SDK include path allowed the harness to compile",
+    "blocked_result": "corpus/tasks/rocwmma-mfma-gemm/results/hipblaslt-link-blocked-gfx1201-20260528T185120Z.json",
+    "record": "data/records/hipblaslt_hgemm_gfx1201_link_blocked_20260528.jsonl"
   },
   "first_counter_backed_candidates": [
     "memory-coalesced-matrix-copy",

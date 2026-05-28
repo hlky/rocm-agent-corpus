@@ -47,18 +47,22 @@
   "artifacts": {
     "baseline": "source/baseline.hip",
     "optimized": "source/optimized.hip",
-    "harness": "../../../harnesses/small_gemm_benchmark.hip"
+    "harness": "../../../harnesses/small_gemm_benchmark.hip",
+    "results": [
+      "results/baseline-4096x16x16x16-20260528T184434Z.json",
+      "results/optimized-4096x16x16x16-20260528T184456Z.json"
+    ]
   },
   "verification": {
-    "status": "port-pending-rocm-run",
-    "method": "The harness computes a CPU FP32 reference for every output element and reports max_abs_error, max_rel_error, bad_count, and passed. Ported from the CUDA corpus; rerun on ROCm hardware before marking passed.",
+    "status": "passed-gfx1201-timing-only-negative",
+    "method": "The harness computes a CPU FP32 reference for every output element and reports max_abs_error, max_rel_error, bad_count, and passed. The 4096x16x16x16 gfx1201 run passed with max_abs_error=0 and bad_count=0.",
     "tolerances": {
       "max_abs_error": 0.001,
       "max_rel_error": 0.0001
     }
   },
   "benchmarking": {
-    "status": "rocm-measurement-pending",
+    "status": "negative-example-timing-only-gfx1201",
     "operation": "batched-small-fixed-sgemm",
     "required_metrics": [
       "median kernel duration",
@@ -84,7 +88,7 @@
   },
   "license": "Project seed example",
   "curation": {
-    "status": "ported-seed",
-    "notes": "Ported from the CUDA corpus on 2026-05-20. CUDA-origin timing artifacts were removed; rerun on ROCm hardware before making performance claims."
+    "status": "negative-example-timing-only",
+    "notes": "Ported from the CUDA corpus on 2026-05-20. Negative example: on 2026-05-28, AMD Radeon RX 9070 XT gfx1201 HIP-event timing measured 0.00170 ms baseline versus 0.00680 ms optimized for 4096 batched 16x16x16 FP32 GEMMs, speedup 0.250000x. The shared-memory seed is slower for this tiny shape; no rocprofiler/rocprof counters or vendor library baseline were collected."
   }
 }

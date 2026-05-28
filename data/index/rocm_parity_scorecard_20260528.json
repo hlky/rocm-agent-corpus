@@ -19,10 +19,10 @@
     "cuda_tasks": 85,
     "rocm_tasks": 85,
     "renamed_equivalents": 25,
-    "measured_rocm_records": 14
+    "measured_rocm_records": 21
   },
   "next_high_value_work": [
-    "Install or expose rocWMMA, hipBLASLt, and Composable Kernel dependencies, then rerun rocwmma-mfma-gemm optimized and library baselines.",
+    "Install or expose rocWMMA and a Windows-linkable hipBLASLt import library, then rerun rocwmma-mfma-gemm optimized and library baselines.",
     "Add matching quantized library or inference-engine baselines for fused-int4-dequant-gemv before making broader INT4 claims.",
     "Continue awkward-shape and tail-path sweeps for measured seed harnesses.",
     "Add matching library baseline records for hipCUB/rocPRIM, hipBLASLt/rocBLAS, Composable Kernel, MIOpen, and Triton.",

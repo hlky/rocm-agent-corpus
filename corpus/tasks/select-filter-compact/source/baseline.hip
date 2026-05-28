@@ -1,6 +1,6 @@
 #include <hip/hip_runtime.h>
 
-#include <cub/cub.hpp>
+#include <hipcub/hipcub.hpp>
 
 #include <cstddef>
 

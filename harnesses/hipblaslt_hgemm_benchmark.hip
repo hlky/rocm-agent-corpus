@@ -1,4 +1,10 @@
+#if __has_include(<hipblasLt.h>)
 #include <hipblasLt.h>
+#elif __has_include(<hipblaslt/hipblaslt.h>)
+#include <hipblaslt/hipblaslt.h>
+#else
+#error "hipBLASLt header not found"
+#endif
 #include <hip/hip_fp16.h>
 #include <hip/hip_runtime.h>
 
@@ -162,7 +168,7 @@ LtPlan create_plan(int m, int n, int k, size_t workspace_bytes, int requested_he
     std::exit(1);
   }
   plan.algo = heuristic_results.front().algo;
-  const hipblasPointerMode_t pointer_mode = HIPBLAS_POINTER_MODE_HOST;
+  const hipblasLtPointerMode_t pointer_mode = HIPBLASLT_POINTER_MODE_HOST;
   check_hipblas(hipblasLtMatmulDescSetAttribute(plan.op_desc,
                                               HIPBLASLT_MATMUL_DESC_POINTER_MODE,
                                               &pointer_mode,

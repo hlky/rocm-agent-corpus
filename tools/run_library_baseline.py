@@ -5,6 +5,8 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
+import site
 import shutil
 import subprocess
 import sys
@@ -19,6 +21,68 @@ def compiler_debug_flags() -> list[str]:
     if sys.platform.startswith("win"):
         return ["-gline-tables-only"]
     return ["-lineinfo"]
+
+
+def bundled_rocm_sdk_roots() -> list[Path]:
+    roots: list[Path] = []
+    for site_dir in site.getsitepackages():
+        root = Path(site_dir) / "_rocm_sdk_devel"
+        if root.exists():
+            roots.append(root)
+    return roots
+
+
+def bundled_rocm_include_flags() -> list[str]:
+    flags: list[str] = []
+    for root in bundled_rocm_sdk_roots():
+        include_dir = root / "include"
+        if include_dir.exists():
+            flags.append(f"-I{include_dir}")
+    return flags
+
+
+def bundled_rocm_library_flags() -> list[str]:
+    flags: list[str] = []
+    for root in bundled_rocm_sdk_roots():
+        lib_dir = root / "lib"
+        if lib_dir.exists():
+            flags.append(f"-L{lib_dir}")
+    return flags
+
+
+def bundled_rocm_library_link_args(names: list[str]) -> list[str]:
+    if sys.platform.startswith("win"):
+        return [f"-l{name}" for name in names]
+
+    args: list[str] = []
+    roots = bundled_rocm_sdk_roots()
+    for name in names:
+        selected = None
+        for root in roots:
+            lib_dir = root / "lib"
+            candidates = [
+                lib_dir / f"{name}.lib",
+                lib_dir / f"{name.lower()}.lib",
+            ]
+            if not sys.platform.startswith("win"):
+                candidates.extend(
+                    [
+                        lib_dir / f"lib{name}.dll.a",
+                        lib_dir / f"lib{name.lower()}.dll.a",
+                    ]
+                )
+            selected = next((candidate for candidate in candidates if candidate.exists()), None)
+            if selected is not None:
+                break
+        args.append(str(selected) if selected is not None else f"-l{name}")
+    return args
+
+
+def expose_bundled_rocm_runtime_bins() -> None:
+    bins = [root / "bin" for root in bundled_rocm_sdk_roots() if (root / "bin").exists()]
+    if not bins:
+        return
+    os.environ["PATH"] = os.pathsep.join(str(path) for path in bins) + os.pathsep + os.environ.get("PATH", "")
 
 
 def parse_args() -> argparse.Namespace:
@@ -64,6 +128,7 @@ def parse_json_stdout(stdout: str) -> dict:
 
 def main() -> int:
     args = parse_args()
+    expose_bundled_rocm_runtime_bins()
     if shutil.which("hipcc") is None:
         raise SystemExit("hipcc not found. Run this on a ROCm toolkit machine or a ROCm GPU host.")
 
@@ -82,14 +147,15 @@ def main() -> int:
         "-std=c++17",
         "-O3",
         *compiler_debug_flags(),
+        *bundled_rocm_include_flags(),
     ]
     if args.arch:
         compile_cmd.append(f"--offload-arch={args.arch}")
     compile_cmd.extend(
         [
             str(ROOT / "harnesses" / "hipblaslt_hgemm_benchmark.hip"),
-            "-lhipblasLt",
-            "-lhipblas",
+            *bundled_rocm_library_flags(),
+            *bundled_rocm_library_link_args(["hipblasLt", "hipblas"]),
             "-o",
             str(exe_path),
         ]

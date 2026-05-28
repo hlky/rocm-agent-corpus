@@ -45,18 +45,24 @@
   "artifacts": {
     "baseline": "source/baseline.hip",
     "optimized": "source/optimized.hip",
-    "harness": "../../../harnesses/layernorm_rmsnorm_benchmark.hip"
+    "harness": "../../../harnesses/layernorm_rmsnorm_benchmark.hip",
+    "results": [
+      "results/baseline-4096x1024-rmsnorm-20260528T184049Z.json",
+      "results/optimized-4096x1024-rmsnorm-20260528T184110Z.json",
+      "results/baseline-4096x1024-layernorm-20260528T184130Z.json",
+      "results/optimized-4096x1024-layernorm-20260528T184152Z.json"
+    ]
   },
   "verification": {
-    "status": "port-pending-rocm-run",
-    "method": "Compare HIP output against a double-precision CPU reference for RMSNorm or LayerNorm. Ported from the CUDA corpus; rerun on ROCm hardware before marking passed.",
+    "status": "passed-gfx1201-timing-only",
+    "method": "Compare HIP output against a double-precision CPU reference for RMSNorm or LayerNorm. The 4096x1024 RMSNorm and LayerNorm gfx1201 runs passed with bad_count=0.",
     "tolerances": {
       "max_abs_error": 0.0001,
       "max_rel_error": 0.001
     }
   },
   "benchmarking": {
-    "status": "rocm-measurement-pending",
+    "status": "timing-only-gfx1201",
     "operation": "rowwise-layernorm-rmsnorm",
     "required_metrics": [
       "median kernel duration",
@@ -82,7 +88,7 @@
   },
   "license": "Project seed example",
   "curation": {
-    "status": "ported-seed",
-    "notes": "Ported from the CUDA corpus on 2026-05-20. CUDA-origin timing artifacts were removed; rerun on ROCm hardware before making performance claims."
+    "status": "timing-only",
+    "notes": "Ported from the CUDA corpus on 2026-05-20. On 2026-05-28, AMD Radeon RX 9070 XT gfx1201 HIP-event timing measured 0.34740 ms baseline versus 0.05160 ms optimized for 4096x1024 RMSNorm, speedup 6.732558x; and 0.38725 ms baseline versus 0.07830 ms optimized for 4096x1024 LayerNorm, speedup 4.945722x. No rocprofiler/rocprof counters were collected."
   }
 }

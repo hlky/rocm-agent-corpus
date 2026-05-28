@@ -12,7 +12,7 @@ the ROCm corpus, without treating CUDA-origin measurements as ROCm evidence.
 | Architecture guidance | ROCm-native scaffolded | `docs/GPU_GFX_ARCHITECTURE_GUIDE.md`, `docs/ARCHITECTURE_LABS.md`, and `architecture/gfx*/README.md` use `gfx` targets, `hipcc`, rocprofiler/rocprof, and AMD GCN ISA evidence rules |
 | Runtime/library equivalents | scaffolded | HIP Graphs, hipRTC, RCCL, rocSHMEM, MIOpen, MIGraphX, hipBLASLt/rocBLAS, Composable Kernel, rocPRIM/hipCUB/rocThrust |
 | Harness equivalents | scaffolded | HIP harnesses exist for the CUDA seed harness families, but most have not been run on AMD hardware in this repo |
-| Evidence parity | started | `tools/summarize_results.py` reports fourteen ROCm optimization records, including tail/awkward-shape sweeps, rectangular copy, non-power-of-two softmax, odd-vocabulary top-k, one near-neutral `timing-only` vectorization result, and INT4 seed-baseline results; counter-backed evidence is still pending |
+| Evidence parity | started | `tools/summarize_results.py` reports twenty-one ROCm optimization records, including tail/awkward-shape sweeps, normalization, scan, histogram, attention, two negative timing-only examples, one near-neutral vectorization result, and INT4 seed-baseline results; counter-backed evidence is still pending |
 
 ## Gate Commands
 
@@ -29,16 +29,21 @@ use `negative example` when a custom HIP optimization loses.
 
 ## Next Highest-Value Parity Work
 
-1. Install or expose rocWMMA, hipBLASLt, and Composable Kernel dependencies,
+1. Install or expose rocWMMA and a Windows-linkable hipBLASLt import library,
    then rerun `rocwmma-mfma-gemm` optimized and library baselines.
    Add more same-hardware ROCm records for additional shape sweeps.
    `memory-coalesced-matrix-copy`, `shared-memory-tiled-transpose`,
-   `block-reduction-sum`, `rowwise-softmax`, `block-topk-sampling`,
-   `vectorized-saxpy`, and `fused-int4-dequant-gemv` now have first gfx1201
-   timing records.
+   `block-reduction-sum`, `rowwise-softmax`, `rowwise-layernorm-rmsnorm`,
+   `block-prefix-scan`, `histogram-privatized-atomics`,
+   `online-attention-forward`, `block-topk-sampling`, `vectorized-saxpy`,
+   `fused-int4-dequant-gemv`, `small-fixed-gemm`, and
+   `select-filter-compact` now have first gfx1201 timing records.
    Same-hardware shape sweeps now also cover rectangular copy, awkward-size
    reduction, non-power-of-two softmax columns, and odd-vocabulary top-k
    sampling.
+   The `small-fixed-gemm` and `select-filter-compact` measurements are
+   negative examples, so they should guide the next custom-kernel attempts
+   rather than be treated as wins.
    Add matching quantized library or inference-engine baselines for
    `fused-int4-dequant-gemv` before making broader INT4 claims.
    Continue awkward-shape and tail-path sweeps for measured seed harnesses.

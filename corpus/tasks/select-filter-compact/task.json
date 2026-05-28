@@ -9,6 +9,7 @@
     "filter",
     "compact",
     "cub",
+    "hipcub",
     "rocthrust",
     "prefix-sum",
     "library-baseline",
@@ -43,15 +44,19 @@
   "artifacts": {
     "baseline": "source/baseline.hip",
     "optimized": "source/optimized.hip",
-    "harness": "../../../harnesses/select_filter_compact_benchmark.hip"
+    "harness": "../../../harnesses/select_filter_compact_benchmark.hip",
+    "results": [
+      "results/baseline-16777216-medium-20260528T185024Z.json",
+      "results/optimized-16777216-medium-20260528T185045Z.json"
+    ]
   },
   "verification": {
-    "status": "harness-ready",
-    "method": "The harness builds unique integer inputs, validates selected count plus order-insensitive integer digest against a CPU oracle, and reports an unordered-equivalent output contract.",
+    "status": "passed-gfx1201-timing-only-negative",
+    "method": "The harness builds unique integer inputs, validates selected count plus order-insensitive integer digest against a CPU oracle, and reports an unordered-equivalent output contract. The 16777216-item medium-density gfx1201 runs passed with matching selected counts, sums, and xor hashes.",
     "tolerances": {}
   },
   "benchmarking": {
-    "status": "harness-ready",
+    "status": "negative-example-timing-only-gfx1201",
     "operation": "select-filter-compact",
     "required_metrics": [
       "median latency",
@@ -72,7 +77,7 @@
   },
   "license": "Project seed example",
   "curation": {
-    "status": "template-only",
-    "notes": "Wave 2 task now has a hipCUB DeviceSelect::Flagged baseline, custom unstable atomic compaction candidate, and HIP-event benchmark harness. No measured result is committed until a ROCm machine run writes result artifacts."
+    "status": "negative-example-timing-only",
+    "notes": "Wave 2 task has a hipCUB DeviceSelect::Flagged baseline, custom unstable atomic compaction candidate, and HIP-event benchmark harness. Negative example: on 2026-05-28, AMD Radeon RX 9070 XT gfx1201 timing measured 0.22920 ms hipCUB baseline versus 0.27850 ms custom global-atomic compaction for n=16777216 medium density, speedup 0.822980x. The custom candidate is slower and unordered-equivalent; no rocprofiler/rocprof counters were collected."
   }
 }

@@ -19,6 +19,11 @@ counters are attached yet.
 | `block-topk-sampling` | 1024x32768 k=4 temperature=0.8 | 8.291950 | 0.590200 | 14.049390x | `data/records/block_topk_sampling_gfx1201_20260528.jsonl` |
 | `vectorized-saxpy` | 16777216 fp32 elements | 0.337750 | 0.333600 | 1.012440x | `data/records/vectorized_saxpy_gfx1201_20260528.jsonl` |
 | `fused-int4-dequant-gemv` | 4096x4096 group_size=128 | 0.477550 | 0.087400 | 5.463959x | `data/records/fused_int4_dequant_gemv_gfx1201_20260528.jsonl` |
+| `rowwise-layernorm-rmsnorm` | 4096x1024 RMSNorm | 0.347400 | 0.051600 | 6.732558x | `data/records/rowwise_layernorm_rmsnorm_rmsnorm_gfx1201_20260528.jsonl` |
+| `rowwise-layernorm-rmsnorm` | 4096x1024 LayerNorm | 0.387250 | 0.078300 | 4.945722x | `data/records/rowwise_layernorm_rmsnorm_layernorm_gfx1201_20260528.jsonl` |
+| `block-prefix-scan` | 65536 segments x 256 fp32 | 6.423750 | 0.437950 | 14.667770x | `data/records/block_prefix_scan_gfx1201_20260528.jsonl` |
+| `histogram-privatized-atomics` | 16777216 skewed uint32 values | 0.662700 | 0.059800 | 11.081940x | `data/records/histogram_privatized_atomics_gfx1201_20260528.jsonl` |
+| `online-attention-forward` | 1x4x128x128x64 causal fp32 | 1.019550 | 0.129250 | 7.888201x | `data/records/online_attention_forward_gfx1201_20260528.jsonl` |
 
 ## Shape Sweep Measurements
 
@@ -32,13 +37,24 @@ counters are attached yet.
 | `rowwise-softmax` | 4096x1000 fp32 rows | 0.341050 | 0.071600 | 4.763268x | `data/records/rowwise_softmax_cols1000_gfx1201_20260528.jsonl` |
 | `block-topk-sampling` | 1024x1009 k=4 temperature=0.8 | 0.418300 | 0.181900 | 2.299615x | `data/records/block_topk_sampling_odd_vocab_gfx1201_20260528.jsonl` |
 
+## Negative Timing-Only Examples
+
+These are valid ROCm measurements where the attempted custom optimization did
+not improve speed.
+
+| Task | Shape | Baseline ms | Optimized ms | Speedup | Record |
+| --- | --- | ---: | ---: | ---: | --- |
+| `small-fixed-gemm` | 4096 batched 16x16x16 fp32 GEMMs | 0.001700 | 0.006800 | 0.250000x | `data/records/small_fixed_gemm_negative_gfx1201_20260528.jsonl` |
+| `select-filter-compact` | n=16777216 medium-density hipCUB vs custom atomic | 0.229200 | 0.278500 | 0.822980x | `data/records/select_filter_compact_negative_gfx1201_20260528.jsonl` |
+
 ## Partial Or Blocked Runs
 
 - `rocwmma-mfma-gemm`: scalar HIP baseline passed for 256x256x256 on gfx1201,
   but the optimized rocWMMA path is `build-blocked` in this venv because
   `rocwmma/rocwmma.hpp` is unavailable. No Matrix Core speedup is claimed.
 - `rocwmma-mfma-gemm:hipblaslt-hgemm`: the hipBLASLt library baseline is
-  `build-blocked` in this venv because `hipblasLt.h` is unavailable.
+  `link-blocked` in this venv. The bundled ROCm SDK include path lets the
+  harness compile, but `hipblasLt.lib` is unavailable for the Windows link.
 
 ## First Measurement Targets
 

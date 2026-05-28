@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import site
 import shutil
 import subprocess
 import sys
@@ -104,6 +105,15 @@ def compiler_debug_flags() -> list[str]:
     return ["-lineinfo"]
 
 
+def bundled_rocm_include_flags() -> list[str]:
+    flags: list[str] = []
+    for site_dir in site.getsitepackages():
+        include_dir = Path(site_dir) / "_rocm_sdk_devel" / "include"
+        if include_dir.exists():
+            flags.append(f"-I{include_dir}")
+    return flags
+
+
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("task_id", choices=sorted(TASK_CONFIG))
@@ -156,7 +166,14 @@ def main() -> int:
     exe_path = out_dir / exe_name
 
     variant_define = "-DVARIANT_BASELINE" if args.variant == "baseline" else "-DVARIANT_OPTIMIZED"
-    compile_cmd = ["hipcc", "-std=c++17", "-O3", *compiler_debug_flags(), variant_define]
+    compile_cmd = [
+        "hipcc",
+        "-std=c++17",
+        "-O3",
+        *compiler_debug_flags(),
+        *bundled_rocm_include_flags(),
+        variant_define,
+    ]
     compile_cmd.extend(config["defines"])
     if args.arch:
         compile_cmd.append(f"--offload-arch={args.arch}")

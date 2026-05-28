@@ -37,17 +37,21 @@
   "artifacts": {
     "baseline": "source/baseline.hip",
     "optimized": "source/optimized.hip",
-    "harness": "../../../harnesses/prefix_scan_benchmark.hip"
+    "harness": "../../../harnesses/prefix_scan_benchmark.hip",
+    "results": [
+      "results/baseline-65536x256-20260528T184216Z.json",
+      "results/optimized-65536x256-20260528T184240Z.json"
+    ]
   },
   "verification": {
-    "status": "port-pending-rocm-run",
-    "method": "Compare each segment against a CPU inclusive scan reference and count elements above tolerance. Ported from the CUDA corpus; rerun on ROCm hardware before marking passed.",
+    "status": "passed-gfx1201-timing-only",
+    "method": "Compare each segment against a CPU inclusive scan reference and count elements above tolerance. The 65536x256 gfx1201 run passed with max_abs_error=0 and bad_count=0.",
     "tolerances": {
       "max_abs_error": 1e-05
     }
   },
   "benchmarking": {
-    "status": "rocm-measurement-pending",
+    "status": "timing-only-gfx1201",
     "operation": "fixed-segment-inclusive-prefix-scan",
     "required_metrics": [
       "median kernel duration",
@@ -66,7 +70,7 @@
   },
   "license": "Project seed example",
   "curation": {
-    "status": "ported-seed",
-    "notes": "Ported from the CUDA corpus on 2026-05-20. CUDA-origin timing artifacts were removed; rerun on ROCm hardware before making performance claims."
+    "status": "timing-only",
+    "notes": "Ported from the CUDA corpus on 2026-05-20. On 2026-05-28, AMD Radeon RX 9070 XT gfx1201 HIP-event timing measured 6.42375 ms baseline versus 0.43795 ms optimized for 65536 segments of length 256, speedup 14.667770x. No rocprofiler/rocprof counters were collected."
   }
 }

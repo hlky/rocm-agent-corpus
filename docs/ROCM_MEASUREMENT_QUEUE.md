@@ -62,6 +62,17 @@ Completed first timing-only gfx1201 records:
 - `fused-int4-dequant-gemv`: 5.463959x one-CTA-per-row fused unpack/dequant
   GEMV over the one-thread-per-row seed baseline for 4096x4096 group_size=128.
   This is not a vendor-library or inference-engine baseline comparison.
+- `rowwise-layernorm-rmsnorm`: 6.732558x for 4096x1024 RMSNorm and 4.945722x
+  for 4096x1024 LayerNorm.
+- `block-prefix-scan`: 14.667770x for 65536 fixed segments of length 256.
+- `histogram-privatized-atomics`: 11.081940x for a 16777216-element skewed
+  256-bin histogram.
+- `online-attention-forward`: 7.888201x for 1x4x128x128x64 causal FP32
+  attention.
+- `small-fixed-gemm`: negative example, 0.250000x for the shared-memory seed
+  versus the scalar-per-output baseline on 4096 batched 16x16x16 FP32 GEMMs.
+- `select-filter-compact`: negative example, 0.822980x for custom global-atomic
+  compaction versus hipCUB DeviceSelect::Flagged at n=16777216 medium density.
 
 Completed first shape sweeps:
 
@@ -87,8 +98,9 @@ Blocked in the current Windows venv:
   available. Install or expose rocWMMA headers/libraries before claiming custom
   Matrix Core timing.
 - `rocwmma-mfma-gemm:hipblaslt-hgemm`: the hipBLASLt library baseline failed to
-  build because `hipblasLt.h` was not available. Install or expose hipBLASLt and
-  hipBLAS headers/libraries before using this library baseline.
+  link because `hipblasLt.lib` was not available. The runner can now find the
+  bundled ROCm SDK include path and compile the harness, but a Windows
+  hipBLASLt import library is still needed before using this library baseline.
 
 ## First Library Baseline
 

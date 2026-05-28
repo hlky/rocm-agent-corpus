@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import site
 import shutil
 import subprocess
 import sys
@@ -57,6 +58,15 @@ def compiler_debug_flags() -> list[str]:
     return ["-lineinfo"]
 
 
+def bundled_rocm_include_flags() -> list[str]:
+    flags: list[str] = []
+    for site_dir in site.getsitepackages():
+        include_dir = Path(site_dir) / "_rocm_sdk_devel" / "include"
+        if include_dir.exists():
+            flags.append(f"-I{include_dir}")
+    return flags
+
+
 def parse_json_stdout(stdout: str) -> dict:
     start = stdout.find("{")
     end = stdout.rfind("}")
@@ -93,6 +103,7 @@ def main() -> int:
         "-std=c++17",
         "-O3",
         *compiler_debug_flags(),
+        *bundled_rocm_include_flags(),
         variant_define,
         op_define,
     ]

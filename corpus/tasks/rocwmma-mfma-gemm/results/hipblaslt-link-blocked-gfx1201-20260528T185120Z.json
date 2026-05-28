@@ -1,0 +1,31 @@
+{
+  "schema_version": "0.1.0",
+  "task_id": "rocwmma-mfma-gemm",
+  "baseline_id": "hipblaslt-hgemm",
+  "variant": "library-baseline",
+  "operation": "rocwmma-hgemm-f32-accumulate",
+  "status": "link-blocked",
+  "evidence_label": "build-blocked",
+  "hardware_id": "rx9070xt_gfx1201_rocm721_windows_20260528",
+  "gfx_target": "gfx1201",
+  "captured_at": "2026-05-28T18:51:20+00:00",
+  "source_artifact": "harnesses/hipblaslt_hgemm_benchmark.hip",
+  "failure_stage": "link",
+  "error_summary": "lld-link: error: could not open 'hipblasLt.lib': no such file or directory",
+  "missing_dependency": "MSVC-compatible hipBLASLt import library hipblasLt.lib",
+  "build_command": [
+    "hipcc",
+    "-std=c++17",
+    "-O3",
+    "-gline-tables-only",
+    "-IH:\\dinoml_v2\\.venv\\rocm\\Lib\\site-packages\\_rocm_sdk_devel\\include",
+    "--offload-arch=gfx1201",
+    "H:\\rocm-agent-corpus\\harnesses\\hipblaslt_hgemm_benchmark.hip",
+    "-LH:\\dinoml_v2\\.venv\\rocm\\Lib\\site-packages\\_rocm_sdk_devel\\lib",
+    "-lhipblasLt",
+    "-lhipblas",
+    "-o",
+    "H:\\rocm-agent-corpus\\out\\library_baselines\\hipblaslt-hgemm\\benchmark.exe"
+  ],
+  "next_action": "Install or expose a MSVC-compatible hipBLASLt import library, or adjust the Windows ROCm SDK package/link mode, then rerun the hipBLASLt HGEMM baseline before comparing Matrix Core kernels."
+}

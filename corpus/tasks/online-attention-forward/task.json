@@ -48,24 +48,28 @@
       "Contiguous B,H,S,D layout only; no ragged batches, padding masks, dropout, rotary embedding, paged KV cache, or grouped-query attention yet",
       "The optimized seed is intended for head_dim <= 128 and uses a fixed 32-key tile with one CTA per query row",
       "Causal masking treats query positions as aligned to the suffix of the KV sequence, so query_length=1,key_length=N models decode at the latest token",
-      "The default 1x4x128x128x64 causal shape is a ROCm timing target; no ROCm result files are currently attached"
+      "The default 1x4x128x128x64 causal shape has a gfx1201 timing-only ROCm result attached"
     ]
   },
   "artifacts": {
     "baseline": "source/baseline.hip",
     "optimized": "source/optimized.hip",
-    "harness": "../../../harnesses/attention_forward_benchmark.hip"
+    "harness": "../../../harnesses/attention_forward_benchmark.hip",
+    "results": [
+      "results/baseline-b1h4q128k128d64-causal1-20260528T184522Z.json",
+      "results/optimized-b1h4q128k128d64-causal1-20260528T184544Z.json"
+    ]
   },
   "verification": {
-    "status": "port-pending-rocm-run",
-    "method": "The harness computes a CPU double-precision stable attention reference for the same scale and causal mask, then reports max_abs_error, max_rel_error, bad_count, and passed. Ported from the CUDA corpus; rerun on ROCm hardware before marking passed.",
+    "status": "passed-gfx1201-timing-only",
+    "method": "The harness computes a CPU double-precision stable attention reference for the same scale and causal mask, then reports max_abs_error, max_rel_error, bad_count, and passed. The 1x4x128x128x64 causal gfx1201 run passed with max_abs_error=0 and bad_count=0.",
     "tolerances": {
       "max_abs_error": 0.001,
       "max_rel_error": 0.001
     }
   },
   "benchmarking": {
-    "status": "rocm-measurement-pending",
+    "status": "timing-only-gfx1201",
     "operation": "scaled-dot-product-attention-forward",
     "required_metrics": [
       "median kernel duration",
@@ -91,7 +95,7 @@
   },
   "license": "Project seed example",
   "curation": {
-    "status": "ported-seed",
-    "notes": "Ported from the CUDA corpus on 2026-05-20. CUDA-origin timing artifacts were removed; rerun on ROCm hardware before making performance claims."
+    "status": "timing-only",
+    "notes": "Ported from the CUDA corpus on 2026-05-20. On 2026-05-28, AMD Radeon RX 9070 XT gfx1201 HIP-event timing measured 1.01955 ms baseline versus 0.12925 ms optimized for 1x4x128x128x64 causal FP32 attention, speedup 7.888201x. No rocprofiler/rocprof counters, CK, MIOpen, MIGraphX, Triton, or framework attention baselines were collected."
   }
 }
