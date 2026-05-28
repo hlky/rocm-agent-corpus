@@ -24,6 +24,8 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--warmup", type=int, default=10)
     parser.add_argument("--iters", type=int, default=50)
     parser.add_argument("--arch", default="", help="Optional hipcc arch, e.g. gfx1100")
+    parser.add_argument("--hardware-id", default="", help="Optional hardware metadata id to attach to result JSON")
+    parser.add_argument("--evidence-label", default="timing-only", help="Evidence label for written result JSON")
     parser.add_argument("--write-result", action="store_true", help="Write JSON output under the task results directory")
     parser.add_argument("--profile", action="store_true", help="Run with rocprof MemoryWorkloadAnalysis_Tables after timing")
     return parser.parse_args()
@@ -47,6 +49,20 @@ def run(command: list[str], cwd: Path | None = None) -> subprocess.CompletedProc
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
     )
+
+
+def compiler_debug_flags() -> list[str]:
+    if sys.platform.startswith("win"):
+        return ["-gline-tables-only"]
+    return ["-lineinfo"]
+
+
+def parse_json_stdout(stdout: str) -> dict:
+    start = stdout.find("{")
+    end = stdout.rfind("}")
+    if start < 0 or end < start:
+        raise json.JSONDecodeError("no JSON object found in benchmark stdout", stdout, 0)
+    return json.loads(stdout[start : end + 1])
 
 
 def main() -> int:
@@ -76,7 +92,7 @@ def main() -> int:
         "hipcc",
         "-std=c++17",
         "-O3",
-        "-lineinfo",
+        *compiler_debug_flags(),
         variant_define,
         op_define,
     ]
@@ -96,6 +112,9 @@ def main() -> int:
         print(compiled.stderr, file=sys.stderr)
     if compiled.returncode != 0:
         return compiled.returncode
+    if not exe_path.exists():
+        print(f"Expected benchmark executable was not created: {exe_path}", file=sys.stderr)
+        return 1
 
     bench_cmd = [
         str(exe_path),
@@ -116,8 +135,17 @@ def main() -> int:
         results_dir.mkdir(exist_ok=True)
         stamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
         result_path = results_dir / f"{args.variant}-{args.rows}x{args.cols}-{stamp}.json"
-        parsed = json.loads(bench.stdout)
+        parsed = parse_json_stdout(bench.stdout)
         parsed["task_id"] = args.task_id
+        parsed["evidence_label"] = args.evidence_label
+        if args.arch:
+            parsed["gfx_target"] = args.arch
+        if args.hardware_id:
+            parsed["hardware_id"] = args.hardware_id
+        parsed.setdefault(
+            "timer_scope",
+            "HIP events around the benchmark function call for the selected variant; allocation and host reference work are excluded",
+        )
         parsed["captured_at"] = datetime.now(timezone.utc).isoformat()
         parsed["source_artifact"] = source_rel
         parsed["build_command"] = compile_cmd

@@ -49,6 +49,8 @@ Completed first timing-only gfx1201 records:
 
 - `memory-coalesced-matrix-copy`: 13.948364x optimized over baseline for
   4096x4096 fp32 copy.
+- `shared-memory-tiled-transpose`: 22.077017x optimized over baseline for
+  4096x4096 fp32 transpose.
 - `block-reduction-sum`: 16.825280x optimized over baseline for a
   16777216-element fp32 sum.
 - `rowwise-softmax`: 7.958159x optimized over baseline for 4096x1024 fp32

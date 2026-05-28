@@ -13,6 +13,7 @@ counters are attached yet.
 | Task | Shape | Baseline ms | Optimized ms | Speedup | Record |
 | --- | --- | ---: | ---: | ---: | --- |
 | `memory-coalesced-matrix-copy` | 4096x4096 fp32 copy | 3.282050 | 0.235300 | 13.948364x | `data/records/memory_coalesced_matrix_copy_gfx1201_20260528.jsonl` |
+| `shared-memory-tiled-transpose` | 4096x4096 fp32 transpose | 14.533300 | 0.658300 | 22.077017x | `data/records/shared_memory_tiled_transpose_gfx1201_20260528.jsonl` |
 | `block-reduction-sum` | 16777216 fp32 elements | 36.872601 | 2.191500 | 16.825280x | `data/records/block_reduction_sum_gfx1201_20260528.jsonl` |
 | `rowwise-softmax` | 4096x1024 fp32 rows | 0.570600 | 0.071700 | 7.958159x | `data/records/rowwise_softmax_gfx1201_20260528.jsonl` |
 | `block-topk-sampling` | 1024x32768 k=4 temperature=0.8 | 8.291950 | 0.590200 | 14.049390x | `data/records/block_topk_sampling_gfx1201_20260528.jsonl` |
@@ -29,7 +30,6 @@ counters are attached yet.
 
 ## First Measurement Targets
 
-- `shared-memory-tiled-transpose` with `tools/run_matrix_task.py`.
 - `rocwmma-mfma-gemm` with both `tools/run_hip_task.py` and `tools/run_library_baseline.py` for hipBLASLt comparison.
 
 The INT4 GEMV result is a seed-baseline comparison only; attach a matching

@@ -38,6 +38,11 @@
       "hardware_id": "rx9070xt_gfx1201_rocm721_windows_20260528",
       "record": "data/records/fused_int4_dequant_gemv_gfx1201_20260528.jsonl",
       "scope": "seed-baseline comparison only; no matching quantized library baseline attached"
+    },
+    {
+      "task_id": "shared-memory-tiled-transpose",
+      "hardware_id": "rx9070xt_gfx1201_rocm721_windows_20260528",
+      "record": "data/records/shared_memory_tiled_transpose_gfx1201_20260528.jsonl"
     }
   ],
   "blocked_timing_only_tasks": [
