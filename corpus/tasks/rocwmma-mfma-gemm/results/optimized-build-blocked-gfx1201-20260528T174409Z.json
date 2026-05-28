@@ -1,0 +1,28 @@
+{
+  "schema_version": "0.1.0",
+  "task_id": "rocwmma-mfma-gemm",
+  "variant": "optimized",
+  "operation": "rocwmma-hgemm-f32-accumulate",
+  "status": "build-blocked",
+  "evidence_label": "build-blocked",
+  "hardware_id": "rx9070xt_gfx1201_rocm721_windows_20260528",
+  "gfx_target": "gfx1201",
+  "captured_at": "2026-05-28T17:44:09+00:00",
+  "source_artifact": "source/optimized.hip",
+  "failure_stage": "compile",
+  "error_summary": "fatal error: 'rocwmma/rocwmma.hpp' file not found",
+  "missing_dependency": "rocWMMA headers/libraries",
+  "build_command": [
+    "hipcc",
+    "-std=c++17",
+    "-O3",
+    "-gline-tables-only",
+    "-DVARIANT_OPTIMIZED",
+    "--offload-arch=gfx1201",
+    "H:\\rocm-agent-corpus\\corpus\\tasks\\rocwmma-mfma-gemm\\source\\optimized.hip",
+    "H:\\rocm-agent-corpus\\harnesses\\rocwmma_gemm_benchmark.hip",
+    "-o",
+    "H:\\rocm-agent-corpus\\out\\rocwmma-mfma-gemm\\optimized\\benchmark.exe"
+  ],
+  "next_action": "Install or expose rocWMMA headers in the ROCm environment, then rerun the optimized custom kernel and hipBLASLt library baseline before making Matrix Core performance claims."
+}

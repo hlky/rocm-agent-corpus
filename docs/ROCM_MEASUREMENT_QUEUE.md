@@ -56,6 +56,13 @@ Completed first timing-only gfx1201 records:
 - `block-topk-sampling`: 14.049390x optimized over baseline for 1024x32768
   k=4 temperature=0.8 top-k sampling.
 
+Blocked in the current Windows venv:
+
+- `rocwmma-mfma-gemm`: scalar HIP baseline passed for 256x256x256, but the
+  optimized rocWMMA path failed to build because `rocwmma/rocwmma.hpp` was not
+  available. Install or expose rocWMMA headers/libraries before claiming custom
+  Matrix Core timing.
+
 ## First Library Baseline
 
 Run the library baseline for the same GEMM shape before claiming a custom

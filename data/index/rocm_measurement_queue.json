@@ -6,9 +6,7 @@
     "python tools/collect_env.py",
     "python tools/inspect_rocm_arch.py"
   ],
-  "first_timing_only_tasks": [
-    "rocwmma-mfma-gemm"
-  ],
+  "first_timing_only_tasks": [],
   "completed_timing_only_tasks": [
     {
       "task_id": "memory-coalesced-matrix-copy",
@@ -29,6 +27,17 @@
       "task_id": "block-topk-sampling",
       "hardware_id": "rx9070xt_gfx1201_rocm721_windows_20260528",
       "record": "data/records/block_topk_sampling_gfx1201_20260528.jsonl"
+    }
+  ],
+  "blocked_timing_only_tasks": [
+    {
+      "task_id": "rocwmma-mfma-gemm",
+      "hardware_id": "rx9070xt_gfx1201_rocm721_windows_20260528",
+      "status": "optimized-build-blocked",
+      "reason": "rocwmma/rocwmma.hpp was not found in the Windows ROCm venv",
+      "baseline_result": "corpus/tasks/rocwmma-mfma-gemm/results/baseline-256x256x256-20260528T174335Z.json",
+      "blocked_result": "corpus/tasks/rocwmma-mfma-gemm/results/optimized-build-blocked-gfx1201-20260528T174409Z.json",
+      "record": "data/records/rocwmma_mfma_gemm_gfx1201_build_blocked_20260528.jsonl"
     }
   ],
   "first_library_baseline": {

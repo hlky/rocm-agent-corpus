@@ -29,8 +29,9 @@ use `negative example` when a custom HIP optimization loses.
 
 ## Next Highest-Value Parity Work
 
-1. Add more same-hardware ROCm records for seed harnesses:
-   `rocwmma-mfma-gemm` and additional shape sweeps.
+1. Install or expose rocWMMA and hipBLASLt/Composable Kernel dependencies, then
+   rerun `rocwmma-mfma-gemm` optimized and library baselines.
+   Add more same-hardware ROCm records for additional shape sweeps.
    `memory-coalesced-matrix-copy`, `block-reduction-sum`,
    `rowwise-softmax`, and `block-topk-sampling` now have first
    `timing-only` gfx1201 records.

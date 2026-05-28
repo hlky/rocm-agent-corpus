@@ -17,6 +17,12 @@ counters are attached yet.
 | `rowwise-softmax` | 4096x1024 fp32 rows | 0.570600 | 0.071700 | 7.958159x | `data/records/rowwise_softmax_gfx1201_20260528.jsonl` |
 | `block-topk-sampling` | 1024x32768 k=4 temperature=0.8 | 8.291950 | 0.590200 | 14.049390x | `data/records/block_topk_sampling_gfx1201_20260528.jsonl` |
 
+## Partial Or Blocked Runs
+
+- `rocwmma-mfma-gemm`: scalar HIP baseline passed for 256x256x256 on gfx1201,
+  but the optimized rocWMMA path is `build-blocked` in this venv because
+  `rocwmma/rocwmma.hpp` is unavailable. No Matrix Core speedup is claimed.
+
 ## First Measurement Targets
 
 - `shared-memory-tiled-transpose` with `tools/run_matrix_task.py`.

@@ -50,18 +50,22 @@
   "artifacts": {
     "baseline": "source/baseline.hip",
     "optimized": "source/optimized.hip",
-    "harness": "../../../harnesses/rocwmma_gemm_benchmark.hip"
+    "harness": "../../../harnesses/rocwmma_gemm_benchmark.hip",
+    "results": [
+      "results/baseline-256x256x256-20260528T174335Z.json",
+      "results/optimized-build-blocked-gfx1201-20260528T174409Z.json"
+    ]
   },
   "verification": {
-    "status": "port-pending-rocm-run",
-    "method": "The harness computes a CPU FP32 reference from the same host FP16 inputs and reports max_abs_error, max_rel_error, bad_count, and passed. No GPU run is included in this scaffold. Ported from the CUDA corpus; rerun on ROCm hardware before marking passed.",
+    "status": "baseline-passed-optimized-build-blocked-gfx1201",
+    "method": "The harness computes a CPU FP32 reference from the same host FP16 inputs and reports max_abs_error, max_rel_error, bad_count, and passed. The scalar HIP baseline passed for 256x256x256 on gfx1201, but the rocWMMA optimized path could not be built in the Windows ROCm venv because rocwmma/rocwmma.hpp was unavailable.",
     "tolerances": {
       "default_max_abs_error": 0.05,
       "default_max_rel_error": 0.02
     }
   },
   "benchmarking": {
-    "status": "rocm-measurement-pending",
+    "status": "baseline-only-optimized-build-blocked-gfx1201",
     "operation": "rocwmma-hgemm-f32-accumulate",
     "required_metrics": [
       "median kernel duration",
@@ -90,7 +94,7 @@
   },
   "license": "Project seed example",
   "curation": {
-    "status": "ported-seed",
-    "notes": "Ported from the CUDA corpus on 2026-05-20. CUDA-origin timing artifacts were removed; rerun on ROCm hardware before making performance claims."
+    "status": "build-blocked",
+    "notes": "Ported from the CUDA corpus on 2026-05-20. On 2026-05-28, AMD Radeon RX 9070 XT gfx1201 HIP-event timing captured a scalar baseline for 256x256x256 HGEMM, but the optimized rocWMMA path failed to build because rocwmma/rocwmma.hpp was not installed in the Windows ROCm venv. Do not make a custom Matrix Core performance claim until rocWMMA headers/libraries and hipBLASLt or Composable Kernel baselines are available."
   }
 }
