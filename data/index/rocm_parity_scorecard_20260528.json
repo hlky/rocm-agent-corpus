@@ -19,10 +19,10 @@
     "cuda_tasks": 85,
     "rocm_tasks": 85,
     "renamed_equivalents": 25,
-    "measured_rocm_records": 3
+    "measured_rocm_records": 4
   },
   "next_high_value_work": [
-    "Add more same-hardware ROCm timing-only records for block-topk-sampling, rocwmma-mfma-gemm, and other seed harnesses.",
+    "Add more same-hardware ROCm timing-only records for rocwmma-mfma-gemm and other seed harnesses.",
     "Add matching library baseline records for hipCUB/rocPRIM, hipBLASLt/rocBLAS, Composable Kernel, MIOpen, and Triton.",
     "Promote at least one counter-backed record with rocprofiler/rocprof artifacts.",
     "Keep CUDA-origin material as algorithm context only until ROCm evidence exists."

@@ -53,6 +53,8 @@ Completed first timing-only gfx1201 records:
   16777216-element fp32 sum.
 - `rowwise-softmax`: 7.958159x optimized over baseline for 4096x1024 fp32
   softmax.
+- `block-topk-sampling`: 14.049390x optimized over baseline for 1024x32768
+  k=4 temperature=0.8 top-k sampling.
 
 ## First Library Baseline
 

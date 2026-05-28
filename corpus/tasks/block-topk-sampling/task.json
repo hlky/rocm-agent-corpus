@@ -46,12 +46,14 @@
     "optimized": "source/optimized.hip",
     "harness": "../../../harnesses/topk_sampling_benchmark.hip",
     "results": [
-      "results/pytorch-eager-1024x32768-k4-t0.8-20260528T172210Z.json"
+      "results/pytorch-eager-1024x32768-k4-t0.8-20260528T172210Z.json",
+      "results/baseline-1024x32768-k4-t0.8-20260528T174012Z.json",
+      "results/optimized-1024x32768-k4-t0.8-20260528T174031Z.json"
     ]
   },
   "verification": {
-    "status": "port-pending-rocm-run",
-    "method": "HIP harness compares top-k indices, raw top-k values, top-k probabilities, and sampled ids against a CPU reference with deterministic tie handling. Ported from the CUDA corpus; rerun on ROCm hardware before marking passed.",
+    "status": "passed-gfx1201-timing-only",
+    "method": "HIP harness compares top-k indices, raw top-k values, top-k probabilities, and sampled ids against a CPU reference with deterministic tie handling. The 1024x32768 k=4 temperature=0.8 gfx1201 HIP runs passed with zero index, sample, top-k value, and probability mismatches.",
     "tolerances": {
       "topk_index_mismatch_count": 0,
       "sample_mismatch_count": 0,
@@ -60,7 +62,7 @@
     }
   },
   "benchmarking": {
-    "status": "rocm-measurement-pending",
+    "status": "timing-only-gfx1201",
     "operation": "top-k-temperature-sampling",
     "required_metrics": [
       "median kernel duration",
@@ -81,7 +83,7 @@
   },
   "license": "Project seed example",
   "curation": {
-    "status": "framework-baseline-timing-only",
-    "notes": "Ported from the CUDA corpus on 2026-05-20. A PyTorch eager ROCm timing-only baseline was captured on AMD Radeon RX 9070 XT gfx1201, but no custom HIP baseline/optimized pair or profiler-counter evidence is attached yet."
+    "status": "timing-only",
+    "notes": "Ported from the CUDA corpus on 2026-05-20. On 2026-05-28, AMD Radeon RX 9070 XT gfx1201 HIP-event timing measured 8.29195 ms baseline versus 0.59020 ms optimized for 1024x32768 k=4 temperature=0.8 top-k sampling, speedup 14.049390x. A PyTorch eager ROCm timing-only baseline for the same shape is also attached. No rocprofiler/rocprof counters were collected."
   }
 }

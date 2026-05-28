@@ -7,7 +7,6 @@
     "python tools/inspect_rocm_arch.py"
   ],
   "first_timing_only_tasks": [
-    "block-topk-sampling",
     "rocwmma-mfma-gemm"
   ],
   "completed_timing_only_tasks": [
@@ -25,6 +24,11 @@
       "task_id": "rowwise-softmax",
       "hardware_id": "rx9070xt_gfx1201_rocm721_windows_20260528",
       "record": "data/records/rowwise_softmax_gfx1201_20260528.jsonl"
+    },
+    {
+      "task_id": "block-topk-sampling",
+      "hardware_id": "rx9070xt_gfx1201_rocm721_windows_20260528",
+      "record": "data/records/block_topk_sampling_gfx1201_20260528.jsonl"
     }
   ],
   "first_library_baseline": {
