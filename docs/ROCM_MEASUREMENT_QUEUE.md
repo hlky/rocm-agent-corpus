@@ -72,6 +72,13 @@ Completed first shape sweeps:
   comparison only.
 - `shared-memory-tiled-transpose`: 7.738806x for non-square 1009x2039 tail
   tiles.
+- `memory-coalesced-matrix-copy`: 7.309428x for rectangular 8192x1024 fp32
+  copy.
+- `block-reduction-sum`: 15.258674x for a 1048579-element fp32 sum.
+- `rowwise-softmax`: 4.763268x for 4096x1000 fp32 softmax with
+  non-power-of-two columns.
+- `block-topk-sampling`: 2.299615x for 1024x1009 k=4 temperature=0.8
+  odd-vocabulary top-k sampling with zero CPU-reference mismatches.
 
 Blocked in the current Windows venv:
 

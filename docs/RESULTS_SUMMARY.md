@@ -27,6 +27,10 @@ counters are attached yet.
 | `vectorized-saxpy` | 16777219 fp32 elements | 0.360000 | 0.340200 | 1.058201x | `data/records/vectorized_saxpy_tail_gfx1201_20260528.jsonl` |
 | `fused-int4-dequant-gemv` | 4096x4097 group_size=128 | 0.584200 | 0.091850 | 6.360370x | `data/records/fused_int4_dequant_gemv_odd_cols_gfx1201_20260528.jsonl` |
 | `shared-memory-tiled-transpose` | 1009x2039 fp32 transpose | 0.051850 | 0.006700 | 7.738806x | `data/records/shared_memory_tiled_transpose_awkward_gfx1201_20260528.jsonl` |
+| `memory-coalesced-matrix-copy` | 8192x1024 fp32 copy | 0.453550 | 0.062050 | 7.309428x | `data/records/memory_coalesced_matrix_copy_rect_gfx1201_20260528.jsonl` |
+| `block-reduction-sum` | 1048579 fp32 elements | 2.220900 | 0.145550 | 15.258674x | `data/records/block_reduction_sum_awkward_gfx1201_20260528.jsonl` |
+| `rowwise-softmax` | 4096x1000 fp32 rows | 0.341050 | 0.071600 | 4.763268x | `data/records/rowwise_softmax_cols1000_gfx1201_20260528.jsonl` |
+| `block-topk-sampling` | 1024x1009 k=4 temperature=0.8 | 0.418300 | 0.181900 | 2.299615x | `data/records/block_topk_sampling_odd_vocab_gfx1201_20260528.jsonl` |
 
 ## Partial Or Blocked Runs
 

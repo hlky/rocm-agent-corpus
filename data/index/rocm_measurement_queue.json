@@ -75,6 +75,30 @@
       "shape": "rows=1009 cols=2039",
       "hardware_id": "rx9070xt_gfx1201_rocm721_windows_20260528",
       "record": "data/records/shared_memory_tiled_transpose_awkward_gfx1201_20260528.jsonl"
+    },
+    {
+      "task_id": "memory-coalesced-matrix-copy",
+      "shape": "rows=8192 cols=1024",
+      "hardware_id": "rx9070xt_gfx1201_rocm721_windows_20260528",
+      "record": "data/records/memory_coalesced_matrix_copy_rect_gfx1201_20260528.jsonl"
+    },
+    {
+      "task_id": "block-reduction-sum",
+      "shape": "n=1048579",
+      "hardware_id": "rx9070xt_gfx1201_rocm721_windows_20260528",
+      "record": "data/records/block_reduction_sum_awkward_gfx1201_20260528.jsonl"
+    },
+    {
+      "task_id": "rowwise-softmax",
+      "shape": "rows=4096 cols=1000",
+      "hardware_id": "rx9070xt_gfx1201_rocm721_windows_20260528",
+      "record": "data/records/rowwise_softmax_cols1000_gfx1201_20260528.jsonl"
+    },
+    {
+      "task_id": "block-topk-sampling",
+      "shape": "rows=1024 vocab_size=1009 k=4 temperature=0.8",
+      "hardware_id": "rx9070xt_gfx1201_rocm721_windows_20260528",
+      "record": "data/records/block_topk_sampling_odd_vocab_gfx1201_20260528.jsonl"
     }
   ],
   "first_library_baseline": {

@@ -48,12 +48,14 @@
     "results": [
       "results/pytorch-eager-1024x32768-k4-t0.8-20260528T172210Z.json",
       "results/baseline-1024x32768-k4-t0.8-20260528T174012Z.json",
-      "results/optimized-1024x32768-k4-t0.8-20260528T174031Z.json"
+      "results/optimized-1024x32768-k4-t0.8-20260528T174031Z.json",
+      "results/baseline-1024x1009-k4-t0.8-20260528T183400Z.json",
+      "results/optimized-1024x1009-k4-t0.8-20260528T183420Z.json"
     ]
   },
   "verification": {
     "status": "passed-gfx1201-timing-only",
-    "method": "HIP harness compares top-k indices, raw top-k values, top-k probabilities, and sampled ids against a CPU reference with deterministic tie handling. The 1024x32768 k=4 temperature=0.8 gfx1201 HIP runs passed with zero index, sample, top-k value, and probability mismatches.",
+    "method": "HIP harness compares top-k indices, raw top-k values, top-k probabilities, and sampled ids against a CPU reference with deterministic tie handling. The 1024x32768 and 1024x1009 k=4 temperature=0.8 gfx1201 HIP runs passed with zero index, sample, top-k value, and probability mismatches.",
     "tolerances": {
       "topk_index_mismatch_count": 0,
       "sample_mismatch_count": 0,
@@ -78,12 +80,12 @@
       "rows=1024 vocab_size=32768 k=4 temperature=0.8",
       "rows=256 vocab_size=128256 k=8 temperature=0.7",
       "rows=4096 vocab_size=32000 k=1 temperature=1.0",
-      "rows=128 vocab_size=1009 k=4 temperature=0.8"
+      "rows=1024 vocab_size=1009 k=4 temperature=0.8"
     ]
   },
   "license": "Project seed example",
   "curation": {
     "status": "timing-only",
-    "notes": "Ported from the CUDA corpus on 2026-05-20. On 2026-05-28, AMD Radeon RX 9070 XT gfx1201 HIP-event timing measured 8.29195 ms baseline versus 0.59020 ms optimized for 1024x32768 k=4 temperature=0.8 top-k sampling, speedup 14.049390x. A PyTorch eager ROCm timing-only baseline for the same shape is also attached. No rocprofiler/rocprof counters were collected."
+    "notes": "Ported from the CUDA corpus on 2026-05-20. On 2026-05-28, AMD Radeon RX 9070 XT gfx1201 HIP-event timing measured 8.29195 ms baseline versus 0.59020 ms optimized for 1024x32768 k=4 temperature=0.8 top-k sampling, speedup 14.049390x; and 0.41830 ms baseline versus 0.18190 ms optimized for 1024x1009 k=4 temperature=0.8 top-k sampling, speedup 2.299615x. A PyTorch eager ROCm timing-only baseline for the full-vocab shape is also attached. No rocprofiler/rocprof counters were collected."
   }
 }

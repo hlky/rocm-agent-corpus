@@ -12,7 +12,7 @@ the ROCm corpus, without treating CUDA-origin measurements as ROCm evidence.
 | Architecture guidance | ROCm-native scaffolded | `docs/GPU_GFX_ARCHITECTURE_GUIDE.md`, `docs/ARCHITECTURE_LABS.md`, and `architecture/gfx*/README.md` use `gfx` targets, `hipcc`, rocprofiler/rocprof, and AMD GCN ISA evidence rules |
 | Runtime/library equivalents | scaffolded | HIP Graphs, hipRTC, RCCL, rocSHMEM, MIOpen, MIGraphX, hipBLASLt/rocBLAS, Composable Kernel, rocPRIM/hipCUB/rocThrust |
 | Harness equivalents | scaffolded | HIP harnesses exist for the CUDA seed harness families, but most have not been run on AMD hardware in this repo |
-| Evidence parity | started | `tools/summarize_results.py` reports ten ROCm optimization records, including tail/awkward-shape sweeps, one near-neutral `timing-only` vectorization result, and INT4 seed-baseline results; counter-backed evidence is still pending |
+| Evidence parity | started | `tools/summarize_results.py` reports fourteen ROCm optimization records, including tail/awkward-shape sweeps, rectangular copy, non-power-of-two softmax, odd-vocabulary top-k, one near-neutral `timing-only` vectorization result, and INT4 seed-baseline results; counter-backed evidence is still pending |
 
 ## Gate Commands
 
@@ -36,6 +36,9 @@ use `negative example` when a custom HIP optimization loses.
    `block-reduction-sum`, `rowwise-softmax`, `block-topk-sampling`,
    `vectorized-saxpy`, and `fused-int4-dequant-gemv` now have first gfx1201
    timing records.
+   Same-hardware shape sweeps now also cover rectangular copy, awkward-size
+   reduction, non-power-of-two softmax columns, and odd-vocabulary top-k
+   sampling.
    Add matching quantized library or inference-engine baselines for
    `fused-int4-dequant-gemv` before making broader INT4 claims.
    Continue awkward-shape and tail-path sweeps for measured seed harnesses.

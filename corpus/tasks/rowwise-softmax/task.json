@@ -37,12 +37,14 @@
     "results": [
       "results/pytorch-eager-4096x1024-20260528T172208Z.json",
       "results/baseline-4096x1024-20260528T173352Z.json",
-      "results/optimized-4096x1024-20260528T173410Z.json"
+      "results/optimized-4096x1024-20260528T173410Z.json",
+      "results/baseline-4096x1000-20260528T183242Z.json",
+      "results/optimized-4096x1000-20260528T183300Z.json"
     ]
   },
   "verification": {
     "status": "passed-gfx1201-timing-only",
-    "method": "Compare against CPU stable softmax and check row sums. The 4096x1024 gfx1201 HIP runs passed with max_abs_error=0 and max_row_sum_error<=1e-6.",
+    "method": "Compare against CPU stable softmax and check row sums. The 4096x1024 and 4096x1000 gfx1201 HIP runs passed with max_abs_error=0 and max_row_sum_error<=1e-6.",
     "tolerances": {
       "max_abs_error": 1e-05,
       "max_row_sum_error": 0.0001
@@ -66,6 +68,6 @@
   "license": "Project seed example",
   "curation": {
     "status": "timing-only",
-    "notes": "Ported from the CUDA corpus on 2026-05-20. On 2026-05-28, AMD Radeon RX 9070 XT gfx1201 HIP-event timing measured 0.57060 ms baseline versus 0.07170 ms optimized for 4096x1024 fp32 softmax, speedup 7.958159x. A PyTorch eager ROCm timing-only baseline is also attached. No rocprofiler/rocprof counters were collected."
+    "notes": "Ported from the CUDA corpus on 2026-05-20. On 2026-05-28, AMD Radeon RX 9070 XT gfx1201 HIP-event timing measured 0.57060 ms baseline versus 0.07170 ms optimized for 4096x1024 fp32 softmax, speedup 7.958159x; and 0.34105 ms baseline versus 0.07160 ms optimized for 4096x1000 fp32 softmax, speedup 4.763268x. A PyTorch eager ROCm timing-only baseline is also attached. No rocprofiler/rocprof counters were collected."
   }
 }
