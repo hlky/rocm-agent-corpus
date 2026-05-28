@@ -19,10 +19,11 @@
     "cuda_tasks": 85,
     "rocm_tasks": 85,
     "renamed_equivalents": 25,
-    "measured_rocm_records": 5
+    "measured_rocm_records": 6
   },
   "next_high_value_work": [
     "Install or expose rocWMMA, hipBLASLt, and Composable Kernel dependencies, then rerun rocwmma-mfma-gemm optimized and library baselines.",
+    "Add matching quantized library or inference-engine baselines for fused-int4-dequant-gemv before making broader INT4 claims.",
     "Add matching library baseline records for hipCUB/rocPRIM, hipBLASLt/rocBLAS, Composable Kernel, MIOpen, and Triton.",
     "Promote at least one counter-backed record with rocprofiler/rocprof artifacts.",
     "Keep CUDA-origin material as algorithm context only until ROCm evidence exists."

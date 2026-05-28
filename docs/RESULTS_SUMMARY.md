@@ -17,6 +17,7 @@ counters are attached yet.
 | `rowwise-softmax` | 4096x1024 fp32 rows | 0.570600 | 0.071700 | 7.958159x | `data/records/rowwise_softmax_gfx1201_20260528.jsonl` |
 | `block-topk-sampling` | 1024x32768 k=4 temperature=0.8 | 8.291950 | 0.590200 | 14.049390x | `data/records/block_topk_sampling_gfx1201_20260528.jsonl` |
 | `vectorized-saxpy` | 16777216 fp32 elements | 0.337750 | 0.333600 | 1.012440x | `data/records/vectorized_saxpy_gfx1201_20260528.jsonl` |
+| `fused-int4-dequant-gemv` | 4096x4096 group_size=128 | 0.477550 | 0.087400 | 5.463959x | `data/records/fused_int4_dequant_gemv_gfx1201_20260528.jsonl` |
 
 ## Partial Or Blocked Runs
 
@@ -29,7 +30,10 @@ counters are attached yet.
 ## First Measurement Targets
 
 - `shared-memory-tiled-transpose` with `tools/run_matrix_task.py`.
-- `fused-int4-dequant-gemv` with `tools/run_hip_task.py`.
 - `rocwmma-mfma-gemm` with both `tools/run_hip_task.py` and `tools/run_library_baseline.py` for hipBLASLt comparison.
+
+The INT4 GEMV result is a seed-baseline comparison only; attach a matching
+quantized library, inference-engine, Triton, or framework baseline before making
+broader INT4 performance claims.
 
 Record HIP-event timing as `timing-only`. Promote a result to `counter-backed-measured` only after attaching rocprofiler/rocprof counter artifacts plus hardware and build metadata.

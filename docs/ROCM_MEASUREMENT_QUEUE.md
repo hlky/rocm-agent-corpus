@@ -57,6 +57,9 @@ Completed first timing-only gfx1201 records:
   k=4 temperature=0.8 top-k sampling.
 - `vectorized-saxpy`: 1.012440x float4 over scalar for a 16777216-element
   SAXPY; timing distributions overlap, so this is near-neutral evidence.
+- `fused-int4-dequant-gemv`: 5.463959x one-CTA-per-row fused unpack/dequant
+  GEMV over the one-thread-per-row seed baseline for 4096x4096 group_size=128.
+  This is not a vendor-library or inference-engine baseline comparison.
 
 Blocked in the current Windows venv:
 

@@ -32,6 +32,12 @@
       "task_id": "vectorized-saxpy",
       "hardware_id": "rx9070xt_gfx1201_rocm721_windows_20260528",
       "record": "data/records/vectorized_saxpy_gfx1201_20260528.jsonl"
+    },
+    {
+      "task_id": "fused-int4-dequant-gemv",
+      "hardware_id": "rx9070xt_gfx1201_rocm721_windows_20260528",
+      "record": "data/records/fused_int4_dequant_gemv_gfx1201_20260528.jsonl",
+      "scope": "seed-baseline comparison only; no matching quantized library baseline attached"
     }
   ],
   "blocked_timing_only_tasks": [

@@ -55,18 +55,22 @@
   "artifacts": {
     "baseline": "source/baseline.hip",
     "optimized": "source/optimized.hip",
-    "harness": "../../../harnesses/int4_dequant_gemv_benchmark.hip"
+    "harness": "../../../harnesses/int4_dequant_gemv_benchmark.hip",
+    "results": [
+      "results/baseline-4096x4096-g128-20260528T181304Z.json",
+      "results/optimized-4096x4096-g128-20260528T181324Z.json"
+    ]
   },
   "verification": {
-    "status": "port-pending-rocm-run",
-    "method": "The harness constructs deterministic packed int4 weights, scales, zero points, and activation values, then computes a CPU FP64-accumulated reference before comparing GPU output with max_abs_error, max_rel_error, bad_count, and passed. Ported from the CUDA corpus; rerun on ROCm hardware before marking passed.",
+    "status": "passed-gfx1201-timing-only",
+    "method": "The harness constructs deterministic packed int4 weights, scales, zero points, and activation values, then computes a CPU FP64-accumulated reference before comparing GPU output with max_abs_error, max_rel_error, bad_count, and passed. The 4096x4096 group_size=128 gfx1201 HIP runs passed with max_abs_error=0, max_rel_error=0, and bad_count=0.",
     "tolerances": {
       "max_abs_error": 0.005,
       "max_rel_error": 0.0005
     }
   },
   "benchmarking": {
-    "status": "rocm-measurement-pending",
+    "status": "timing-only-gfx1201-seed-baseline",
     "operation": "fused-int4-dequant-gemv",
     "required_metrics": [
       "median kernel duration",
@@ -92,7 +96,7 @@
   },
   "license": "Project seed example",
   "curation": {
-    "status": "ported-seed",
-    "notes": "Ported from the CUDA corpus on 2026-05-20. CUDA-origin timing artifacts were removed; rerun on ROCm hardware before making performance claims."
+    "status": "timing-only-seed-baseline",
+    "notes": "Ported from the CUDA corpus on 2026-05-20. On 2026-05-28, AMD Radeon RX 9070 XT gfx1201 HIP-event timing measured 0.47755 ms one-thread-per-row baseline versus 0.08740 ms one-CTA-per-row fused unpack/dequant/reduction for 4096x4096 group_size=128, speedup 5.463959x. This is a seed-baseline comparison, not a claim against hipBLASLt, Composable Kernel, MIGraphX, Triton, vLLM, or other direct quantized library/plugin paths. No rocprofiler/rocprof counters were collected."
   }
 }
