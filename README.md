@@ -50,6 +50,7 @@ tools/                    Validation, task scaffolding, benchmarking, and enviro
 - `docs/CUDA_ROCM_PARITY_NOTES_20260528.md`: first parity pass against the CUDA corpus.
 - `docs/CUDA_ROCM_TASK_PARITY_MAP.md`: task-by-task CUDA to ROCm equivalence map.
 - `docs/ARCHITECTURE_LABS.md`: ROCm `gfx` target labs and evidence gates.
+- `tools/check_cuda_rocm_task_parity.py`: validates CUDA task coverage against ROCm equivalents.
 - `docs/HIPBLAS_ROCBLAS_GUIDE.md`: hipBLAS/rocBLAS/hipBLASLt baselines.
 - `docs/COMPOSABLE_KERNEL_EXTENSION_GUIDE.md`: Composable Kernel and CK Tile paths.
 - `docs/ROCPRIM_HIPCUB_ROCTHRUST_GUIDE.md`: rocPRIM, hipCUB, and rocThrust primitives.

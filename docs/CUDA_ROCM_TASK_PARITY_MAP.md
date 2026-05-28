@@ -12,6 +12,18 @@ treating CUDA-origin measurements as ROCm evidence.
   hardware, ROCm version, `hipcc` flags, `gfx` target, correctness, timing, and
   evidence label.
 
+## Validation
+
+Run the parity checker after adding, renaming, or removing tasks:
+
+```bash
+python tools/check_cuda_rocm_task_parity.py --source H:/cuda-agent-corpus
+```
+
+The checker verifies that every CUDA task directory has a same-ID ROCm scaffold
+or a renamed equivalent listed below, and that ROCm has no unmapped extra task
+directory.
+
 ## Renamed Equivalents
 
 | CUDA task | ROCm task | Reason |
