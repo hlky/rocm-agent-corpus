@@ -62,6 +62,9 @@ Blocked in the current Windows venv:
   optimized rocWMMA path failed to build because `rocwmma/rocwmma.hpp` was not
   available. Install or expose rocWMMA headers/libraries before claiming custom
   Matrix Core timing.
+- `rocwmma-mfma-gemm:hipblaslt-hgemm`: the hipBLASLt library baseline failed to
+  build because `hipblasLt.h` was not available. Install or expose hipBLASLt and
+  hipBLAS headers/libraries before using this library baseline.
 
 ## First Library Baseline
 

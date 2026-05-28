@@ -29,8 +29,8 @@ use `negative example` when a custom HIP optimization loses.
 
 ## Next Highest-Value Parity Work
 
-1. Install or expose rocWMMA and hipBLASLt/Composable Kernel dependencies, then
-   rerun `rocwmma-mfma-gemm` optimized and library baselines.
+1. Install or expose rocWMMA, hipBLASLt, and Composable Kernel dependencies,
+   then rerun `rocwmma-mfma-gemm` optimized and library baselines.
    Add more same-hardware ROCm records for additional shape sweeps.
    `memory-coalesced-matrix-copy`, `block-reduction-sum`,
    `rowwise-softmax`, and `block-topk-sampling` now have first

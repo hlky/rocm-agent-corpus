@@ -53,12 +53,13 @@
     "harness": "../../../harnesses/rocwmma_gemm_benchmark.hip",
     "results": [
       "results/baseline-256x256x256-20260528T174335Z.json",
-      "results/optimized-build-blocked-gfx1201-20260528T174409Z.json"
+      "results/optimized-build-blocked-gfx1201-20260528T174409Z.json",
+      "results/hipblaslt-build-blocked-gfx1201-20260528T174630Z.json"
     ]
   },
   "verification": {
     "status": "baseline-passed-optimized-build-blocked-gfx1201",
-    "method": "The harness computes a CPU FP32 reference from the same host FP16 inputs and reports max_abs_error, max_rel_error, bad_count, and passed. The scalar HIP baseline passed for 256x256x256 on gfx1201, but the rocWMMA optimized path could not be built in the Windows ROCm venv because rocwmma/rocwmma.hpp was unavailable.",
+    "method": "The harness computes a CPU FP32 reference from the same host FP16 inputs and reports max_abs_error, max_rel_error, bad_count, and passed. The scalar HIP baseline passed for 256x256x256 on gfx1201, but the rocWMMA optimized path could not be built in the Windows ROCm venv because rocwmma/rocwmma.hpp was unavailable. The hipBLASLt library baseline is also build-blocked because hipblasLt.h is unavailable.",
     "tolerances": {
       "default_max_abs_error": 0.05,
       "default_max_rel_error": 0.02
@@ -95,6 +96,6 @@
   "license": "Project seed example",
   "curation": {
     "status": "build-blocked",
-    "notes": "Ported from the CUDA corpus on 2026-05-20. On 2026-05-28, AMD Radeon RX 9070 XT gfx1201 HIP-event timing captured a scalar baseline for 256x256x256 HGEMM, but the optimized rocWMMA path failed to build because rocwmma/rocwmma.hpp was not installed in the Windows ROCm venv. Do not make a custom Matrix Core performance claim until rocWMMA headers/libraries and hipBLASLt or Composable Kernel baselines are available."
+    "notes": "Ported from the CUDA corpus on 2026-05-20. On 2026-05-28, AMD Radeon RX 9070 XT gfx1201 HIP-event timing captured a scalar baseline for 256x256x256 HGEMM, but the optimized rocWMMA path failed to build because rocwmma/rocwmma.hpp was not installed in the Windows ROCm venv. The hipBLASLt baseline also failed to build because hipblasLt.h was not installed. Do not make a custom Matrix Core performance claim until rocWMMA headers/libraries and hipBLASLt or Composable Kernel baselines are available."
   }
 }

@@ -43,7 +43,11 @@
   "first_library_baseline": {
     "task_id": "rocwmma-mfma-gemm",
     "baseline": "hipblaslt-hgemm",
-    "command": "python tools/run_library_baseline.py rocwmma-mfma-gemm:hipblaslt-hgemm --arch <gfx-target> --write-result"
+    "command": "python tools/run_library_baseline.py rocwmma-mfma-gemm:hipblaslt-hgemm --arch <gfx-target> --write-result",
+    "status": "build-blocked-in-windows-rocm-venv",
+    "reason": "hipblasLt.h was not found",
+    "blocked_result": "corpus/tasks/rocwmma-mfma-gemm/results/hipblaslt-build-blocked-gfx1201-20260528T174630Z.json",
+    "record": "data/records/hipblaslt_hgemm_gfx1201_build_blocked_20260528.jsonl"
   },
   "first_counter_backed_candidates": [
     "memory-coalesced-matrix-copy",

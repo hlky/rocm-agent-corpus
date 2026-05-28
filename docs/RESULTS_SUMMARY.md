@@ -22,6 +22,8 @@ counters are attached yet.
 - `rocwmma-mfma-gemm`: scalar HIP baseline passed for 256x256x256 on gfx1201,
   but the optimized rocWMMA path is `build-blocked` in this venv because
   `rocwmma/rocwmma.hpp` is unavailable. No Matrix Core speedup is claimed.
+- `rocwmma-mfma-gemm:hipblaslt-hgemm`: the hipBLASLt library baseline is
+  `build-blocked` in this venv because `hipblasLt.h` is unavailable.
 
 ## First Measurement Targets
 
