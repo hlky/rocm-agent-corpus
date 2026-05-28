@@ -49,6 +49,7 @@ tools/                    Validation, task scaffolding, benchmarking, and enviro
 - `docs/ROAD_TO_SOTA_TOPK.md`: Top-K roadmap, baselines, and evidence checklist.
 - `docs/CUDA_ROCM_PARITY_NOTES_20260528.md`: first parity pass against the CUDA corpus.
 - `docs/CUDA_ROCM_TASK_PARITY_MAP.md`: task-by-task CUDA to ROCm equivalence map.
+- `docs/ROCM_PARITY_SCORECARD_20260528.md`: current task, harness, architecture, and evidence parity status.
 - `docs/ARCHITECTURE_LABS.md`: ROCm `gfx` target labs and evidence gates.
 - `tools/check_cuda_rocm_task_parity.py`: validates CUDA task coverage against ROCm equivalents.
 - `docs/HIPBLAS_ROCBLAS_GUIDE.md`: hipBLAS/rocBLAS/hipBLASLt baselines.

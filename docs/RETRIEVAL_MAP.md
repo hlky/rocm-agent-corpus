@@ -39,12 +39,13 @@ Read:
 5. `docs/V2_EXTENSION_WAVE3.md`
 6. `data/index/v2_extension_wave.json`
 7. `docs/CUDA_ROCM_TASK_PARITY_MAP.md`
-8. `docs/INITIAL_TRACKING_LIST.md`
-9. `docs/CORPUS_EXPANSION_STAGES.md`
-10. `docs/GEMM_COMPETITION_TRACK.md`
-11. `docs/ROCPRIM_COMPETITION_TRACK.md`
-12. `docs/ARCHITECTURE_LABS.md`
-13. `docs/AGENT_EVAL_HARNESS.md`
+8. `docs/ROCM_PARITY_SCORECARD_20260528.md`
+9. `docs/INITIAL_TRACKING_LIST.md`
+10. `docs/CORPUS_EXPANSION_STAGES.md`
+11. `docs/GEMM_COMPETITION_TRACK.md`
+12. `docs/ROCPRIM_COMPETITION_TRACK.md`
+13. `docs/ARCHITECTURE_LABS.md`
+14. `docs/AGENT_EVAL_HARNESS.md`
 
 Question: "How do I turn a PyTorch op or subgraph into a ROCm challenge?"
 

@@ -1,0 +1,30 @@
+{
+  "schema_version": "0.1.0",
+  "observed_at": "2026-05-28",
+  "doc": "docs/ROCM_PARITY_SCORECARD_20260528.md",
+  "status": {
+    "task_coverage": "parity-achieved",
+    "publication": "done",
+    "architecture_guidance": "rocm-native-scaffolded",
+    "runtime_library_equivalents": "scaffolded",
+    "harness_equivalents": "scaffolded-not-measured",
+    "evidence_parity": "not-achieved"
+  },
+  "checks": [
+    "python tools/check_cuda_rocm_task_parity.py --source H:/cuda-agent-corpus",
+    "python tools/validate_corpus.py",
+    "python tools/summarize_results.py"
+  ],
+  "last_known_counts": {
+    "cuda_tasks": 85,
+    "rocm_tasks": 85,
+    "renamed_equivalents": 25,
+    "measured_rocm_records": 0
+  },
+  "next_high_value_work": [
+    "Add same-hardware ROCm timing-only records for seed harnesses.",
+    "Add matching library baseline records for hipCUB/rocPRIM, hipBLASLt/rocBLAS, Composable Kernel, MIOpen, and Triton.",
+    "Promote at least one counter-backed record with rocprofiler/rocprof artifacts.",
+    "Keep CUDA-origin material as algorithm context only until ROCm evidence exists."
+  ]
+}
