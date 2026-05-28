@@ -12,7 +12,7 @@ the ROCm corpus, without treating CUDA-origin measurements as ROCm evidence.
 | Architecture guidance | ROCm-native scaffolded | `docs/GPU_GFX_ARCHITECTURE_GUIDE.md`, `docs/ARCHITECTURE_LABS.md`, and `architecture/gfx*/README.md` use `gfx` targets, `hipcc`, rocprofiler/rocprof, and AMD GCN ISA evidence rules |
 | Runtime/library equivalents | scaffolded | HIP Graphs, hipRTC, RCCL, rocSHMEM, MIOpen, MIGraphX, hipBLASLt/rocBLAS, Composable Kernel, rocPRIM/hipCUB/rocThrust |
 | Harness equivalents | scaffolded | HIP harnesses exist for the CUDA seed harness families, but most have not been run on AMD hardware in this repo |
-| Evidence parity | started | `tools/summarize_results.py` reports four `timing-only` ROCm optimization records; counter-backed evidence is still pending |
+| Evidence parity | started | `tools/summarize_results.py` reports five ROCm optimization records, including one near-neutral `timing-only` vectorization result; counter-backed evidence is still pending |
 
 ## Gate Commands
 
@@ -33,8 +33,8 @@ use `negative example` when a custom HIP optimization loses.
    then rerun `rocwmma-mfma-gemm` optimized and library baselines.
    Add more same-hardware ROCm records for additional shape sweeps.
    `memory-coalesced-matrix-copy`, `block-reduction-sum`,
-   `rowwise-softmax`, and `block-topk-sampling` now have first
-   `timing-only` gfx1201 records.
+   `rowwise-softmax`, `block-topk-sampling`, and `vectorized-saxpy` now have
+   first gfx1201 timing records.
 2. Add library baseline records for the same shapes:
    hipCUB/rocPRIM, hipBLASLt/rocBLAS, Composable Kernel, MIOpen, and Triton
    where applicable.

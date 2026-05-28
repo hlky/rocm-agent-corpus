@@ -55,6 +55,8 @@ Completed first timing-only gfx1201 records:
   softmax.
 - `block-topk-sampling`: 14.049390x optimized over baseline for 1024x32768
   k=4 temperature=0.8 top-k sampling.
+- `vectorized-saxpy`: 1.012440x float4 over scalar for a 16777216-element
+  SAXPY; timing distributions overlap, so this is near-neutral evidence.
 
 Blocked in the current Windows venv:
 

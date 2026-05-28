@@ -27,6 +27,11 @@
       "task_id": "block-topk-sampling",
       "hardware_id": "rx9070xt_gfx1201_rocm721_windows_20260528",
       "record": "data/records/block_topk_sampling_gfx1201_20260528.jsonl"
+    },
+    {
+      "task_id": "vectorized-saxpy",
+      "hardware_id": "rx9070xt_gfx1201_rocm721_windows_20260528",
+      "record": "data/records/vectorized_saxpy_gfx1201_20260528.jsonl"
     }
   ],
   "blocked_timing_only_tasks": [

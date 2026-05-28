@@ -33,17 +33,21 @@
   },
   "artifacts": {
     "baseline": "source/baseline.hip",
-    "optimized": "source/optimized.hip"
+    "optimized": "source/optimized.hip",
+    "results": [
+      "results/baseline-16777216-20260528T174821Z.json",
+      "results/optimized-16777216-20260528T174839Z.json"
+    ]
   },
   "verification": {
-    "status": "port-pending-rocm-run",
-    "method": "Compare against CPU reference for aligned and tail sizes. Ported from the CUDA corpus; rerun on ROCm hardware before marking passed.",
+    "status": "passed-gfx1201-timing-only",
+    "method": "Compare against CPU reference for aligned and tail sizes. The 16777216-element gfx1201 HIP runs passed with max_abs_error=0 and bad_count=0.",
     "tolerances": {
       "max_abs_error": 1e-05
     }
   },
   "benchmarking": {
-    "status": "rocm-measurement-pending",
+    "status": "timing-only-gfx1201",
     "operation": "saxpy",
     "required_metrics": [
       "median kernel duration",
@@ -59,7 +63,7 @@
   },
   "license": "Project seed example",
   "curation": {
-    "status": "ported-seed",
-    "notes": "Ported from the CUDA corpus on 2026-05-20. CUDA-origin timing artifacts were removed; rerun on ROCm hardware before making performance claims."
+    "status": "timing-only-near-neutral",
+    "notes": "Ported from the CUDA corpus on 2026-05-20. On 2026-05-28, AMD Radeon RX 9070 XT gfx1201 HIP-event timing measured 0.33775 ms scalar baseline versus 0.33360 ms float4 optimized for 16777216-element SAXPY, speedup 1.012440x. The timing distributions overlap, so this is near-neutral evidence rather than a broad vectorization win. No rocprofiler/rocprof counters were collected."
   }
 }
