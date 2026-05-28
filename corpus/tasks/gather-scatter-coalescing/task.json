@@ -1,0 +1,71 @@
+{
+  "schema_version": "0.1.0",
+  "id": "gather-scatter-coalescing",
+  "title": "Gather/Scatter Coalescing Comparison",
+  "domain": "memory",
+  "language": "hip-cpp",
+  "tags": [
+    "gather",
+    "scatter",
+    "coalescing",
+    "irregular-access",
+    "vectorized-load"
+  ],
+  "source_refs": [
+    "amd-rocm-programming-guide",
+    "amd-hip-memory-performance",
+    "rocm-examples"
+  ],
+  "problem": {
+    "summary": "Gather values from input through an index map and scatter values back through the same map. The benchmark can run an irregular permutation mode or a coalesced identity mode to expose memory-transaction effects.",
+    "inputs": [
+      "float* input",
+      "int* indices",
+      "float* gathered",
+      "float* scattered",
+      "int n",
+      "int coalesced_mode"
+    ],
+    "outputs": [
+      "gathered[i] equals input[index]",
+      "scattered[index] equals input[i]",
+      "index is i when coalesced_mode is nonzero"
+    ],
+    "constraints": [
+      "indices must be a permutation of 0..n-1 in irregular mode",
+      "input, gathered, and scattered do not alias",
+      "n may not be a multiple of four"
+    ]
+  },
+  "artifacts": {
+    "baseline": "source/baseline.hip",
+    "optimized": "source/optimized.hip",
+    "harness": "../../../harnesses/gather_scatter_benchmark.hip"
+  },
+  "verification": {
+    "status": "template-only",
+    "method": "Harness compares gathered and scattered outputs against a CPU reference for irregular and coalesced index modes.",
+    "tolerances": {}
+  },
+  "benchmarking": {
+    "status": "todo",
+    "operation": "gather-scatter",
+    "required_metrics": [
+      "median kernel duration",
+      "effective memory bandwidth",
+      "global load/store sectors per request",
+      "irregular versus coalesced mode"
+    ],
+    "recommended_shapes": [
+      "n=1048576 irregular",
+      "n=16777216 irregular",
+      "n=16777216 coalesced",
+      "n=16777219 coalesced-tail"
+    ]
+  },
+  "license": "Project template example",
+  "curation": {
+    "status": "template-only",
+    "notes": "No GPU timing has been collected. Treat any future HIP-event-only result as timing-only unless profiler counters are attached."
+  }
+}

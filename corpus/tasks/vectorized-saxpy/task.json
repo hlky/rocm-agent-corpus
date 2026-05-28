@@ -1,0 +1,65 @@
+{
+  "schema_version": "0.1.0",
+  "id": "vectorized-saxpy",
+  "title": "Vectorized SAXPY",
+  "domain": "memory",
+  "language": "hip-cpp",
+  "tags": [
+    "vectorized-load",
+    "alignment",
+    "coalescing",
+    "elementwise"
+  ],
+  "source_refs": [
+    "amd-rocm-programming-guide",
+    "amd-hip-memory-performance"
+  ],
+  "problem": {
+    "summary": "Compute out[i] = alpha * x[i] + y[i]. The baseline uses one scalar element per thread. The optimized version uses aligned float4 vectorized loads and stores, with a scalar tail path.",
+    "inputs": [
+      "float alpha",
+      "float* x",
+      "float* y",
+      "float* output",
+      "int n"
+    ],
+    "outputs": [
+      "output[i] equals alpha * x[i] + y[i]"
+    ],
+    "constraints": [
+      "x, y, and output are allocated by hipMalloc or otherwise sufficiently aligned",
+      "n may not be divisible by 4"
+    ]
+  },
+  "artifacts": {
+    "baseline": "source/baseline.hip",
+    "optimized": "source/optimized.hip"
+  },
+  "verification": {
+    "status": "port-pending-rocm-run",
+    "method": "Compare against CPU reference for aligned and tail sizes. Ported from the CUDA corpus; rerun on ROCm hardware before marking passed.",
+    "tolerances": {
+      "max_abs_error": 1e-05
+    }
+  },
+  "benchmarking": {
+    "status": "rocm-measurement-pending",
+    "operation": "saxpy",
+    "required_metrics": [
+      "median kernel duration",
+      "effective memory bandwidth",
+      "correctness max_abs_error"
+    ],
+    "recommended_shapes": [
+      "16777216",
+      "16777219",
+      "1048576",
+      "65539"
+    ]
+  },
+  "license": "Project seed example",
+  "curation": {
+    "status": "ported-seed",
+    "notes": "Ported from the CUDA corpus on 2026-05-20. CUDA-origin timing artifacts were removed; rerun on ROCm hardware before making performance claims."
+  }
+}

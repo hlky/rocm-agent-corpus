@@ -1,0 +1,217 @@
+{
+  "schema_version": "0.1.0",
+  "track_id": "wide-k-topk-selection",
+  "guide": "docs/ROAD_TO_SOTA_TOPK.md",
+  "implementation_survey": "docs/TOPK_IMPLEMENTATION_SURVEY.md",
+  "implementation_survey_index": "data/index/topk_implementation_survey.json",
+  "baseline_harness_blueprint": "docs/TOPK_BASELINE_HARNESS_BLUEPRINT.md",
+  "baseline_harness_blueprint_index": "data/index/topk_baseline_harness_blueprint.json",
+  "task": "corpus/tasks/wide-k-topk-selection/task.json",
+  "mission": "Make Top-K work explicit across k regimes so agents choose different algorithms and baselines for k=1, tiny k, medium k, large k, and k close to n.",
+  "must_not_claim": [
+    "Do not generalize the existing k<=8 fused sampling seed to medium or large k.",
+    "Do not compare sorted custom output against an unsorted baseline without classifying the contract mismatch.",
+    "Do not call a custom result a win without same-hardware PyTorch/hipCUB/FlashInfer or relevant serving-stack timing.",
+    "Do not hide temporary-storage allocation or workspace reuse in one variant but not another."
+  ],
+  "regimes": [
+    {
+      "id": "argmax-k1",
+      "k_range": "1",
+      "representative_shapes": [
+        "rows=4096 n=32000 k=1 sorted=false",
+        "rows=65536 n=512 k=1 sorted=false",
+        "rows=32 n=262144 k=1 sorted=false"
+      ],
+      "custom_candidates": [
+        "warp value-index reduction",
+        "CTA value-index reduction",
+        "multi-CTA row reduction for few long rows",
+        "fused logits processor plus argmax"
+      ],
+      "baselines": [
+        "PyTorch argmax or torch.topk(k=1)",
+        "hipCUB DeviceReduce/ArgMax-style pair reduction where applicable",
+        "serving-stack greedy sampler when decode boundary matters"
+      ],
+      "primary_risks": [
+        "tie policy mismatch",
+        "mask or NaN policy mismatch",
+        "launch overhead dominates for small batches"
+      ]
+    },
+    {
+      "id": "tiny-k",
+      "k_range": "2..8",
+      "representative_shapes": [
+        "rows=1024 n=32768 k=4 sorted=true",
+        "rows=1024 n=32768 k=8 sorted=true",
+        "rows=256 n=128256 k=8 sorted=true",
+        "rows=128 n=1009 k=4 sorted=true"
+      ],
+      "custom_candidates": [
+        "compile-time sorted register list",
+        "fixed compare-exchange network",
+        "warp-per-row merge",
+        "CTA-per-row shared-memory merge",
+        "fused Top-K plus softmax/sample"
+      ],
+      "baselines": [
+        "current block-topk-sampling seed",
+        "PyTorch torch.topk",
+        "hipCUB DeviceTopK for unsorted membership",
+        "FlashInfer top-k sampling when sampling-facing",
+        "vLLM on ROCm or vLLM sampler path when serving-facing"
+      ],
+      "primary_risks": [
+        "register pressure from local candidate arrays",
+        "sortedness costs hidden in custom path",
+        "hipCUB unsorted output is not deterministic sorted Top-K"
+      ]
+    },
+    {
+      "id": "small-k",
+      "k_range": "16..32",
+      "representative_shapes": [
+        "rows=512 n=32768 k=16 sorted=true",
+        "rows=256 n=32768 k=32 sorted=true",
+        "rows=1024 n=4096 k=32 sorted=false"
+      ],
+      "custom_candidates": [
+        "bitonic or pairwise network over candidate tiles",
+        "CTA candidate merge with shared-memory tiling",
+        "two-level warp then CTA merge",
+        "unsorted membership path plus final small sort only when required"
+      ],
+      "baselines": [
+        "PyTorch torch.topk(sorted=True/False)",
+        "hipCUB DeviceTopK",
+        "hipCUB DeviceRadixSort for sorted oracle",
+        "FlashInfer top-k/top-p path when sampling-facing",
+        "OneFlow heap/full-sort top_k as a framework implementation reference"
+      ],
+      "primary_risks": [
+        "shared-memory footprint grows as threads*k",
+        "network compare count dominates",
+        "final sorted repair erases unsorted savings"
+      ]
+    },
+    {
+      "id": "medium-k",
+      "k_range": "64..256",
+      "representative_shapes": [
+        "rows=256 n=65536 k=64 sorted=true",
+        "rows=128 n=65536 k=128 sorted=true",
+        "rows=64 n=131072 k=256 sorted=true"
+      ],
+      "custom_candidates": [
+        "heap/list hybrid",
+        "two-pass block candidates",
+        "radix-select threshold with boundary repair",
+        "partition then local sort of candidates"
+      ],
+      "baselines": [
+        "PyTorch torch.topk",
+        "hipCUB DeviceTopK",
+        "hipCUB DeviceRadixSort",
+        "rocThrust sort_by_key or partial-sort prototype"
+      ],
+      "primary_risks": [
+        "register spills from large candidate state",
+        "temporary candidate buffers dominate memory traffic",
+        "threshold repair complexity creates correctness bugs"
+      ]
+    },
+    {
+      "id": "large-k",
+      "k_range": "512..4096",
+      "representative_shapes": [
+        "rows=32 n=131072 k=512 sorted=true",
+        "rows=16 n=131072 k=1024 sorted=true",
+        "rows=16 n=262144 k=4096 sorted=true"
+      ],
+      "custom_candidates": [
+        "radix-select",
+        "threshold partition plus final sort",
+        "multi-pass bucket or pivot search",
+        "full radix sort when k/n is high"
+      ],
+      "baselines": [
+        "hipCUB DeviceRadixSort",
+        "PyTorch torch.topk",
+        "hipCUB DeviceTopK when unsorted output is valid",
+        "RadiK/Qrita/RTop-K-inspired reproduction where feasible",
+        "vLLM persistent_topk for ragged/sparse-attention k=512/1024/2048 indexer contracts"
+      ],
+      "primary_risks": [
+        "full sort may be simpler and faster for high k/n",
+        "workspace allocation dominates if not reused",
+        "duplicate keys around pivot break deterministic output"
+      ]
+    },
+    {
+      "id": "near-full-k",
+      "k_range": "k/n >= 0.25",
+      "representative_shapes": [
+        "rows=16 n=32768 k=8192 sorted=true",
+        "rows=8 n=65536 k=32768 sorted=true"
+      ],
+      "custom_candidates": [
+        "full sort",
+        "top-n-minus-bottom selection when k close to n",
+        "radix sort with limited key bits",
+        "framework/library full sort baseline"
+      ],
+      "baselines": [
+        "hipCUB DeviceRadixSort",
+        "rocThrust sort_by_key",
+        "PyTorch torch.sort or torch.topk"
+      ],
+      "primary_risks": [
+        "selection algorithm does nearly full-sort work anyway",
+        "output write bandwidth dominates",
+        "sortedness and stability cost are the operation"
+      ]
+    },
+    {
+      "id": "ragged-segmented",
+      "k_range": "1..128 per segment",
+      "representative_shapes": [
+        "rows=4096 n_min=1 n_max=65536 k=1..128",
+        "rows=1024 Zipf segment lengths k=8",
+        "rows=256 page-table segments k=32"
+      ],
+      "custom_candidates": [
+        "warp-per-short-segment",
+        "CTA-per-medium-segment",
+        "multi-CTA long-segment split",
+        "length-bucketed scheduler",
+        "segmented two-pass candidates"
+      ],
+      "baselines": [
+        "PyTorch per-segment loop or padded topk",
+        "hipCUB segmented primitives plus per-segment sort/select",
+        "FlashInfer ragged/page-table transforms where contract matches",
+        "vLLM persistent sparse-attention Top-K indexer for k=512/1024/2048 when output contract matches"
+      ],
+      "primary_risks": [
+        "load imbalance dominates arithmetic",
+        "padding makes framework baseline unfairly expensive or cheap depending on boundary",
+        "empty and shorter-than-k segments need explicit output policy"
+      ]
+    }
+  ],
+  "first_benchmark_batch": [
+    "rows=4096 n=32000 k=1 sorted=false",
+    "rows=1024 n=32768 k=4 sorted=true",
+    "rows=1024 n=32768 k=8 sorted=true",
+    "rows=512 n=32768 k=16 sorted=true",
+    "rows=256 n=32768 k=32 sorted=true",
+    "rows=256 n=65536 k=64 sorted=true",
+    "rows=128 n=65536 k=128 sorted=true",
+    "rows=64 n=131072 k=256 sorted=true",
+    "rows=32 n=131072 k=512 sorted=true",
+    "rows=16 n=131072 k=1024 sorted=true"
+  ],
+  "promotion_rule": "A k regime becomes measured only after correctness artifacts plus same-hardware library baselines are attached for at least one representative shape."
+}

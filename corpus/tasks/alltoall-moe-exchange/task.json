@@ -1,0 +1,80 @@
+{
+  "schema_version": "0.1.0",
+  "id": "alltoall-moe-exchange",
+  "title": "All To All MoE Exchange Scaffold",
+  "domain": "multi-gpu",
+  "language": "hip-cpp+rccl",
+  "tags": [
+    "rccl",
+    "all-to-all",
+    "moe",
+    "routing",
+    "multi-gpu",
+    "template-only"
+  ],
+  "source_refs": [
+    "amd-rccl",
+    "amd-rccl-docs",
+    "amd-rocshmem",
+    "megatron-lm",
+    "amd-rocm-programming-guide"
+  ],
+  "problem": {
+    "summary": "Model MoE token permutation, rank-to-rank exchange, and unpermutation with RCCL/rocSHMEM comparison boundaries.",
+    "inputs": [
+      "token activations",
+      "expert assignments",
+      "send counts",
+      "rank count",
+      "expert ownership metadata"
+    ],
+    "outputs": [
+      "expert-local token buffers",
+      "inverse permutation metadata",
+      "timing/timeline metadata"
+    ],
+    "constraints": [
+      "Template-only; include permutation and count-building costs unless explicitly excluded",
+      "Record token distribution skew and all-to-all primitive used",
+      "No custom communication win without matching rank/topology contract"
+    ]
+  },
+  "artifacts": {
+    "baseline": "source/baseline.hip",
+    "optimized": "source/optimized.hip",
+    "harness": "source/harness_plan.md"
+  },
+  "verification": {
+    "status": "template-only",
+    "method": "Implement the baseline, optimized candidate, and CPU or strongest-library oracle where applicable; compare outputs before timing claims.",
+    "tolerances": {
+      "max_abs_error": 0.0001,
+      "max_rel_error": 0.0001
+    }
+  },
+  "benchmarking": {
+    "status": "template-only",
+    "operation": "alltoall-moe-exchange",
+    "required_metrics": [
+      "end-to-end exchange latency",
+      "rank count",
+      "tokens",
+      "hidden",
+      "experts",
+      "skew",
+      "bytes sent matrix",
+      "timeline evidence",
+      "correctness hash"
+    ],
+    "recommended_shapes": [
+      "ranks=2 tokens=4096 hidden=4096 experts=8",
+      "ranks=4 tokens=8192 hidden=4096 experts=32 skewed",
+      "ranks=8 tokens=16384 hidden=8192 experts=64"
+    ]
+  },
+  "license": "Project seed example",
+  "curation": {
+    "status": "template-only",
+    "notes": "Promoted from the v2 extension backlog as wave 2. No performance, correctness, or profiler evidence is claimed yet."
+  }
+}

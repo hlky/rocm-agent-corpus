@@ -1,0 +1,733 @@
+{
+  "schema_version": "0.1.0",
+  "track_id": "gemm-competition",
+  "guide": "docs/GEMM_COMPETITION_TRACK.md",
+  "mission": "Teach agents to write, measure, and explain custom GEMM kernels that beat, match, specialize beyond, or extend hipBLAS/rocBLAS, hipBLASLt, Composable Kernel, Triton, MIGraphX, and framework-generated baselines for scoped workloads.",
+  "evidence_policy": {
+    "default_profiler_status": "timing-only",
+    "required_result_classes": [
+      "custom-win",
+      "custom-specialized-win",
+      "near-match",
+      "library-win",
+      "negative-example",
+      "correctness-fail",
+      "compile-fail"
+    ],
+    "must_not_claim": [
+      "rocprofiler/rocprof counters unless collected",
+      "fair hipBLASLt comparison unless algorithm search and workspace are recorded",
+      "fair TF32 comparison unless math mode is explicit",
+      "epilogue win unless library epilogue baseline is considered where supported"
+    ]
+  },
+  "examples": [
+    {
+      "path": "examples/gemm/README.md",
+      "role": "local track entrypoint"
+    },
+    {
+      "path": "examples/gemm/fixed_shape_sgemm_skeleton.hip",
+      "role": "small fixed-shape custom GEMM skeleton"
+    },
+    {
+      "path": "examples/gemm/hipblaslt_baseline_skeleton.hip",
+      "role": "hipBLASLt baseline and metadata skeleton"
+    }
+  ],
+  "metadata_requirements": [
+    "task_id",
+    "result_class",
+    "gpu_name",
+    "gfx_target",
+    "driver_version",
+    "cuda_toolkit_version",
+    "compiler_version",
+    "build_command",
+    "arch_flags",
+    "m",
+    "n",
+    "k",
+    "batch_count",
+    "group_count",
+    "layout_a",
+    "layout_b",
+    "layout_c",
+    "layout_d",
+    "lda",
+    "ldb",
+    "ldc",
+    "ldd",
+    "dtype_a",
+    "dtype_b",
+    "dtype_accumulator",
+    "dtype_output",
+    "math_mode",
+    "alpha",
+    "beta",
+    "epilogue",
+    "alignment_bytes",
+    "workspace_bytes",
+    "warmup_iterations",
+    "measured_iterations",
+    "timer_type",
+    "profiler_status",
+    "correctness_reference",
+    "tolerance",
+    "seed",
+    "baseline_versions",
+    "win_loss_notes"
+  ],
+  "baseline_definitions": [
+    {
+      "id": "host-reference",
+      "kind": "correctness-oracle",
+      "records": [
+        "accumulator semantics",
+        "rounding and cast policy",
+        "epilogue semantics"
+      ]
+    },
+    {
+      "id": "custom-naive",
+      "kind": "educational-custom",
+      "records": [
+        "indexing",
+        "layout mapping",
+        "alpha_beta_contract"
+      ]
+    },
+    {
+      "id": "custom-shared-memory",
+      "kind": "custom-baseline",
+      "records": [
+        "cta_tile",
+        "thread_tile",
+        "shared_memory_bytes",
+        "edge_handling"
+      ]
+    },
+    {
+      "id": "custom-tensor-core",
+      "kind": "custom-advanced",
+      "records": [
+        "mma_instruction_or_rocwmma_shape",
+        "accumulator_type",
+        "pipeline_stages",
+        "architecture_path"
+      ]
+    },
+    {
+      "id": "hipblas",
+      "kind": "vendor-competitor",
+      "records": [
+        "api_call",
+        "transpose_flags",
+        "leading_dimensions",
+        "math_mode",
+        "tf32_policy"
+      ]
+    },
+    {
+      "id": "hipblaslt",
+      "kind": "vendor-competitor-and-epilogue-reference",
+      "records": [
+        "matmul_desc",
+        "matrix_layouts",
+        "preference_workspace",
+        "heuristic_count",
+        "selected_algorithm",
+        "epilogue_attributes"
+      ]
+    },
+    {
+      "id": "composable-kernel",
+      "kind": "competitor-and-extension-surface",
+      "records": [
+        "composable-kernel_commit",
+        "example_ancestor",
+        "cta_tile",
+        "warp_tile",
+        "instruction_tile",
+        "stages",
+        "scheduler",
+        "epilogue_operator"
+      ]
+    },
+    {
+      "id": "triton",
+      "kind": "compiler-competitor",
+      "records": [
+        "meta_parameters",
+        "compile_boundary",
+        "framework_version",
+        "dispatch_included"
+      ]
+    }
+  ],
+  "tasks": [
+    {
+      "id": "sgemm-naive-shared",
+      "status": "planned",
+      "objective": "Teach FP32 GEMM indexing, coalescing, and shared-memory tiling before comparing against vendor baselines.",
+      "shape_families": [
+        "medium-square",
+        "rectangular"
+      ],
+      "candidate_shapes": [
+        {
+          "m": 128,
+          "n": 128,
+          "k": 128
+        },
+        {
+          "m": 512,
+          "n": 512,
+          "k": 512
+        },
+        {
+          "m": 1024,
+          "n": 256,
+          "k": 768
+        }
+      ],
+      "dtypes": [
+        "fp32"
+      ],
+      "layouts": [
+        "row-major contiguous",
+        "column-major library mapping"
+      ],
+      "baselines": [
+        "host-reference",
+        "custom-naive",
+        "custom-shared-memory",
+        "hipblas",
+        "hipblaslt"
+      ],
+      "custom_candidates": [
+        "one-output-element-per-thread",
+        "16x16 shared-memory tile",
+        "32x32 shared-memory tile",
+        "register tiling"
+      ],
+      "win_hypotheses": [
+        "Shared-memory custom kernel should beat naive by reducing global loads.",
+        "hipBLAS/rocBLAS/hipBLASLt should usually beat educational FP32 custom kernels unless shape specialization or fusion is added."
+      ],
+      "negative_examples_to_keep": [
+        "Shared-memory tile slower than hipBLAS/rocBLAS because Matrix Core or TF32 math mode was enabled in the library.",
+        "Larger tile loses due to register pressure or low occupancy."
+      ]
+    },
+    {
+      "id": "sgemm-fixed-small",
+      "status": "planned",
+      "objective": "Explore tiny fixed-shape GEMM where compile-time dimensions, unrolling, and fusion can beat generic library overhead.",
+      "shape_families": [
+        "tiny-fixed",
+        "small-batched"
+      ],
+      "candidate_shapes": [
+        {
+          "m": 8,
+          "n": 8,
+          "k": 8
+        },
+        {
+          "m": 16,
+          "n": 16,
+          "k": 16
+        },
+        {
+          "m": 32,
+          "n": 32,
+          "k": 32
+        }
+      ],
+      "dtypes": [
+        "fp32",
+        "fp16"
+      ],
+      "layouts": [
+        "row-major contiguous",
+        "fixed leading dimension"
+      ],
+      "baselines": [
+        "host-reference",
+        "custom-naive",
+        "custom-shared-memory",
+        "hipblas",
+        "hipblaslt",
+        "composable-kernel"
+      ],
+      "custom_candidates": [
+        "compile-time fixed M/N/K",
+        "one CTA per matrix",
+        "one warp per matrix",
+        "fused bias or activation"
+      ],
+      "win_hypotheses": [
+        "Custom kernel can win when many fixed-size matrices are processed in one launch.",
+        "Fusion can remove one or more extra launches and memory passes."
+      ],
+      "negative_examples_to_keep": [
+        "One matrix per launch loses to launch overhead.",
+        "Over-unrolled kernel loses to register pressure."
+      ]
+    },
+    {
+      "id": "tf32-policy-study",
+      "status": "planned",
+      "objective": "Separate FP32 and TF32 contracts so agents do not claim unfair wins or losses.",
+      "shape_families": [
+        "medium-square",
+        "large-square"
+      ],
+      "candidate_shapes": [
+        {
+          "m": 1024,
+          "n": 1024,
+          "k": 1024
+        },
+        {
+          "m": 4096,
+          "n": 4096,
+          "k": 4096
+        }
+      ],
+      "dtypes": [
+        "fp32-input-fp32-accumulate",
+        "fp32-input-tf32-tensor-core"
+      ],
+      "layouts": [
+        "row-major wrapper",
+        "column-major native"
+      ],
+      "baselines": [
+        "host-reference",
+        "custom-shared-memory",
+        "hipblas",
+        "hipblaslt",
+        "composable-kernel"
+      ],
+      "custom_candidates": [
+        "FP32 shared-memory kernel",
+        "TF32 Matrix Core path where implemented"
+      ],
+      "win_hypotheses": [
+        "TF32 library baselines should be much faster than strict FP32 scalar custom kernels.",
+        "Strict FP32 comparison can make an educational custom kernel easier to interpret."
+      ],
+      "negative_examples_to_keep": [
+        "Claimed custom loss caused by comparing FP32 custom math to TF32 library math.",
+        "Claimed custom win caused by disabling library Matrix Core paths unintentionally."
+      ]
+    },
+    {
+      "id": "hgemm-tensor-core",
+      "status": "planned",
+      "objective": "Build FP16/BF16 Matrix Core competition records against hipBLASLt and Composable Kernel.",
+      "shape_families": [
+        "medium-square",
+        "large-square",
+        "attention-head"
+      ],
+      "candidate_shapes": [
+        {
+          "m": 128,
+          "n": 128,
+          "k": 64
+        },
+        {
+          "m": 1024,
+          "n": 1024,
+          "k": 1024
+        },
+        {
+          "m": 4096,
+          "n": 11008,
+          "k": 4096
+        }
+      ],
+      "dtypes": [
+        "fp16-input-fp32-accumulate",
+        "bf16-input-fp32-accumulate"
+      ],
+      "layouts": [
+        "row-major contiguous",
+        "column-major native",
+        "aligned padded"
+      ],
+      "baselines": [
+        "host-reference",
+        "custom-tensor-core",
+        "hipblaslt",
+        "composable-kernel",
+        "triton"
+      ],
+      "custom_candidates": [
+        "rocWMMA educational kernel",
+        "CK Tile tiled MFMA",
+        "Composable Kernel-derived custom tile",
+        "architecture-specific MFMA path"
+      ],
+      "win_hypotheses": [
+        "Custom Matrix Core path may near-match libraries for fixed aligned shapes.",
+        "Fused epilogues can create specialized wins even if the plain mainloop ties or loses."
+      ],
+      "negative_examples_to_keep": [
+        "rocWMMA kernel loses to Composable Kernel due to weaker pipeline.",
+        "Matrix Core path fails tolerance because accumulator or cast semantics differ."
+      ]
+    },
+    {
+      "id": "gemm-bias-relu-epilogue",
+      "status": "planned",
+      "objective": "Compare custom fused bias+ReLU epilogue against hipBLAS/rocBLAS plus separate kernels and hipBLASLt epilogue.",
+      "shape_families": [
+        "medium-square",
+        "mlp-projection",
+        "small-batched"
+      ],
+      "candidate_shapes": [
+        {
+          "m": 512,
+          "n": 2048,
+          "k": 2048
+        },
+        {
+          "m": 1,
+          "n": 4096,
+          "k": 4096
+        },
+        {
+          "m": 16,
+          "n": 4096,
+          "k": 4096
+        }
+      ],
+      "dtypes": [
+        "fp32",
+        "fp16",
+        "bf16"
+      ],
+      "layouts": [
+        "row-major D",
+        "column bias",
+        "row bias"
+      ],
+      "baselines": [
+        "host-reference",
+        "custom-shared-memory",
+        "custom-tensor-core",
+        "hipblas",
+        "hipblaslt",
+        "composable-kernel"
+      ],
+      "custom_candidates": [
+        "bias broadcast in epilogue",
+        "ReLU clamp in epilogue",
+        "vectorized output stores",
+        "Composable Kernel custom epilogue"
+      ],
+      "win_hypotheses": [
+        "Custom fused epilogue should beat plain hipBLAS/rocBLAS followed by separate bias and ReLU kernels.",
+        "hipBLASLt may remain the strongest baseline when its epilogue exactly matches the contract."
+      ],
+      "negative_examples_to_keep": [
+        "Custom kernel beats plain hipBLAS/rocBLAS but loses to hipBLASLt epilogue.",
+        "Bias broadcast axis bug passes square tests but fails rectangular tests."
+      ]
+    },
+    {
+      "id": "gemm-custom-unsupported-epilogue",
+      "status": "planned",
+      "objective": "Use custom HIP or Composable Kernel when the desired epilogue is not directly expressible in hipBLASLt.",
+      "shape_families": [
+        "mlp-projection",
+        "quantized-gemm",
+        "inference-fusion"
+      ],
+      "candidate_shapes": [
+        {
+          "m": 64,
+          "n": 4096,
+          "k": 4096
+        },
+        {
+          "m": 128,
+          "n": 11008,
+          "k": 4096
+        }
+      ],
+      "dtypes": [
+        "fp16",
+        "bf16",
+        "fp8",
+        "int8"
+      ],
+      "layouts": [
+        "row-major contiguous",
+        "per-column scale",
+        "per-group scale"
+      ],
+      "baselines": [
+        "host-reference",
+        "hipblaslt",
+        "composable-kernel",
+        "triton",
+        "migraphx-plugin"
+      ],
+      "custom_candidates": [
+        "GELU or SiLU epilogue",
+        "residual add plus activation",
+        "scale plus clamp plus cast",
+        "auxiliary amax output",
+        "Composable Kernel epilogue visitor"
+      ],
+      "win_hypotheses": [
+        "Unsupported epilogue fusion can beat any library path that requires extra materialized passes.",
+        "Composable Kernel may be the fastest route to a custom epilogue while preserving a strong mainloop."
+      ],
+      "negative_examples_to_keep": [
+        "Extra epilogue work raises register pressure enough to lose.",
+        "MIGraphX plugin integration overhead hides a fast inner kernel for small shapes."
+      ]
+    },
+    {
+      "id": "strided-batched-small",
+      "status": "planned",
+      "objective": "Compare custom one-launch batched small GEMM against hipBLAS/rocBLAS strided batched and hipBLASLt batched paths.",
+      "shape_families": [
+        "small-batched",
+        "attention-head"
+      ],
+      "candidate_shapes": [
+        {
+          "m": 16,
+          "n": 16,
+          "k": 64,
+          "batch_count": 4096
+        },
+        {
+          "m": 32,
+          "n": 32,
+          "k": 64,
+          "batch_count": 1024
+        },
+        {
+          "m": 64,
+          "n": 64,
+          "k": 64,
+          "batch_count": 256
+        }
+      ],
+      "dtypes": [
+        "fp32",
+        "fp16",
+        "bf16"
+      ],
+      "layouts": [
+        "strided batch",
+        "interleaved batch",
+        "head-major"
+      ],
+      "baselines": [
+        "host-reference",
+        "custom-naive",
+        "custom-shared-memory",
+        "custom-tensor-core",
+        "hipblas",
+        "hipblaslt",
+        "composable-kernel"
+      ],
+      "custom_candidates": [
+        "one CTA per matrix",
+        "one warp per matrix",
+        "multiple matrices per CTA",
+        "fused per-batch epilogue"
+      ],
+      "win_hypotheses": [
+        "Custom batching can win when the matrix size is too small for generic GEMM scheduling.",
+        "Known batch stride and fixed dimensions reduce indexing overhead."
+      ],
+      "negative_examples_to_keep": [
+        "One CTA per matrix underutilizes GFXs for very tiny matrices.",
+        "hipBLAS/rocBLAS strided batched wins once batch count is large enough."
+      ]
+    },
+    {
+      "id": "grouped-gemm-moe",
+      "status": "planned",
+      "objective": "Study variable-shape grouped GEMM for mixture-of-experts routing and token groups.",
+      "shape_families": [
+        "grouped-gemm",
+        "moe"
+      ],
+      "candidate_shapes": [
+        {
+          "groups": 8,
+          "m_range": [
+            1,
+            256
+          ],
+          "n": 4096,
+          "k": 4096
+        },
+        {
+          "groups": 64,
+          "m_range": [
+            1,
+            128
+          ],
+          "n": 14336,
+          "k": 4096
+        }
+      ],
+      "dtypes": [
+        "fp16",
+        "bf16",
+        "fp8"
+      ],
+      "layouts": [
+        "expert-major",
+        "token-major",
+        "grouped pointer array"
+      ],
+      "baselines": [
+        "host-reference",
+        "hipblaslt",
+        "composable-kernel",
+        "triton",
+        "framework-generated"
+      ],
+      "custom_candidates": [
+        "persistent grouped scheduler",
+        "token-count bucketing",
+        "fused permutation plus GEMM",
+        "Composable Kernel grouped GEMM modification"
+      ],
+      "win_hypotheses": [
+        "Custom scheduler can win when group sizes are highly skewed and known.",
+        "Fusion with routing or unpermutation can beat a sequence of generic kernels."
+      ],
+      "negative_examples_to_keep": [
+        "Custom grouped queue loses to Composable Kernel grouped GEMM due to load imbalance.",
+        "Sorting or bucketing overhead exceeds mainloop savings."
+      ]
+    },
+    {
+      "id": "attention-qk-score",
+      "status": "planned",
+      "objective": "Treat QK score computation as a GEMM-adjacent task and identify when full attention fusion beats GEMM baselines.",
+      "shape_families": [
+        "attention-score",
+        "small-batched",
+        "sequence-length-sweep"
+      ],
+      "candidate_shapes": [
+        {
+          "batch": 1,
+          "heads": 32,
+          "query_length": 128,
+          "key_length": 128,
+          "head_dim": 128
+        },
+        {
+          "batch": 1,
+          "heads": 32,
+          "query_length": 1,
+          "key_length": 8192,
+          "head_dim": 128
+        }
+      ],
+      "dtypes": [
+        "fp16",
+        "bf16",
+        "fp8"
+      ],
+      "layouts": [
+        "BHSK",
+        "BSHK",
+        "paged-kv-cache"
+      ],
+      "baselines": [
+        "host-reference",
+        "hipblaslt",
+        "composable-kernel",
+        "triton",
+        "flash-attention",
+        "framework-generated"
+      ],
+      "custom_candidates": [
+        "QK GEMM plus fused scale",
+        "QK plus mask plus online softmax",
+        "decode-oriented one-query kernel",
+        "paged-KV layout specialization"
+      ],
+      "win_hypotheses": [
+        "Pure GEMM baseline may lose once scale, mask, and softmax memory traffic are included.",
+        "Decode shapes can reward narrow custom kernels over general attention paths."
+      ],
+      "negative_examples_to_keep": [
+        "Custom QK GEMM win disappears when full attention pipeline is measured.",
+        "Paged KV indexing overhead dominates arithmetic savings."
+      ]
+    },
+    {
+      "id": "quantized-gemm-dequant-epilogue",
+      "status": "planned",
+      "objective": "Explore quantized GEMM where scale/dequant/activation/quantization are part of the competition surface.",
+      "shape_families": [
+        "quantized-gemm",
+        "mlp-projection",
+        "inference-fusion"
+      ],
+      "candidate_shapes": [
+        {
+          "m": 16,
+          "n": 4096,
+          "k": 4096
+        },
+        {
+          "m": 128,
+          "n": 11008,
+          "k": 4096
+        }
+      ],
+      "dtypes": [
+        "int8-input-int32-accumulate",
+        "fp8-input-fp32-accumulate",
+        "int4-packed-input"
+      ],
+      "layouts": [
+        "per-tensor scale",
+        "per-channel scale",
+        "per-group scale",
+        "packed weights"
+      ],
+      "baselines": [
+        "host-reference",
+        "hipblaslt",
+        "composable-kernel",
+        "migraphx-plugin",
+        "framework-generated"
+      ],
+      "custom_candidates": [
+        "fused dequant in mainloop",
+        "scale and clamp in epilogue",
+        "packed int4 load path",
+        "auxiliary amax collection"
+      ],
+      "win_hypotheses": [
+        "Known scale granularity and packing can make a narrow custom kernel faster than a generic quantized path.",
+        "Avoiding materialized dequantized operands can reduce memory traffic."
+      ],
+      "negative_examples_to_keep": [
+        "Unpacking int4 costs more than saved bandwidth for small K.",
+        "Numerical mismatch makes apparent speedup invalid."
+      ]
+    }
+  ]
+}

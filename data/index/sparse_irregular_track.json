@@ -1,0 +1,220 @@
+{
+  "schema_version": "0.1.0",
+  "track_id": "sparse-irregular-kernel-track",
+  "status": "template-only",
+  "guide": "docs/SPARSE_IRREGULAR_KERNEL_GUIDE.md",
+  "mission": "Expand reductions, sparse, irregular graph, embedding, and block-sparse attention coverage with custom HIP kernel scaffolds that compete honestly against hipCUB/rocPRIM/hipCUB/rocThrust, CUDA library sparse paths, FlashAttention, Composable Kernel, vLLM, and FlashInfer.",
+  "evidence_policy": {
+    "default_status": "template-only",
+    "measured_without_profiler": "timing-only",
+    "must_not_claim": [
+      "rocprofiler/rocprof counters unless collected",
+      "library win or loss unless the contract and timing boundary match",
+      "dedupe speedup unless sort, unique, inverse map, and scatter costs are recorded or explicitly excluded",
+      "serving attention win from an isolated block-sparse kernel timing"
+    ]
+  },
+  "metadata_requirements": [
+    "task_id",
+    "gpu_name",
+    "gfx_target",
+    "driver_version",
+    "cuda_toolkit_version",
+    "compiler_version",
+    "build_command",
+    "arch_flags",
+    "dtype",
+    "shape",
+    "layout",
+    "sparsity_density",
+    "row_or_segment_length_histogram",
+    "duplicate_ratio",
+    "library_baseline",
+    "temporary_storage_bytes",
+    "launch_count",
+    "preprocessing_included",
+    "warmup_iterations",
+    "measured_iterations",
+    "timer_type",
+    "profiler_status",
+    "correctness_reference",
+    "tolerance",
+    "result_class",
+    "win_loss_notes"
+  ],
+  "tasks": [
+    {
+      "id": "segmented-reduction-fixed-and-ragged",
+      "status": "template-only",
+      "category": "reduction",
+      "artifacts": {
+        "task": "corpus/tasks/segmented-reduction-fixed-and-ragged/task.json",
+        "baseline": "corpus/tasks/segmented-reduction-fixed-and-ragged/source/baseline.hip",
+        "optimized": "corpus/tasks/segmented-reduction-fixed-and-ragged/source/optimized.hip"
+      },
+      "baseline": "one thread per segment",
+      "custom_strategy": "one CTA per segment with shared-memory reduction",
+      "library_baselines": [
+        "hipCUB DeviceSegmentedReduce",
+        "hipCUB BlockReduce"
+      ],
+      "candidate_shapes": [
+        "fixed small segments",
+        "fixed medium segments",
+        "ragged skewed segments"
+      ]
+    },
+    {
+      "id": "csr-spmv-load-balance",
+      "status": "template-only",
+      "category": "sparse-linear-algebra",
+      "artifacts": {
+        "task": "corpus/tasks/csr-spmv-load-balance/task.json",
+        "baseline": "corpus/tasks/csr-spmv-load-balance/source/baseline.hip",
+        "optimized": "corpus/tasks/csr-spmv-load-balance/source/optimized.hip"
+      },
+      "baseline": "one thread per CSR row",
+      "custom_strategy": "one warp per row with shuffle reduction",
+      "library_baselines": [
+        "cuSPARSE via CUDA library samples",
+        "hipCUB warp collectives as parts bin"
+      ],
+      "candidate_shapes": [
+        "uniform short rows",
+        "uniform medium rows",
+        "power-law rows"
+      ]
+    },
+    {
+      "id": "embedding-gather-dedup",
+      "status": "template-only",
+      "category": "embedding",
+      "artifacts": {
+        "task": "corpus/tasks/embedding-gather-dedup/task.json",
+        "baseline": "corpus/tasks/embedding-gather-dedup/source/baseline.hip",
+        "optimized": "corpus/tasks/embedding-gather-dedup/source/optimized.hip"
+      },
+      "baseline": "direct gather for every requested id",
+      "custom_strategy": "pre-sorted unique gather once and inverse scatter",
+      "library_baselines": [
+        "rocPRIM/hipCUB/rocThrust sort/unique/select primitives",
+        "serving embedding lookup references"
+      ],
+      "candidate_shapes": [
+        "all unique ids",
+        "high duplicate ids",
+        "Zipf token distribution"
+      ]
+    },
+    {
+      "id": "frontier-compaction-bfs",
+      "status": "template-only",
+      "category": "graph",
+      "artifacts": {
+        "task": "corpus/tasks/frontier-compaction-bfs/task.json",
+        "baseline": "corpus/tasks/frontier-compaction-bfs/source/baseline.hip",
+        "optimized": "corpus/tasks/frontier-compaction-bfs/source/optimized.hip"
+      },
+      "baseline": "global atomic per selected vertex",
+      "custom_strategy": "block-local scan with one global reservation per block",
+      "library_baselines": [
+        "hipCUB DeviceSelect",
+        "hipCUB DeviceScan"
+      ],
+      "candidate_shapes": [
+        "sparse active mask",
+        "medium active mask",
+        "dense active mask"
+      ]
+    },
+    {
+      "id": "block-sparse-attention-forward",
+      "status": "template-only",
+      "category": "attention",
+      "artifacts": {
+        "task": "corpus/tasks/block-sparse-attention-forward/task.json",
+        "baseline": "corpus/tasks/block-sparse-attention-forward/source/baseline.hip",
+        "optimized": "corpus/tasks/block-sparse-attention-forward/source/optimized.hip"
+      },
+      "baseline": "dense key scan with block-mask checks",
+      "custom_strategy": "CSR-style visible block list with online softmax",
+      "library_baselines": [
+        "FlashAttention",
+        "Composable Kernel",
+        "vLLM",
+        "FlashInfer"
+      ],
+      "candidate_shapes": [
+        "local-window prefill",
+        "low-density block mask",
+        "decode sparse blocks"
+      ]
+    },
+    {
+      "id": "sddmm-sparse-attention-score",
+      "status": "template-only",
+      "category": "sparse-linear-algebra",
+      "artifacts": {
+        "task": "corpus/tasks/sddmm-sparse-attention-score/task.json",
+        "baseline": "corpus/tasks/sddmm-sparse-attention-score/source/baseline.hip",
+        "optimized": "corpus/tasks/sddmm-sparse-attention-score/source/optimized.hip"
+      },
+      "baseline": "one thread per nonzero sampled dot product",
+      "custom_strategy": "tile dense feature vectors across sparse edge blocks",
+      "library_baselines": [
+        "cuSPARSE where applicable",
+        "Composable Kernel sparse",
+        "dense masked attention reference"
+      ],
+      "candidate_shapes": [
+        "uniform distribution",
+        "skewed distribution",
+        "large irregular workload"
+      ]
+    },
+    {
+      "id": "spgemm-merge-hash",
+      "status": "template-only",
+      "category": "sparse-linear-algebra",
+      "artifacts": {
+        "task": "corpus/tasks/spgemm-merge-hash/task.json",
+        "baseline": "corpus/tasks/spgemm-merge-hash/source/baseline.hip",
+        "optimized": "corpus/tasks/spgemm-merge-hash/source/optimized.hip"
+      },
+      "baseline": "row-wise sparse expansion",
+      "custom_strategy": "row-length-aware merge or hash accumulators",
+      "library_baselines": [
+        "cuSPARSE SpGEMM",
+        "custom merge path",
+        "custom hash path"
+      ],
+      "candidate_shapes": [
+        "uniform distribution",
+        "skewed distribution",
+        "large irregular workload"
+      ]
+    },
+    {
+      "id": "sparse-format-conversion",
+      "status": "template-only",
+      "category": "sparse-preprocessing",
+      "artifacts": {
+        "task": "corpus/tasks/sparse-format-conversion/task.json",
+        "baseline": "corpus/tasks/sparse-format-conversion/source/baseline.hip",
+        "optimized": "corpus/tasks/sparse-format-conversion/source/optimized.hip"
+      },
+      "baseline": "staged library or sort/scan/scatter conversion",
+      "custom_strategy": "fused count/prefix/scatter for known formats",
+      "library_baselines": [
+        "cuSPARSE conversion APIs",
+        "hipCUB sort/scan",
+        "rocThrust sort/scan"
+      ],
+      "candidate_shapes": [
+        "uniform distribution",
+        "skewed distribution",
+        "large irregular workload"
+      ]
+    }
+  ]
+}

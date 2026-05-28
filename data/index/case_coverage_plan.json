@@ -1,0 +1,338 @@
+{
+  "schema_version": "0.1.0",
+  "guide": "docs/CASE_COVERAGE_PLAN.md",
+  "mission": "Track complete coverage of every v1 row in docs/CASE_CATALOG.md with tasks, measured records, library baselines, and custom-kernel hypotheses. Track extended v2 rows as proposed backlog until promoted.",
+  "completion_rule": [
+    "task_with_baseline_optimized_harness_and_oracle",
+    "at_least_one_named_hardware_timing_or_counter_record",
+    "library_baseline_record_or_justified_not_applicable_note",
+    "negative_or_library_win_record_when_custom_does_not_win",
+    "retrieval_links_from_navigation_and_skills"
+  ],
+  "coverage_rollup": {
+    "measured_or_measured_seed_rows": 14,
+    "template_or_scaffold_rows": 31,
+    "remaining_first_class_task_gaps": [],
+    "promoted_v2_template_tasks": 30
+  },
+  "priority_next": [
+    {
+      "case": "GEMM",
+      "next_artifact": "same-hardware rocWMMA custom, hipBLASLt, Composable Kernel, and Triton timing",
+      "reason": "Current rocWMMA seed has CUDA-origin A4000 custom timing and CUDA-origin A4500 hipBLASLt timing, but no same-hardware custom-vs-library comparison."
+    },
+    {
+      "case": "Top-k",
+      "next_artifact": "hipCUB/FlashInfer/vLLM on ROCm timing for block-topk-sampling",
+      "reason": "Measured top-k sampling seed now has library recipes but no measured library competitors."
+    },
+    {
+      "case": "Attention",
+      "next_artifact": "FlashAttention/MIOpen/Triton/serving timing for online-attention-forward",
+      "reason": "Measured online-attention seed now has library recipes but no measured library competitors."
+    },
+    {
+      "case": "Quantized GEMM",
+      "next_artifact": "materialized-dequant and bitsandbytes/Composable Kernel/vLLM on ROCm timing",
+      "reason": "Measured int4 GEMV seed now has library recipes but no measured library competitors."
+    },
+    {
+      "case": "Gather/scatter",
+      "next_artifact": "gather-scatter-coalescing timing and hipCUB/rocThrust comparison",
+      "reason": "Memory movement catalog now has a scaffold but no measured irregular-access record."
+    },
+    {
+      "case": "cuSPARSE sparse",
+      "next_artifact": "cuSPARSE baseline for csr-spmv-load-balance",
+      "reason": "Sparse library family now has a scaffold but needs a measured library competitor."
+    },
+    {
+      "case": "Template-only scaffolds",
+      "next_artifact": "first timing records for memory, sparse, system, ML adjunct, integration, and multi-GPU task tracks",
+      "reason": "First-class task artifacts now exist; the next quality jump is correctness-plus-timing evidence."
+    }
+  ],
+  "library_targets": [
+    "CUDA Runtime",
+    "rocprofiler/rocprof",
+    "Nsight Systems",
+    "hipBLAS/rocBLAS",
+    "hipBLASLt",
+    "Composable Kernel",
+    "CK Tile",
+    "rocPRIM/hipCUB/rocThrust",
+    "hipCUB",
+    "rocThrust",
+    "MIOpen",
+    "MIGraphX",
+    "vLLM on ROCm",
+    "Triton",
+    "PyTorch extension",
+    "OneFlow",
+    "vLLM",
+    "FlashInfer",
+    "bitsandbytes",
+    "Transformer Engine on ROCm",
+    "RCCL",
+    "rocSHMEM",
+    "cuSPARSE",
+    "hipRTC",
+    "nvJitLink"
+  ],
+  "extension_backlog": {
+    "status": "v2-proposed",
+    "source": "docs/CASE_CATALOG.md#extended-case-families",
+    "promoted_wave": {
+      "id": "v2-extension-promotion-wave-1",
+      "guide": "docs/V2_EXTENSION_PROMOTION_WAVE.md",
+      "index": "data/index/v2_extension_wave.json",
+      "status": "template-only",
+      "task_ids": [
+        "paged-kv-cache-attention",
+        "gqa-mqa-decode-attention",
+        "varlen-packed-attention",
+        "fused-mlp-swiglu",
+        "direct-convolution-2d",
+        "conv2d-fused-bias-activation",
+        "radix-sort-key-value",
+        "top-p-nucleus-sampling",
+        "fp8-cast-scale-amax",
+        "block-scaled-fp4-gemm",
+        "int8-dot-mfma-gemm",
+        "structured-sparsity-2to4",
+        "ragged-grouped-gemm",
+        "composable-kernel-custom-epilogue",
+        "pytorch-inductor-generated-kernel",
+        "rocprof-counter-roofline"
+      ]
+    },
+    "promotion_rule": "Promote an extension case only after assigning a task ID, library baselines, harness plan, and first evidence target.",
+    "families": [
+      {
+        "family": "Memory, layout, and data plumbing",
+        "first_cases": [
+          "strided-batched-layout-transform",
+          "packed-layout-transcode",
+          "memory-pool-allocator"
+        ],
+        "library_baselines": [
+          "rocThrust",
+          "hipCUB",
+          "CUDA memory pools",
+          "framework tensor copies"
+        ]
+      },
+      {
+        "family": "Convolution, signal, and classical linear algebra",
+        "first_cases": [
+          "direct-convolution-2d",
+          "conv2d-fused-bias-activation",
+          "implicit-gemm-convolution",
+          "small-gemv-token-batch"
+        ],
+        "library_baselines": [
+          "MIOpen",
+          "Composable Kernel conv",
+          "MIGraphX",
+          "cuFFT",
+          "hipBLAS/rocBLAS",
+          "cuSOLVER"
+        ]
+      },
+      {
+        "family": "Sorting, grouping, and selection",
+        "first_cases": [
+          "radix-sort-key-value",
+          "select-filter-compact",
+          "groupby-reduce-by-key",
+          "top-p-nucleus-sampling"
+        ],
+        "library_baselines": [
+          "hipCUB",
+          "rocThrust",
+          "vLLM on ROCm",
+          "vLLM",
+          "FlashInfer"
+        ]
+      },
+      {
+        "family": "Transformer and ML fusion",
+        "first_cases": [
+          "paged-kv-cache-attention",
+          "varlen-packed-attention",
+          "gqa-mqa-decode-attention",
+          "fused-mlp-swiglu",
+          "normalization-backward"
+        ],
+        "library_baselines": [
+          "FlashAttention",
+          "MIOpen",
+          "vLLM on ROCm",
+          "vLLM",
+          "FlashInfer",
+          "Transformer Engine on ROCm",
+          "Triton"
+        ]
+      },
+      {
+        "family": "Quantization and numeric formats",
+        "first_cases": [
+          "fp8-cast-scale-amax",
+          "block-scaled-fp4-gemm",
+          "int8-dot-mfma-gemm",
+          "int4-groupwise-gemv"
+        ],
+        "library_baselines": [
+          "Transformer Engine on ROCm",
+          "hipBLASLt",
+          "Composable Kernel",
+          "MIGraphX",
+          "bitsandbytes"
+        ]
+      },
+      {
+        "family": "Sparse, structured sparsity, and graph work",
+        "first_cases": [
+          "sddmm-sparse-attention-score",
+          "spgemm-merge-hash",
+          "structured-sparsity-2to4",
+          "gnn-neighbor-aggregation"
+        ],
+        "library_baselines": [
+          "cuSPARSE",
+          "cuSPARSELt",
+          "Composable Kernel sparse",
+          "MIGraphX",
+          "Gunrock-like references"
+        ]
+      },
+      {
+        "family": "Matrix Core, Composable Kernel, and CK Tile internals",
+        "first_cases": [
+          "composable-kernel-custom-epilogue",
+          "ragged-grouped-gemm",
+          "splitk-reduction-gemm",
+          "warp-specialized-wgmma"
+        ],
+        "library_baselines": [
+          "Composable Kernel",
+          "CK Tile",
+          "hipBLASLt",
+          "Triton"
+        ]
+      },
+      {
+        "family": "Inference, framework, and compiler integration",
+        "first_cases": [
+          "miopen-frontend-fusion",
+          "graph-captured-inference-step",
+          "vllm-rocm-custom-plugin",
+          "pytorch-inductor-generated-kernel"
+        ],
+        "library_baselines": [
+          "MIOpen",
+          "HIP Graphs",
+          "MIGraphX",
+          "vLLM on ROCm",
+          "PyTorch Inductor",
+          "OneFlow"
+        ]
+      },
+      {
+        "family": "Multi-GPU and runtime systems",
+        "first_cases": [
+          "reduce-scatter-overlap",
+          "allgather-overlap",
+          "alltoall-moe-exchange",
+          "cuda-ipc-multiprocess"
+        ],
+        "library_baselines": [
+          "RCCL",
+          "rocSHMEM",
+          "CUDA P2P/IPC",
+          "framework distributed"
+        ]
+      },
+      {
+        "family": "Tooling, verification, and agent evaluation",
+        "first_cases": [
+          "rocprof-counter-roofline",
+          "rocm-sanitizer-racecheck",
+          "amdisa-diff-regression",
+          "autotune-parameter-sweep"
+        ],
+        "library_baselines": [
+          "rocprofiler/rocprof",
+          "Nsight Systems",
+          "rocm-sanitizer",
+          "cuobjdump",
+          "nvdisasm",
+          "nvbench"
+        ]
+      },
+      {
+        "family": "Architecture-specific extension paths",
+        "first_cases": [
+          "gfx90a-gfx942-cdna-split",
+          "gfx942-cdna3-mfma-lab",
+          "sm100-sm120-blackwell-path",
+          "cluster-dsm-workqueue"
+        ],
+        "library_baselines": [
+          "CUDA tuning guides",
+          "Composable Kernel",
+          "hipBLASLt",
+          "MIGraphX"
+        ]
+      }
+    ],
+    "promoted_waves": [
+      {
+        "id": "v2-extension-promotion-wave-1",
+        "guide": "docs/V2_EXTENSION_PROMOTION_WAVE.md",
+        "index": "data/index/v2_extension_wave.json",
+        "status": "template-only",
+        "task_ids": [
+          "paged-kv-cache-attention",
+          "gqa-mqa-decode-attention",
+          "varlen-packed-attention",
+          "fused-mlp-swiglu",
+          "direct-convolution-2d",
+          "conv2d-fused-bias-activation",
+          "radix-sort-key-value",
+          "top-p-nucleus-sampling",
+          "fp8-cast-scale-amax",
+          "block-scaled-fp4-gemm",
+          "int8-dot-mfma-gemm",
+          "structured-sparsity-2to4",
+          "ragged-grouped-gemm",
+          "composable-kernel-custom-epilogue",
+          "pytorch-inductor-generated-kernel",
+          "rocprof-counter-roofline"
+        ]
+      },
+      {
+        "id": "v2-extension-promotion-wave-2",
+        "guide": "docs/V2_EXTENSION_PROMOTION_WAVE.md",
+        "index": "data/index/v2_extension_wave.json",
+        "status": "template-only",
+        "task_ids": [
+          "select-filter-compact",
+          "groupby-reduce-by-key",
+          "unique-run-length-encode",
+          "sddmm-sparse-attention-score",
+          "spgemm-merge-hash",
+          "sparse-format-conversion",
+          "reduce-scatter-overlap",
+          "allgather-overlap",
+          "alltoall-moe-exchange",
+          "rocm-sanitizer-racecheck",
+          "amdisa-diff-regression",
+          "autotune-parameter-sweep",
+          "gfx90a-gfx942-cdna-split",
+          "gfx942-cdna3-mfma-lab"
+        ]
+      }
+    ]
+  }
+}

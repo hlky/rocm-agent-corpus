@@ -1,0 +1,95 @@
+{
+  "version": 1,
+  "status": "scaffolded",
+  "description": "PyTorch-public-API HIP/ROCm challenge task manifest. PyTorch is the baseline and correctness oracle.",
+  "docs": [
+    "docs/PYTORCH_PUBLIC_API_KERNEL_CATALOG.md",
+    "docs/PYTORCH_API_REAL_WORLD_SHAPE_MATRIX.md",
+    "docs/REAL_MODEL_PROBLEM_SIZES.md",
+    "docs/PYTORCH_BASELINE_CHALLENGE.md"
+  ],
+  "indexes": [
+    "data/index/pytorch_public_api_kernel_catalog.json",
+    "data/index/pytorch_api_real_world_shape_matrix.json",
+    "data/index/real_model_problem_sizes.json",
+    "data/index/pytorch_baseline_challenge.json"
+  ],
+  "required_task_fields": [
+    "task_id",
+    "task_level",
+    "public_pytorch_reference",
+    "reference_module_or_function",
+    "real_shape_matrix_refs",
+    "visible_shapes",
+    "hidden_shape_policy",
+    "dtype_layout_stride_contract",
+    "correctness_policy",
+    "primary_baseline",
+    "optional_baselines",
+    "timing_boundary",
+    "allowed_specialization",
+    "disallowed_shortcuts",
+    "score_weights"
+  ],
+  "candidate_tasks": [
+    {
+      "task_id": "qwen_vocab_topk20",
+      "track": "torch_selection_sampling",
+      "public_pytorch_reference": "torch.topk(logits, k=20, dim=-1, sorted=True)",
+      "real_shape_matrix_refs": ["pt_selection_sampling_rows"],
+      "real_shape_refs": ["qwen3_8b_dense", "qwen3_4b_2507_long"],
+      "visible_shapes": [
+        {"rows": 1, "n": 151936, "k": 20, "dtype": "bfloat16"},
+        {"rows": 16, "n": 151936, "k": 20, "dtype": "bfloat16"}
+      ],
+      "baseline": "pytorch-eager-public-api"
+    },
+    {
+      "task_id": "qwen3_moe_router_topk8",
+      "track": "torch_selection_sampling",
+      "public_pytorch_reference": "softmax(router_logits.float(), dim=-1) then torch.topk(k=8)",
+      "real_shape_matrix_refs": ["pt_selection_sampling_rows", "pt_softmax_attention_rows", "pt_gather_scatter_compaction"],
+      "real_shape_refs": ["qwen3_moe_30b_a3b", "qwen3_moe_235b_a22b"],
+      "visible_shapes": [
+        {"tokens": 4096, "experts": 128, "k": 8, "hidden": 2048},
+        {"tokens": 16384, "experts": 128, "k": 8, "hidden": 4096}
+      ],
+      "baseline": "pytorch-eager-public-api"
+    },
+    {
+      "task_id": "flux_packed_latent_attention",
+      "track": "torch_attention",
+      "public_pytorch_reference": "torch.nn.functional.scaled_dot_product_attention over Flux image/text token projections",
+      "real_shape_matrix_refs": ["pt_softmax_attention_rows", "pt_dense_linear_gemm_rows", "pt_layout_latent_pack_concat"],
+      "real_shape_refs": ["flux_transformer_1024"],
+      "visible_shapes": [
+        {"batch": 1, "image_tokens": 4096, "text_tokens": 512, "heads": 24, "head_dim": 128}
+      ],
+      "baseline": "pytorch-eager-public-api"
+    },
+    {
+      "task_id": "allegro_3d_rope_apply",
+      "track": "torch_position_scan_rope",
+      "public_pytorch_reference": "Build/gather per-axis cos/sin tables and apply rotate-half RoPE to Q/K tensors with PyTorch tensor ops",
+      "real_shape_matrix_refs": ["pt_position_scan_rope_rows"],
+      "real_shape_refs": ["allegro_3d_rope_grid", "qwen3_vl_cu_seqlens_mrope"],
+      "visible_shapes": [
+        {"batch": 1, "tokens": 79200, "heads": 24, "head_dim": 96, "axis_chunks": [32, 32, 32], "dtype": "bfloat16"},
+        {"batch": 1, "tokens": 4096, "heads": 32, "kv_heads": 8, "head_dim": 128, "position_axes": 3, "dtype": "bfloat16"}
+      ],
+      "baseline": "pytorch-eager-public-api"
+    },
+    {
+      "task_id": "sdxl_vae_conv_block",
+      "track": "torch_conv_codec",
+      "public_pytorch_reference": "Conv2d + GroupNorm + SiLU + residual/add/upsample subgraph",
+      "real_shape_matrix_refs": ["pt_conv_resample_codec_rows", "pt_pointwise_cfg_scheduler"],
+      "real_shape_refs": ["sdxl_vae_decode_1024", "sd15_vae_decode_512"],
+      "visible_shapes": [
+        {"batch": 1, "channels": 4, "height": 128, "width": 128, "dtype": "float16"},
+        {"batch": 1, "channels": 4, "height": 64, "width": 64, "dtype": "float16"}
+      ],
+      "baseline": "pytorch-eager-public-api"
+    }
+  ]
+}

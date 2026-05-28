@@ -1,0 +1,75 @@
+{
+  "schema_version": "0.1.0",
+  "id": "composable-kernel-custom-epilogue",
+  "title": "Composable Kernel Custom Epilogue Visitor Scaffold",
+  "domain": "gemm-extension",
+  "language": "hip-cpp",
+  "tags": [
+    "composable-kernel",
+    "ck_tile",
+    "epilogue",
+    "visitor",
+    "hipblaslt",
+    "template-only"
+  ],
+  "source_refs": [
+    "rocm-composable-kernel",
+    "amd-hipblaslt-rocblas-docs",
+    "amd-rocm-programming-guide"
+  ],
+  "problem": {
+    "summary": "Create a task boundary for custom Composable Kernel epilogue visitors that fuse bias, activation, scaling, auxiliary outputs, or metadata writes after GEMM.",
+    "inputs": [
+      "A/B matrices",
+      "bias or side tensors",
+      "scale metadata",
+      "activation parameters",
+      "optional auxiliary output"
+    ],
+    "outputs": [
+      "GEMM output",
+      "optional auxiliary tensors"
+    ],
+    "constraints": [
+      "Template-only; compare against hipBLASLt epilogues and built-in Composable Kernel epilogues first",
+      "Record Composable Kernel commit, tile shapes, scheduler, epilogue tree, and workspace",
+      "Do not claim direct HIP kernel wins from an extension-only artifact"
+    ]
+  },
+  "artifacts": {
+    "baseline": "source/baseline.hip",
+    "optimized": "source/optimized.hip",
+    "harness": "source/harness_plan.md"
+  },
+  "verification": {
+    "status": "template-only",
+    "method": "Implement the baseline, optimized candidate, and CPU or library oracle; compare all outputs across edge cases before timing claims.",
+    "tolerances": {
+      "max_abs_error": 0.0001,
+      "max_rel_error": 0.0001
+    }
+  },
+  "benchmarking": {
+    "status": "template-only",
+    "operation": "composable-kernel-custom-epilogue",
+    "required_metrics": [
+      "GEMM latency",
+      "epilogue latency delta",
+      "extra launches avoided",
+      "tile shape",
+      "register/shared memory pressure",
+      "workspace bytes",
+      "correctness max error"
+    ],
+    "recommended_shapes": [
+      "M=N=K=4096 fp16",
+      "M=128 N=4096 K=4096 fp16",
+      "M=4096 N=11008 K=4096 fp16"
+    ]
+  },
+  "license": "Project seed example",
+  "curation": {
+    "status": "template-only",
+    "notes": "Promoted from the v2 extension backlog as a template-only task. No performance, correctness, or profiler evidence is claimed yet."
+  }
+}

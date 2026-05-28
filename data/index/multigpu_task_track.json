@@ -1,0 +1,99 @@
+{
+  "schema_version": "0.1.0",
+  "track_id": "multi-gpu-collectives",
+  "guide": "docs/MULTIGPU_TASK_GUIDE.md",
+  "mission": "Expand multi-GPU coverage with template-only tasks for collective overlap and GPU-initiated one-sided queueing, while preserving evidence discipline when no multi-GPU hardware is available.",
+  "evidence_policy": {
+    "current_status": "template-only",
+    "must_say": [
+      "template-only for unrun scaffolds",
+      "timing-only for HIP-event timings without profiler timelines or counters",
+      "negative example when a chunking or queue optimization loses"
+    ],
+    "must_not_claim": [
+      "communication overlap from source structure alone",
+      "Nsight counter evidence without profiler artifacts",
+      "RCCL or rocSHMEM wins without matching rank count, topology, and timing boundary"
+    ]
+  },
+  "tasks": [
+    {
+      "id": "rccl-overlap-allreduce",
+      "task_path": "corpus/tasks/rccl-overlap-allreduce/task.json",
+      "status": "template-only",
+      "topic": "phase-separated versus chunked compute plus RCCL AllReduce overlap",
+      "source_refs": [
+        "amd-rccl",
+        "amd-rccl-docs",
+        "amd-hip-programming-guide",
+        "amd-rocm-programming-guide"
+      ]
+    },
+    {
+      "id": "rocshmem-queue",
+      "task_path": "corpus/tasks/rocshmem-queue/task.json",
+      "status": "template-only",
+      "topic": "host-mediated queue versus GPU-initiated rocSHMEM one-sided enqueue",
+      "source_refs": [
+        "amd-rocshmem",
+        "amd-hip-programming-guide",
+        "amd-rocm-programming-guide"
+      ]
+    },
+    {
+      "id": "reduce-scatter-overlap",
+      "task_path": "corpus/tasks/reduce-scatter-overlap/task.json",
+      "status": "template-only",
+      "topic": "chunked compute plus RCCL ReduceScatter overlap",
+      "source_refs": [
+        "amd-rccl",
+        "amd-rccl-docs",
+        "megatron-lm",
+        "amd-rocm-programming-guide"
+      ]
+    },
+    {
+      "id": "allgather-overlap",
+      "task_path": "corpus/tasks/allgather-overlap/task.json",
+      "status": "template-only",
+      "topic": "pipelined all-gather and consumer compute overlap",
+      "source_refs": [
+        "amd-rccl",
+        "amd-rccl-docs",
+        "megatron-lm",
+        "amd-rocm-programming-guide"
+      ]
+    },
+    {
+      "id": "alltoall-moe-exchange",
+      "task_path": "corpus/tasks/alltoall-moe-exchange/task.json",
+      "status": "template-only",
+      "topic": "MoE token permutation, rank exchange, and unpermutation",
+      "source_refs": [
+        "amd-rccl",
+        "amd-rccl-docs",
+        "amd-rocshmem",
+        "megatron-lm",
+        "amd-rocm-programming-guide"
+      ]
+    }
+  ],
+  "metadata_requirements": [
+    "task_id",
+    "evidence_label",
+    "gpu_name",
+    "gfx_target",
+    "driver_version",
+    "cuda_toolkit_version",
+    "compiler_or_library_version",
+    "build_or_compile_options",
+    "rank_or_pe_count",
+    "topology_or_transport",
+    "timer_type",
+    "warmup_iterations",
+    "measured_iterations",
+    "correctness_reference",
+    "tolerance",
+    "win_loss_notes"
+  ]
+}

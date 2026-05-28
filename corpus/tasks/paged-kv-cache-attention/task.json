@@ -1,0 +1,77 @@
+{
+  "schema_version": "0.1.0",
+  "id": "paged-kv-cache-attention",
+  "title": "Paged KV Cache Decode Attention",
+  "domain": "llm-inference",
+  "language": "hip-cpp",
+  "tags": [
+    "attention",
+    "decode",
+    "paged-kv",
+    "vllm",
+    "flashinfer",
+    "vllm-rocm",
+    "template-only"
+  ],
+  "source_refs": [
+    "amd-rocm-programming-guide",
+    "vllm",
+    "flashinfer",
+    "flash-attention"
+  ],
+  "problem": {
+    "summary": "Compute single-token or small-query decode attention over a paged KV cache while preserving explicit page-table, block-size, and cache-layout contracts.",
+    "inputs": [
+      "Q shaped [tokens, query_heads, head_dim]",
+      "paged K/V cache blocks",
+      "page table or block table",
+      "sequence lengths",
+      "optional causal/window metadata"
+    ],
+    "outputs": [
+      "attention output shaped [tokens, query_heads, head_dim]"
+    ],
+    "constraints": [
+      "Template-only; no FlashInfer/vLLM/vLLM on ROCm win is claimed",
+      "Record page size, block table layout, KV dtype, GQA/MQA head mapping, and batch scheduler boundary",
+      "Separate prefill from decode measurements"
+    ]
+  },
+  "artifacts": {
+    "baseline": "source/baseline.hip",
+    "optimized": "source/optimized.hip",
+    "harness": "source/harness_plan.md"
+  },
+  "verification": {
+    "status": "template-only",
+    "method": "Implement the baseline, optimized candidate, and CPU or library oracle; compare all outputs across edge cases before timing claims.",
+    "tolerances": {
+      "max_abs_error": 0.0001,
+      "max_rel_error": 0.0001
+    }
+  },
+  "benchmarking": {
+    "status": "template-only",
+    "operation": "paged-kv-cache-decode-attention",
+    "required_metrics": [
+      "median decode latency",
+      "tokens per step",
+      "page size",
+      "KV dtype",
+      "page-table bytes",
+      "cache hit/coalescing notes",
+      "correctness max error",
+      "hardware metadata"
+    ],
+    "recommended_shapes": [
+      "tokens=1 heads=32 kv_heads=8 head_dim=128 pages=4096",
+      "tokens=16 heads=32 kv_heads=8 head_dim=128 variable lengths",
+      "tokens=64 heads=40 kv_heads=8 head_dim=128 pages=8192"
+    ]
+  },
+  "license": "Project seed example",
+  "curation": {
+    "status": "template-only",
+    "notes": "Promoted from the v2 extension backlog as a template-only task. No performance, correctness, or profiler evidence is claimed yet."
+  }
+}

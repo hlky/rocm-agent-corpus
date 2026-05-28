@@ -1,0 +1,74 @@
+{
+  "schema_version": "0.1.0",
+  "id": "rocprof-counter-roofline",
+  "title": "Nsight Counter Roofline Evidence Scaffold",
+  "domain": "profiling",
+  "language": "profiling-workflow",
+  "tags": [
+    "rocprof-compute",
+    "roofline",
+    "profiling",
+    "counters",
+    "evidence",
+    "template-only"
+  ],
+  "source_refs": [
+    "amd-rocprofiler-docs",
+    "amd-rocm-programming-guide"
+  ],
+  "problem": {
+    "summary": "Define the corpus artifact shape for counter-backed rocprofiler/rocprof and roofline evidence without inventing counters when access is blocked.",
+    "inputs": [
+      "compiled kernel executable",
+      "benchmark command",
+      "target kernel regex",
+      "hardware metadata",
+      "rocprof section set"
+    ],
+    "outputs": [
+      "rocprofiler/rocprof report",
+      "metric summary",
+      "roofline classification",
+      "blocked-counter note if applicable"
+    ],
+    "constraints": [
+      "Template-only; no counter-backed claim until a report artifact exists",
+      "Record metric set, replay mode, permissions, clocks, and hardware",
+      "If counters are blocked, label profile-attempted-blocked"
+    ]
+  },
+  "artifacts": {
+    "baseline": "source/profile_recipe.md",
+    "optimized": "source/analysis_template.md",
+    "harness": "source/collection_checklist.md"
+  },
+  "verification": {
+    "status": "template-only",
+    "method": "Run the target kernel's own correctness harness first, then attach rocprofiler/rocprof or blocked-counter artifacts to the corresponding measured record.",
+    "tolerances": {}
+  },
+  "benchmarking": {
+    "status": "template-only",
+    "operation": "rocprof-counter-roofline",
+    "required_metrics": [
+      "GFX throughput",
+      "DRAM throughput",
+      "L2 throughput",
+      "achieved occupancy",
+      "tensor pipe utilization",
+      "stall reasons",
+      "roofline position",
+      "counter access status"
+    ],
+    "recommended_shapes": [
+      "apply to memory task",
+      "apply to GEMM task",
+      "apply to attention task"
+    ]
+  },
+  "license": "Project seed example",
+  "curation": {
+    "status": "template-only",
+    "notes": "Promoted from the v2 extension backlog as a template-only task. No performance, correctness, or profiler evidence is claimed yet."
+  }
+}

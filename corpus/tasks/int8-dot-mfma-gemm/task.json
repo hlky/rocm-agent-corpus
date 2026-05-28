@@ -1,0 +1,81 @@
+{
+  "schema_version": "0.1.0",
+  "id": "int8-dot-mfma-gemm",
+  "title": "INT8 DP4A IMFMA GEMM Scaffold",
+  "domain": "quantized-gemm",
+  "language": "hip-cpp",
+  "tags": [
+    "int8",
+    "gemm",
+    "dp4a",
+    "imma",
+    "hipblaslt",
+    "composable-kernel",
+    "template-only"
+  ],
+  "source_refs": [
+    "amd-hipblaslt-rocblas-docs",
+    "rocm-composable-kernel",
+    "amd-migraphx-docs",
+    "bitsandbytes",
+    "amd-rocm-programming-guide"
+  ],
+  "problem": {
+    "summary": "Compare scalar/dequantized INT8 matmul, DP4A-style custom kernels, and library INT8 Matrix Core paths with explicit scale and output contracts.",
+    "inputs": [
+      "int8 A",
+      "int8 B",
+      "scales",
+      "optional zero-points",
+      "M/N/K",
+      "layout and transpose flags"
+    ],
+    "outputs": [
+      "int32/fp16/fp32 output with optional requantization"
+    ],
+    "constraints": [
+      "Template-only; record signedness, layout, scale placement, accumulator type, and output cast",
+      "Separate DP4A fallback from IMFMA/Matrix Core paths",
+      "Fair hipBLASLt/Composable Kernel/MIGraphX comparison requires same math/output contract"
+    ]
+  },
+  "artifacts": {
+    "baseline": "source/baseline.hip",
+    "optimized": "source/optimized.hip",
+    "harness": "source/harness_plan.md"
+  },
+  "verification": {
+    "status": "template-only",
+    "method": "Implement the baseline, optimized candidate, and CPU or library oracle; compare all outputs across edge cases before timing claims.",
+    "tolerances": {
+      "max_abs_error": 0.0001,
+      "max_rel_error": 0.0001
+    }
+  },
+  "benchmarking": {
+    "status": "template-only",
+    "operation": "int8-dot-mfma-gemm",
+    "required_metrics": [
+      "median latency",
+      "M",
+      "N",
+      "K",
+      "layout",
+      "accumulator dtype",
+      "scale policy",
+      "effective TOPS",
+      "library algorithm",
+      "correctness max error"
+    ],
+    "recommended_shapes": [
+      "M=1 N=4096 K=4096",
+      "M=128 N=4096 K=4096",
+      "M=4096 N=4096 K=4096"
+    ]
+  },
+  "license": "Project seed example",
+  "curation": {
+    "status": "template-only",
+    "notes": "Promoted from the v2 extension backlog as a template-only task. No performance, correctness, or profiler evidence is claimed yet."
+  }
+}

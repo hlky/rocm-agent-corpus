@@ -1,0 +1,115 @@
+{
+  "schema_version": "0.1.0",
+  "track_id": "system-low-level-kernels",
+  "guide": "docs/SYSTEM_LOW_LEVEL_KERNEL_GUIDE.md",
+  "mission": "Expand system-level and low-level CUDA coverage with template-only tasks for launch overhead, overlap, runtime specialization, persistent scheduling, warp primitives, async copy, architecture-specific Matrix Core paths, MIGraphX tactics, and Triton-vs-CUDA comparisons.",
+  "evidence_policy": {
+    "current_status": "template-only",
+    "must_say": [
+      "template-only for unrun scaffolds",
+      "timing-only for HIP-event timings without profiler counters",
+      "negative example when an attempted optimization loses"
+    ],
+    "must_not_claim": [
+      "Nsight counter evidence without profiler artifacts",
+      "WGMFMA/global-to-LDS staging/global-to-LDS staging benefit without source and GFX metadata",
+      "MIGraphX or Triton win without identical timing boundary"
+    ]
+  },
+  "tasks": [
+    {
+      "id": "hip-graphs-launch-overhead",
+      "task_path": "corpus/tasks/hip-graphs-launch-overhead/task.json",
+      "status": "template-only",
+      "topic": "launch overhead and graph replay"
+    },
+    {
+      "id": "streamed-copy-compute-overlap",
+      "task_path": "corpus/tasks/streamed-copy-compute-overlap/task.json",
+      "status": "template-only",
+      "topic": "H2D/kernel/D2H stream overlap"
+    },
+    {
+      "id": "hiprtc-specialized-kernel-cache",
+      "task_path": "corpus/tasks/hiprtc-specialized-kernel-cache/task.json",
+      "status": "template-only",
+      "topic": "runtime compilation and specialization cache"
+    },
+    {
+      "id": "persistent-work-queue",
+      "task_path": "corpus/tasks/persistent-work-queue/task.json",
+      "status": "template-only",
+      "topic": "persistent CTA scheduling for irregular work"
+    },
+    {
+      "id": "warp-reduce-scan-vote",
+      "task_path": "corpus/tasks/warp-reduce-scan-vote/task.json",
+      "status": "template-only",
+      "topic": "warp shuffle, scan, and vote primitives"
+    },
+    {
+      "id": "lds-tiled-copy",
+      "task_path": "corpus/tasks/lds-tiled-copy/task.json",
+      "status": "template-only",
+      "topic": "async-copy tiled staging"
+    },
+    {
+      "id": "cdna-mfma-gemm",
+      "task_path": "corpus/tasks/cdna-mfma-gemm/task.json",
+      "status": "template-only",
+      "topic": "CDNA3 WGMFMA/global-to-LDS staging GEMM skeleton"
+    },
+    {
+      "id": "inline-mfma-skeleton",
+      "task_path": "corpus/tasks/inline-mfma-skeleton/task.json",
+      "status": "template-only",
+      "topic": "inline LLVM IR / AMD GCN ISA mfma skeleton"
+    },
+    {
+      "id": "migraphx-engine-tuning-sweep",
+      "task_path": "corpus/tasks/migraphx-engine-tuning-sweep/task.json",
+      "status": "template-only",
+      "topic": "MIGraphX engine, tactic, profile, and timing-cache sweep"
+    },
+    {
+      "id": "triton-vs-hip-row-kernel",
+      "task_path": "corpus/tasks/triton-vs-hip-row-kernel/task.json",
+      "status": "template-only",
+      "topic": "Triton compiler baseline versus HIP C++ row kernel"
+    },
+    {
+      "id": "rocm-sanitizer-racecheck",
+      "task_path": "corpus/tasks/rocm-sanitizer-racecheck/task.json",
+      "status": "template-only",
+      "topic": "sanitizer-driven CUDA correctness workflow"
+    },
+    {
+      "id": "amdisa-diff-regression",
+      "task_path": "corpus/tasks/amdisa-diff-regression/task.json",
+      "status": "template-only",
+      "topic": "LLVM IR / AMD GCN ISA/codegen regression inspection"
+    },
+    {
+      "id": "autotune-parameter-sweep",
+      "task_path": "corpus/tasks/autotune-parameter-sweep/task.json",
+      "status": "template-only",
+      "topic": "reproducible parameter sweep and holdout validation"
+    }
+  ],
+  "metadata_requirements": [
+    "task_id",
+    "evidence_label",
+    "gpu_name",
+    "gfx_target",
+    "driver_version",
+    "cuda_toolkit_version",
+    "compiler_or_library_version",
+    "build_or_compile_options",
+    "timer_type",
+    "warmup_iterations",
+    "measured_iterations",
+    "correctness_reference",
+    "tolerance",
+    "win_loss_notes"
+  ]
+}

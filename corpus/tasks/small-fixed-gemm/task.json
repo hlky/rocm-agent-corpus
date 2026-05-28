@@ -1,0 +1,90 @@
+{
+  "schema_version": "0.1.0",
+  "id": "small-fixed-gemm",
+  "title": "Small Fixed-Shape Batched SGEMM",
+  "domain": "linear-algebra",
+  "language": "hip-cpp",
+  "tags": [
+    "gemm",
+    "sgemm",
+    "small-matrix",
+    "batched-gemm",
+    "fixed-shape",
+    "custom-kernel-competition",
+    "library-overhead",
+    "shared-memory"
+  ],
+  "source_refs": [
+    "amd-rocm-programming-guide",
+    "amd-hipblaslt-rocblas-docs",
+    "rocm-composable-kernel",
+    "triton",
+    "kernelbench",
+    "gpu-mode"
+  ],
+  "problem": {
+    "summary": "Compute C[b] = A[b] * B[b] for many independent row-major FP32 matrices with fixed small M, N, and K. The task is aimed at custom kernels that can compete with hipBLAS/rocBLAS, hipBLASLt, Composable Kernel, Triton, or framework-generated kernels when generic library setup, descriptor selection, or launch overhead is large relative to the tiny matrix work.",
+    "inputs": [
+      "float* a: batch_count row-major matrices shaped [M, K]",
+      "float* b: batch_count row-major matrices shaped [K, N]",
+      "float* c: batch_count row-major output matrices shaped [M, N]",
+      "int batch_count",
+      "int M",
+      "int N",
+      "int K"
+    ],
+    "outputs": [
+      "For each batch item b, c[b, row, col] equals sum_k a[b, row, k] * b[b, k, col]"
+    ],
+    "constraints": [
+      "FP32 inputs and FP32 accumulation",
+      "Row-major contiguous strided batches",
+      "No alpha, beta, transpose, bias, activation, or mixed-precision behavior in this seed task",
+      "Recommended scope is M, N, K <= 64; the optimized seed uses one CTA per output matrix and stages one full A and B matrix in shared memory",
+      "Batch count should be swept because batch=1 mostly measures launch overhead while large batches measure CTA-per-matrix throughput"
+    ]
+  },
+  "artifacts": {
+    "baseline": "source/baseline.hip",
+    "optimized": "source/optimized.hip",
+    "harness": "../../../harnesses/small_gemm_benchmark.hip"
+  },
+  "verification": {
+    "status": "port-pending-rocm-run",
+    "method": "The harness computes a CPU FP32 reference for every output element and reports max_abs_error, max_rel_error, bad_count, and passed. Ported from the CUDA corpus; rerun on ROCm hardware before marking passed.",
+    "tolerances": {
+      "max_abs_error": 0.001,
+      "max_rel_error": 0.0001
+    }
+  },
+  "benchmarking": {
+    "status": "rocm-measurement-pending",
+    "operation": "batched-small-fixed-sgemm",
+    "required_metrics": [
+      "median kernel duration",
+      "p10 kernel duration",
+      "p90 kernel duration",
+      "gflop_per_s",
+      "matrices_per_s",
+      "max_abs_error",
+      "max_rel_error",
+      "bad_count",
+      "evidence_label"
+    ],
+    "recommended_shapes": [
+      "batch=1,M=16,N=16,K=16",
+      "batch=32,M=16,N=16,K=16",
+      "batch=4096,M=16,N=16,K=16",
+      "batch=4096,M=8,N=8,K=8",
+      "batch=1024,M=32,N=32,K=32",
+      "batch=1024,M=16,N=32,K=16",
+      "batch=1024,M=32,N=16,K=32",
+      "batch=256,M=64,N=64,K=32"
+    ]
+  },
+  "license": "Project seed example",
+  "curation": {
+    "status": "ported-seed",
+    "notes": "Ported from the CUDA corpus on 2026-05-20. CUDA-origin timing artifacts were removed; rerun on ROCm hardware before making performance claims."
+  }
+}

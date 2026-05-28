@@ -1,0 +1,391 @@
+{
+  "schema_version": "0.1.0",
+  "observed_at": "2026-05-21",
+  "guide": "docs/TOPK_IMPLEMENTATION_SURVEY.md",
+  "status": "source-inspection-only",
+  "purpose": "Map real Top-K implementations to contracts, algorithms, baseline roles, and custom-kernel attack surfaces.",
+  "evidence_note": "No GPU measurements or rocprofiler/rocprof counters were added with this survey. Treat all implementation notes as source-inspection guidance until benchmark records are attached.",
+  "must_not_claim": [
+    "A result against one stack is a result against all Top-K contracts.",
+    "Unsorted hipCUB or FlashInfer output is equivalent to sorted deterministic output without a timed repair.",
+    "Sampling Top-K, masking Top-K, MoE routing Top-K, and values/indices Top-K are interchangeable.",
+    "vLLM has one Top-K implementation independent of runtime dispatch.",
+    "Workspace, row-state memset, framework allocation, or contiguous-copy costs can be ignored in fair timing."
+  ],
+  "implementations": [
+    {
+      "id": "pytorch-aten-topk",
+      "stack": "PyTorch/ATen",
+      "contract_family": [
+        "framework-topk",
+        "values-indices"
+      ],
+      "entrypoints": [
+        "torch.topk",
+        "topk_out_cuda",
+        "launch_gather_topk_kernel"
+      ],
+      "local_paths": [],
+      "upstream_urls": [
+        "https://github.com/pytorch/pytorch/blob/main/aten/src/ATen/native/cuda/TensorTopK.cpp",
+        "https://github.com/pytorch/pytorch/blob/main/aten/src/ATen/native/cuda/TensorTopK.cu",
+        "https://github.com/pytorch/pytorch/blob/main/aten/src/ATen/native/cuda/SortingRadixSelect.cuh",
+        "https://docs.pytorch.org/docs/2.12/generated/torch.topk.html"
+      ],
+      "default_sortedness": "sorted=True at Python API; sorted=False available",
+      "determinism_and_ties": "PyTorch docs do not guarantee stable indices for tied elements.",
+      "algorithm_notes": [
+        "ROCm path gathers Top-K with radix kth-value selection, then sorts only selected results when sorted output is requested.",
+        "Single-block path uses radixSelect plus gather of values better than or equal to the kth boundary.",
+        "Multi-block path uses radix digit counts, per-slice scans, kth counts, and a gather pass for large slices.",
+        "Input is made contiguous before launch."
+      ],
+      "workspace_notes": [
+        "Sorted selected-output fallback can allocate sortedValues and sortedIndices.",
+        "Framework dispatch and tensor allocation must be recorded separately."
+      ],
+      "custom_attack_surfaces": [
+        "fixed shape and fixed k",
+        "direct contiguous layout without framework copy",
+        "unsorted membership when downstream accepts it",
+        "fused top-k plus softmax/sample",
+        "deterministic tie policy with pair comparisons"
+      ],
+      "baseline_role": "Framework oracle and practical baseline; not necessarily strongest serving baseline."
+    },
+    {
+      "id": "cub-device-topk",
+      "stack": "hipCUB/rocPRIM",
+      "contract_family": [
+        "selection",
+        "unordered-membership"
+      ],
+      "entrypoints": [
+        "hipcub::DeviceTopK::MaxKeys",
+        "hipcub::DeviceTopK::MinKeys",
+        "hipcub::DeviceTopK::MaxPairs",
+        "hipcub::DeviceTopK::MinPairs"
+      ],
+      "local_paths": [
+        "third_party/cccl/cub/cub/device/device_topk.cuh",
+        "third_party/cccl/cub/cub/device/dispatch/dispatch_topk.cuh",
+        "third_party/cccl/cub/cub/agent/agent_topk.cuh",
+        "third_party/cccl/cub/cub/block/specializations/block_topk_air.cuh",
+        "third_party/cccl/cub/test/catch2_test_device_topk_api.cu"
+      ],
+      "upstream_urls": [
+        "https://nvidia.github.io/cccl/cub/api/structcub_1_1DeviceTopK.html"
+      ],
+      "default_sortedness": "unsorted only in current API",
+      "determinism_and_ties": "Requires cuda::execution::determinism::not_guaranteed; tied boundary subsets may vary.",
+      "algorithm_notes": [
+        "AIR radix Top-K with histogram/filter passes.",
+        "Candidate buffers are allocated from hipCUB temp storage.",
+        "Primitive keys are radix-twiddled; custom decomposed keys use field radix traits.",
+        "Tests validate unordered membership or sort outputs before comparison."
+      ],
+      "workspace_notes": [
+        "Record temp-storage query, temporary bytes, and allocation or reuse policy.",
+        "Candidate buffers include ping-pong key buffers and optional indices."
+      ],
+      "custom_attack_surfaces": [
+        "sorted deterministic repair",
+        "tiny fixed-k kernels",
+        "fused downstream consumers",
+        "contract-specific tie policy",
+        "segmented or ragged specialization"
+      ],
+      "baseline_role": "Strong unsorted membership baseline; contract mismatch for sorted deterministic Top-K without repair."
+    },
+    {
+      "id": "tensorrt-llm-topk",
+      "stack": "vLLM on ROCm",
+      "contract_family": [
+        "serving-sampling",
+        "last-dim-selection",
+        "top-p"
+      ],
+      "entrypoints": [
+        "invokeBatchTopKSampling",
+        "invokeTopkLastDim",
+        "invokeBatchTopPSampling",
+        "invokeBatchAirTopPSampling"
+      ],
+      "local_paths": [
+        "third_party/tensorrt-llm/cpp/tensorrt_llm/kernels/samplingTopKKernels.cu",
+        "third_party/tensorrt-llm/cpp/tensorrt_llm/kernels/samplingTopKKernels.h",
+        "third_party/tensorrt-llm/cpp/tensorrt_llm/kernels/topkLastDim.cu",
+        "third_party/tensorrt-llm/cpp/tensorrt_llm/kernels/samplingTopPKernels.cu",
+        "third_party/tensorrt-llm/cpp/tensorrt_llm/kernels/samplingAirTopPKernels.cu",
+        "third_party/tensorrt-llm/docs/source/features/sampling.md"
+      ],
+      "upstream_urls": [
+        "https://nvidia.github.io/vLLM on ROCm/latest/features/sampling.html",
+        "https://github.com/NVIDIA/vLLM on ROCm/blob/main/cpp/tensorrt_llm/kernels/samplingTopKKernels.cu",
+        "https://github.com/NVIDIA/vLLM on ROCm/blob/main/cpp/tensorrt_llm/kernels/topkLastDim.cu"
+      ],
+      "default_sortedness": "path-dependent; sampling paths may not expose sorted candidates",
+      "determinism_and_ties": "Docs do not guarantee particular tied-probability treatment; direct kernels have path-specific behavior.",
+      "algorithm_notes": [
+        "Top-K sampling is a two-stage hipCUB BlockReduce pipeline with temp ids/values and rocRAND/CURAND sampling.",
+        "Top-K sampling supports 1 <= k <= 1024 in the inspected path.",
+        "topkLastDim includes AIR/radix Top-K and a small inputLength <= 128, k <= 8 MoE-style reduce path.",
+        "Classic Top-P uses hipCUB segmented radix sort; AIR Top-P uses histogram/radix thresholding."
+      ],
+      "workspace_notes": [
+        "Top-K sampling workspace includes full temp logits plus temp Top-K ids and values.",
+        "Record rocRAND/CURAND state and whether RNG is timed.",
+        "Record sampler backend: Torch Sampler, TRTLLM Sampler, or direct kernel."
+      ],
+      "custom_attack_surfaces": [
+        "fixed k and vocab",
+        "precomputed uniforms instead of rocRAND/CURAND",
+        "sampled-token-only output",
+        "no finished-state or heterogeneous request handling",
+        "fused logits processors"
+      ],
+      "baseline_role": "Serving baseline and edge-case reference; fair only when the same serving boundary and features are timed."
+    },
+    {
+      "id": "flashinfer-topk",
+      "stack": "FlashInfer",
+      "contract_family": [
+        "selection",
+        "sampling",
+        "ragged-transform"
+      ],
+      "entrypoints": [
+        "flashinfer.top_k",
+        "flashinfer.sampling.top_k_sampling_from_probs",
+        "flashinfer.sampling.top_k_top_p_sampling_from_logits",
+        "flashinfer.sampling.top_k_mask_logits",
+        "flashinfer.top_k_page_table_transform",
+        "flashinfer.top_k_ragged_transform"
+      ],
+      "local_paths": [
+        "third_party/flashinfer/flashinfer/topk.py",
+        "third_party/flashinfer/flashinfer/sampling.py",
+        "third_party/flashinfer/include/flashinfer/topk.cuh",
+        "third_party/flashinfer/include/flashinfer/sampling.cuh",
+        "third_party/flashinfer/include/flashinfer/fast_topk_clusters_exact.cuh",
+        "third_party/flashinfer/csrc/topk.cu",
+        "third_party/flashinfer/benchmarks/bench_topk.py"
+      ],
+      "upstream_urls": [
+        "https://docs.flashinfer.ai/api/topk.html",
+        "https://docs.flashinfer.ai/generated/flashinfer.top_k.html",
+        "https://docs.flashinfer.ai/generated/flashinfer.sampling.top_k_sampling_from_probs.html",
+        "https://docs.flashinfer.ai/generated/flashinfer.sampling.top_k_top_p_sampling_from_probs.html"
+      ],
+      "default_sortedness": "flashinfer.top_k defaults to unsorted output; sorted=True is explicit",
+      "determinism_and_ties": "deterministic=False is default for speed; tie-break modes force deterministic mode.",
+      "algorithm_notes": [
+        "Radix Top-K path with cached 1 MB row-state buffer.",
+        "Cluster exact path is selected on gfx target major 10 when nondeterministic and graph constraints allow it.",
+        "FilteredTopK requires 128 KB dynamic shared memory.",
+        "Deterministic sorted output is handled on device for k <= 2048; other sorted cases may use torch.sort.",
+        "Sampling APIs implement rejection-style GPU sampling without explicit sorting."
+      ],
+      "workspace_notes": [
+        "Record row-state cache, overflow buffers, dynamic shared memory, graph-safe path, seed, offset, and sorted fallback.",
+        "Include softmax timing when using probability-consuming APIs unless the custom path also starts from probabilities."
+      ],
+      "custom_attack_surfaces": [
+        "small vocab or tiny k",
+        "fixed sorted deterministic contract",
+        "avoid Python dispatch and row-state cache",
+        "sampled-token-only output",
+        "architecture-specific fallback for limited shared memory"
+      ],
+      "baseline_role": "Primary inference Top-K and sampling baseline, especially for large vocabularies."
+    },
+    {
+      "id": "vllm-topk",
+      "stack": "vLLM",
+      "contract_family": [
+        "serving-dispatch",
+        "masking",
+        "sampling",
+        "ragged-indexer"
+      ],
+      "entrypoints": [
+        "TopKTopPSampler",
+        "apply_top_k_top_p_triton",
+        "flashinfer_sample",
+        "persistent_topk",
+        "sampler.cu topk paths"
+      ],
+      "local_paths": [
+        "third_party/vllm/vllm/v1/sample/ops/topk_topp_sampler.py",
+        "third_party/vllm/vllm/v1/sample/ops/topk_topp_triton.py",
+        "third_party/vllm/csrc/sampler.cu",
+        "third_party/vllm/csrc/topk.cu",
+        "third_party/vllm/csrc/persistent_topk.cuh",
+        "third_party/vllm/benchmarks/benchmark_topk_topp.py"
+      ],
+      "upstream_urls": [
+        "https://github.com/vllm-project/vllm/blob/main/vllm/v1/sample/ops/topk_topp_triton.py",
+        "https://github.com/vllm-project/vllm/blob/main/csrc/persistent_topk.cuh"
+      ],
+      "default_sortedness": "runtime path dependent; Triton path masks logits rather than returning sorted Top-K",
+      "determinism_and_ties": "path dependent across FlashInfer, Triton, PyTorch, and custom HIP paths.",
+      "algorithm_notes": [
+        "Sampler dispatch can choose FlashInfer, Triton, PyTorch-native, ROCm AITER, XPU, or custom HIP paths.",
+        "FlashInfer is skipped when processed logits/logprobs or per-request generators are required.",
+        "Triton path is Qrita-inspired pivot masking with duplicate-boundary handling and Top-P after Top-K.",
+        "persistent_topk is a sparse-attention ragged indexer for FP32 and k in {512, 1024, 2048}."
+      ],
+      "workspace_notes": [
+        "Record selected path, environment flags, logits.contiguous copy, cached buffers, row-state cudaMemsetAsync, and output mode.",
+        "Do not time against the label vLLM without knowing which backend ran."
+      ],
+      "custom_attack_surfaces": [
+        "fixed dispatch mode",
+        "no per-request generators",
+        "no processed logits/logprobs output",
+        "shape-static HIP extension",
+        "ragged page-table locality"
+      ],
+      "baseline_role": "Serving baseline whose actual path must be observed and logged."
+    },
+    {
+      "id": "oneflow-topk",
+      "stack": "OneFlow",
+      "contract_family": [
+        "framework-topk"
+      ],
+      "entrypoints": [
+        "top_k",
+        "HeapTopKKernel",
+        "SortPairsDescending"
+      ],
+      "local_paths": [
+        "third_party/oneflow/oneflow/user/kernels/top_k_kernel.cu",
+        "third_party/oneflow/oneflow/core/functional/functional_api.yaml"
+      ],
+      "upstream_urls": [
+        "https://github.com/Oneflow-Inc/oneflow"
+      ],
+      "default_sortedness": "framework API exposes sorted flag; inspected ROCm path uses sorted index production",
+      "determinism_and_ties": "path dependent; inspect pair compare behavior for exact tie policy.",
+      "algorithm_notes": [
+        "For k > 30 or instance_num == 1, OneFlow uses a hipCUB-based full sort path and copies first k indices.",
+        "For k <= 30 and multiple instances, each thread maintains a heap over a strided subset, then bitonic-sorts shared entries."
+      ],
+      "workspace_notes": [
+        "Full-sort path allocates sorted input, indices, sorted indices, and hipCUB temp storage.",
+        "Heap path consumes shared memory proportional to num_heap * heap_size * sizeof(Entry)."
+      ],
+      "custom_attack_surfaces": [
+        "register list instead of heap for tiny k",
+        "avoid sorting all heap entries when unsorted output is accepted",
+        "retune heap-vs-sort crossover by GPU and shape",
+        "fuse value gather or sampling"
+      ],
+      "baseline_role": "Compact framework reference for heap/list/full-sort crossover."
+    },
+    {
+      "id": "transformer-engine-fused-router-topk",
+      "stack": "Transformer Engine",
+      "contract_family": [
+        "moe-routing"
+      ],
+      "entrypoints": [
+        "fused_topk_with_score_function",
+        "nvte_fused_topk_with_score_function_forward"
+      ],
+      "local_paths": [
+        "third_party/transformer-engine/transformer_engine/pytorch/router.py",
+        "third_party/transformer-engine/transformer_engine/common/fused_router/fused_topk_with_score_function.cu",
+        "third_party/transformer-engine/transformer_engine/common/include/transformer_engine/fused_router.h"
+      ],
+      "upstream_urls": [
+        "https://github.com/NVIDIA/TransformerEngine"
+      ],
+      "default_sortedness": "routing map/probability output, not generic sorted Top-K values",
+      "determinism_and_ties": "routing-path dependent; exact tie policy must be tested for MoE workloads.",
+      "algorithm_notes": [
+        "One warp handles one token with shared-memory buffers for scores, top-k scores, top-k indices, group scores, and masked scores.",
+        "Supports grouped Top-K and score functions before or after Top-K.",
+        "Uses naive Top-K for topk < 16 and radix Top-K for larger topk."
+      ],
+      "workspace_notes": [
+        "Record shared memory size, group buffers, score function, backward requirements, and routing_map layout."
+      ],
+      "custom_attack_surfaces": [
+        "forward-only inference router",
+        "fixed expert count and topk",
+        "no grouped Top-K branch",
+        "fused score transform and routing writes"
+      ],
+      "baseline_role": "MoE routing reference, not generic row-major vocab Top-K."
+    },
+    {
+      "id": "cutlass-topk-softmax-epilogue",
+      "stack": "Composable Kernel",
+      "contract_family": [
+        "gemm-epilogue-fusion"
+      ],
+      "entrypoints": [
+        "LinCombTopKSoftmaxCol",
+        "Sm90TopKSoftmaxColReduction",
+        "61_hopper_gemm_with_topk_and_softmax"
+      ],
+      "local_paths": [
+        "third_party/cutlass/examples/61_hopper_gemm_with_topk_and_softmax/61_hopper_gemm_with_topk_and_softmax.cu",
+        "third_party/cutlass/include/cutlass/epilogue/fusion/sm90_visitor_topk_softmax.hpp",
+        "third_party/cutlass/include/cutlass/epilogue/fusion/operations.hpp"
+      ],
+      "upstream_urls": [
+        "https://github.com/NVIDIA/cutlass"
+      ],
+      "default_sortedness": "fused Top-K softmax over epilogue values; not a standalone sorted Top-K API",
+      "determinism_and_ties": "example warns repeated top-k values can be problematic because values, not unique value-index pairs, are tracked.",
+      "algorithm_notes": [
+        "CDNA3 epilogue visitor tracks static Top-K values and logsumexp.",
+        "K=2 and K=4 are performance optimized by default.",
+        "Reduction uses warp shuffles and then masks non-top-k outputs."
+      ],
+      "workspace_notes": [
+        "Record CDNA3 requirement, epilogue shared storage carveout, static k, and tile assumptions."
+      ],
+      "custom_attack_surfaces": [
+        "move Top-K into GEMM or score epilogue",
+        "track value-index pairs for duplicate repair",
+        "generate separate kernels for k=1/2/4/8",
+        "avoid materialized logits reread"
+      ],
+      "baseline_role": "Fusion design reference for producer-side Top-K, not generic selection baseline."
+    }
+  ],
+  "benchmark_fields_to_add": [
+    "contract_family",
+    "actual_backend_path",
+    "sortedness",
+    "tie_policy",
+    "determinism_mode",
+    "rng_source",
+    "rng_seed_or_offset",
+    "workspace_bytes",
+    "row_state_bytes",
+    "dynamic_shared_memory_bytes",
+    "workspace_allocation_timed",
+    "row_state_memset_timed",
+    "contiguous_copy_timed",
+    "kernel_launch_count",
+    "framework_dispatch_timed",
+    "output_materialization",
+    "sample_match_policy"
+  ],
+  "custom_kernel_ladder": [
+    "argmax value-index reduction",
+    "tiny-k register list or fixed network",
+    "CTA candidate merge",
+    "heap/list hybrid",
+    "two-pass block candidates",
+    "radix threshold and boundary repair",
+    "persistent or multi-CTA rows",
+    "fused sampling",
+    "producer epilogue fusion"
+  ]
+}

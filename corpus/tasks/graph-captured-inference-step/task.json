@@ -1,0 +1,78 @@
+{
+  "schema_version": "0.1.0",
+  "id": "graph-captured-inference-step",
+  "title": "HIP Graph Captured Inference Step",
+  "domain": "inference-runtime",
+  "language": "hip-cpp",
+  "tags": [
+    "cuda-graphs",
+    "fixed-buffers",
+    "framework",
+    "inference",
+    "launch-overhead",
+    "rocm-parity",
+    "template-only"
+  ],
+  "source_refs": [
+    "amd-hip-programming-guide",
+    "amd-migraphx-docs",
+    "rocm-hip-python",
+    "amd-rocm-programming-guide"
+  ],
+  "problem": {
+    "summary": "Capture a fixed-buffer inference step into a HIP Graph and compare ordinary launches, capture/instantiate cost, and steady-state replay latency.",
+    "inputs": [
+      "preallocated input, output, and workspace buffers",
+      "fixed batch and sequence bucket",
+      "one or more kernels or library calls eligible for capture"
+    ],
+    "outputs": [
+      "inference output tensor",
+      "graph executable and replay timing record"
+    ],
+    "constraints": [
+      "Template-only; no launch-overhead or inference speedup claim is attached",
+      "Shapes, addresses, workspace sizes, and stream dependencies must remain stable during graph replay",
+      "Record whether timing includes graph capture, instantiation, parameter update, or replay only"
+    ]
+  },
+  "artifacts": {
+    "baseline": "source/baseline.hip",
+    "optimized": "source/optimized.hip",
+    "harness": "source/harness_plan.md",
+    "profiles": [],
+    "results": []
+  },
+  "verification": {
+    "status": "template-only",
+    "method": "Run ordinary-launch and graph-replay paths on identical fixed buffers and compare outputs before collecting timing.",
+    "tolerances": {
+      "max_abs_error": 0.0001,
+      "max_rel_error": 0.0001
+    }
+  },
+  "benchmarking": {
+    "status": "template-only",
+    "operation": "graph-captured-inference-step",
+    "required_metrics": [
+      "ordinary launch latency",
+      "graph capture time",
+      "graph instantiate time",
+      "graph replay latency",
+      "parameter update cost",
+      "fixed buffer sizes",
+      "timer_type",
+      "hardware metadata"
+    ],
+    "recommended_shapes": [
+      "batch=1 hidden=4096 tokens=1 decode bucket",
+      "batch=8 hidden=4096 tokens=16 microbatch",
+      "batch=32 hidden=8192 tokens=1 serving bucket"
+    ]
+  },
+  "license": "Project seed example",
+  "curation": {
+    "status": "template-only",
+    "notes": "ROCm parity port from CUDA task `graph-captured-inference-step`. This is a template/harness scaffold only; CUDA-origin result artifacts were intentionally not copied, and no ROCm timing, correctness, or profiler-counter evidence is claimed yet. Run on AMD hardware, attach ROCm version, hipcc flags, gfx target, and label HIP-event-only results as timing-only."
+  }
+}

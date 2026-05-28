@@ -1,0 +1,81 @@
+{
+  "schema_version": "0.1.0",
+  "id": "implicit-gemm-convolution",
+  "title": "Implicit GEMM Convolution",
+  "domain": "convolution",
+  "language": "hip-cpp",
+  "tags": [
+    "convolution",
+    "cudnn",
+    "cutlass",
+    "implicit-gemm",
+    "iterator-math",
+    "rocm-parity",
+    "template-only",
+    "tensor-core"
+  ],
+  "source_refs": [
+    "amd-miopen-docs",
+    "amd-miopen",
+    "rocm-composable-kernel",
+    "amd-rocm-programming-guide",
+    "amd-migraphx-docs"
+  ],
+  "problem": {
+    "summary": "Implement or specialize convolution through implicit GEMM without materializing im2col. The baseline uses MIOpen or Composable Kernel implicit-GEMM convolution plans; the custom path studies iterator math, layout constraints, and Tensor Core eligibility for fixed convolution shapes.",
+    "inputs": [
+      "activation tensor NCHW or NHWC",
+      "filter tensor KRSC or KCRS",
+      "convolution descriptors for padding, stride, and dilation",
+      "output tensor descriptor",
+      "optional bias or activation epilogue"
+    ],
+    "outputs": [
+      "convolution output tensor"
+    ],
+    "constraints": [
+      "Template-only; no performance, correctness, or profiler evidence is claimed",
+      "Record layout, dtype, accumulator type, math mode, workspace, algorithm or tactic, and Tensor Core eligibility",
+      "Library baselines should include MIOpen/backend plans, Composable Kernel implicit-GEMM convolution, MIGraphX tactics for inference, and framework convolution calls where applicable",
+      "A custom kernel can compete by specializing fixed shapes, static padding, channel multiples, fused epilogues, or avoiding separate layout transforms"
+    ]
+  },
+  "artifacts": {
+    "baseline": "source/baseline.hip",
+    "optimized": "source/optimized.hip",
+    "harness": "source/harness_plan.md",
+    "profiles": [],
+    "results": []
+  },
+  "verification": {
+    "status": "template-only",
+    "method": "Compare against MIOpen, Composable Kernel, or CPU reference convolution across padding, stride, dilation, and layout cases before timing any custom implicit-GEMM candidate.",
+    "tolerances": {
+      "max_abs_error": 0.001,
+      "max_rel_error": 0.001
+    }
+  },
+  "benchmarking": {
+    "status": "template-only",
+    "operation": "implicit-gemm-convolution",
+    "required_metrics": [
+      "median end-to-end latency",
+      "math mode",
+      "layout",
+      "workspace bytes",
+      "algorithm or tactic",
+      "Tensor Core eligibility",
+      "correctness max error"
+    ],
+    "recommended_shapes": [
+      "N=32 H=W=56 C=64 K=128 R=S=3 stride=1 pad=1 NHWC fp16",
+      "N=1 H=W=224 C=3 K=64 R=S=7 stride=2 pad=3 NCHW fp32",
+      "N=16 H=W=28 C=128 K=256 R=S=1 stride=1 NHWC bf16"
+    ]
+  },
+  "license": "Project seed example",
+  "curation": {
+    "status": "template-only",
+    "notes": "ROCm parity port from CUDA task `implicit-gemm-convolution`. This is a template/harness scaffold only; CUDA-origin result artifacts were intentionally not copied, and no ROCm timing, correctness, or profiler-counter evidence is claimed yet. Run on AMD hardware, attach ROCm version, hipcc flags, gfx target, and label HIP-event-only results as timing-only."
+  }
+}

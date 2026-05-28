@@ -1,0 +1,155 @@
+#!/usr/bin/env python3
+"""Build and run a seed matrix HIP/ROCm task."""
+
+from __future__ import annotations
+
+import argparse
+import json
+import shutil
+import subprocess
+import sys
+from datetime import datetime, timezone
+from pathlib import Path
+
+
+ROOT = Path(__file__).resolve().parents[1]
+
+
+def parse_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("task_id", help="Task id under corpus/tasks")
+    parser.add_argument("variant", choices=["baseline", "optimized"], help="Variant to build and run")
+    parser.add_argument("--rows", type=int, default=4096)
+    parser.add_argument("--cols", type=int, default=4096)
+    parser.add_argument("--warmup", type=int, default=10)
+    parser.add_argument("--iters", type=int, default=50)
+    parser.add_argument("--arch", default="", help="Optional hipcc arch, e.g. gfx1100")
+    parser.add_argument("--write-result", action="store_true", help="Write JSON output under the task results directory")
+    parser.add_argument("--profile", action="store_true", help="Run with rocprof MemoryWorkloadAnalysis_Tables after timing")
+    return parser.parse_args()
+
+
+def load_task(task_id: str) -> tuple[Path, dict]:
+    task_dir = ROOT / "corpus" / "tasks" / task_id
+    task_json = task_dir / "task.json"
+    if not task_json.exists():
+        raise SystemExit(f"Unknown task: {task_id}")
+    return task_dir, json.loads(task_json.read_text(encoding="utf-8"))
+
+
+def run(command: list[str], cwd: Path | None = None) -> subprocess.CompletedProcess[str]:
+    print("+ " + " ".join(command))
+    return subprocess.run(
+        command,
+        cwd=str(cwd) if cwd else None,
+        check=False,
+        text=True,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+    )
+
+
+def main() -> int:
+    args = parse_args()
+    if shutil.which("hipcc") is None:
+        raise SystemExit("hipcc not found. Run this on a ROCm toolkit machine or a ROCm GPU host.")
+
+    task_dir, task = load_task(args.task_id)
+    operation = task.get("benchmarking", {}).get("operation")
+    if operation not in {"copy", "transpose"}:
+        raise SystemExit(f"Task {args.task_id} does not declare benchmarking.operation copy|transpose")
+
+    artifact_key = args.variant
+    source_rel = task["artifacts"][artifact_key]
+    source_path = task_dir / source_rel
+    if not source_path.exists():
+        raise SystemExit(f"Missing source artifact: {source_path}")
+
+    out_dir = ROOT / "out" / args.task_id / args.variant
+    out_dir.mkdir(parents=True, exist_ok=True)
+    exe_name = "benchmark.exe" if sys.platform.startswith("win") else "benchmark"
+    exe_path = out_dir / exe_name
+
+    variant_define = "-DVARIANT_BASELINE" if args.variant == "baseline" else "-DVARIANT_OPTIMIZED"
+    op_define = "-DOP_COPY" if operation == "copy" else "-DOP_TRANSPOSE"
+    compile_cmd = [
+        "hipcc",
+        "-std=c++17",
+        "-O3",
+        "-lineinfo",
+        variant_define,
+        op_define,
+    ]
+    if args.arch:
+        compile_cmd.append(f"--offload-arch={args.arch}")
+    compile_cmd.extend([
+        str(source_path),
+        str(ROOT / "harnesses" / "matrix_transform_benchmark.hip"),
+        "-o",
+        str(exe_path),
+    ])
+
+    compiled = run(compile_cmd)
+    if compiled.stdout:
+        print(compiled.stdout)
+    if compiled.stderr:
+        print(compiled.stderr, file=sys.stderr)
+    if compiled.returncode != 0:
+        return compiled.returncode
+
+    bench_cmd = [
+        str(exe_path),
+        str(args.rows),
+        str(args.cols),
+        str(args.warmup),
+        str(args.iters),
+    ]
+    bench = run(bench_cmd)
+    if bench.stderr:
+        print(bench.stderr, file=sys.stderr)
+    print(bench.stdout)
+    if bench.returncode != 0:
+        return bench.returncode
+
+    if args.write_result:
+        results_dir = task_dir / "results"
+        results_dir.mkdir(exist_ok=True)
+        stamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
+        result_path = results_dir / f"{args.variant}-{args.rows}x{args.cols}-{stamp}.json"
+        parsed = json.loads(bench.stdout)
+        parsed["task_id"] = args.task_id
+        parsed["captured_at"] = datetime.now(timezone.utc).isoformat()
+        parsed["source_artifact"] = source_rel
+        parsed["build_command"] = compile_cmd
+        result_path.write_text(json.dumps(parsed, indent=2) + "\n", encoding="utf-8")
+        print(f"Wrote {result_path}")
+
+    if args.profile:
+        if shutil.which("rocprof") is None:
+            raise SystemExit("rocprof not found; timing succeeded but profiling cannot run.")
+        profile_dir = task_dir / "profiles"
+        profile_dir.mkdir(exist_ok=True)
+        stamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
+        profile_path = profile_dir / f"{args.variant}-{args.rows}x{args.cols}-{stamp}.txt"
+        rocprof_cmd = [
+            "rocprof",
+            "--section",
+            "MemoryWorkloadAnalysis_Tables",
+            "--print-details=all",
+            str(exe_path),
+            str(args.rows),
+            str(args.cols),
+            "2",
+            "5",
+        ]
+        profiled = run(rocprof_cmd)
+        profile_path.write_text(profiled.stdout + profiled.stderr, encoding="utf-8")
+        print(f"Wrote {profile_path}")
+        return profiled.returncode
+
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
+

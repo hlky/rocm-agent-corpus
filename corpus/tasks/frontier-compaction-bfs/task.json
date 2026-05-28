@@ -1,0 +1,72 @@
+{
+  "schema_version": "0.1.0",
+  "id": "frontier-compaction-bfs",
+  "title": "Frontier Compaction BFS",
+  "domain": "graph",
+  "language": "hip-cpp",
+  "tags": [
+    "bfs",
+    "frontier",
+    "compaction",
+    "scan",
+    "select",
+    "irregular"
+  ],
+  "source_refs": [
+    "amd-rocm-programming-guide",
+    "rocm-rocprim"
+  ],
+  "problem": {
+    "summary": "Compact active graph vertices into a BFS frontier. The baseline uses a global atomic counter for every active flag. The optimized scaffold uses a block-local scan plus one global atomic per block, mirroring the custom surface behind hipCUB-style select/scan paths.",
+    "inputs": [
+      "int* flags",
+      "int* vertices",
+      "int* frontier",
+      "int* frontier_count",
+      "int n"
+    ],
+    "outputs": [
+      "frontier contains vertices[i] for each active flags[i] in block-local stable order",
+      "frontier_count contains the number of selected vertices"
+    ],
+    "constraints": [
+      "optimized seed is stable within each block but block reservation order follows block index only because each block performs one atomic",
+      "frontier_count must be initialized to zero before launch",
+      "production BFS also needs duplicate suppression and visited marking"
+    ]
+  },
+  "artifacts": {
+    "baseline": "source/baseline.hip",
+    "optimized": "source/optimized.hip"
+  },
+  "verification": {
+    "status": "template-only",
+    "method": "TODO: compare selected set and count against CPU compaction and hipCUB DeviceSelect for stable ordering contracts.",
+    "tolerances": {
+      "count_mismatch": 0
+    }
+  },
+  "benchmarking": {
+    "status": "template-only",
+    "operation": "frontier-compaction",
+    "required_metrics": [
+      "median kernel duration",
+      "active density",
+      "selected count",
+      "atomic count estimate",
+      "hipCUB DeviceSelect baseline",
+      "correctness count"
+    ],
+    "recommended_shapes": [
+      "n=1048576 density=0.01",
+      "n=1048576 density=0.1",
+      "n=1048576 density=0.5",
+      "n=16777216 scale-free-level"
+    ]
+  },
+  "license": "Project seed example",
+  "curation": {
+    "status": "template-only",
+    "notes": "Template-only BFS frontier compaction scaffold. The optimized path is a simple scan/select idea; hipCUB DeviceSelect remains the expected library baseline."
+  }
+}

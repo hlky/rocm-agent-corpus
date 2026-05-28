@@ -1,0 +1,83 @@
+{
+  "schema_version": "0.1.0",
+  "id": "packed-layout-transcode",
+  "title": "Packed Layout Transcode",
+  "domain": "quantization",
+  "language": "hip-cpp",
+  "tags": [
+    "channel-layout",
+    "cutlass",
+    "fp8",
+    "int4",
+    "packed-format",
+    "rocm-parity",
+    "template-only",
+    "tensorrt-llm",
+    "transcode"
+  ],
+  "source_refs": [
+    "amd-rocm-programming-guide",
+    "rocm-composable-kernel",
+    "vllm",
+    "vllm-rocm-docs",
+    "transformer-engine",
+    "bitsandbytes"
+  ],
+  "problem": {
+    "summary": "Transcode low-bit or channel-packed tensors between producer and consumer layouts, such as int4 nibble order, grouped-scale ordering, channel interleaves, or FP8 block layouts. The baseline materializes unpack/repack stages; the optimized path performs direct packed loads, bitfield rearrangement, and vectorized stores.",
+    "inputs": [
+      "packed source tensor",
+      "packed destination tensor",
+      "shape and logical channel count",
+      "source and destination packing descriptors",
+      "optional scale, zero-point, or amax metadata"
+    ],
+    "outputs": [
+      "destination tensor encoded in the requested packed layout",
+      "optional reordered metadata arrays"
+    ],
+    "constraints": [
+      "Template-only; no correctness, timing, or profiler evidence is claimed",
+      "Record bit order, signedness, group size, scale layout, padding rules, and whether metadata is transposed with payload",
+      "Library baselines should include Composable Kernel layout utilities or kernels, MIGraphX/vLLM on ROCm format paths, Transformer Engine FP8 paths, bitsandbytes low-bit references, and framework quantization paths where applicable",
+      "A custom kernel can compete by avoiding materialized dequantization, specializing channel multiples, or fusing transcode with a consumer kernel"
+    ]
+  },
+  "artifacts": {
+    "baseline": "source/baseline.hip",
+    "optimized": "source/optimized.hip",
+    "harness": "source/harness_plan.md",
+    "profiles": [],
+    "results": []
+  },
+  "verification": {
+    "status": "template-only",
+    "method": "Decode both source and destination layouts to a canonical integer or float representation on CPU and compare all logical elements plus scale metadata placement before timing.",
+    "tolerances": {
+      "max_abs_error": 0.0
+    }
+  },
+  "benchmarking": {
+    "status": "template-only",
+    "operation": "packed-layout-transcode",
+    "required_metrics": [
+      "median kernel duration",
+      "effective payload bytes",
+      "metadata bytes",
+      "format descriptors",
+      "packing group size",
+      "library baseline timing",
+      "correctness max error"
+    ],
+    "recommended_shapes": [
+      "M=4096 K=4096 int4 group=128 row-major-to-interleaved",
+      "tokens=8192 channels=4096 int8x4-channel-pack reorder",
+      "M=16384 K=1024 fp8 block-scale metadata-transpose"
+    ]
+  },
+  "license": "Project seed example",
+  "curation": {
+    "status": "template-only",
+    "notes": "ROCm parity port from CUDA task `packed-layout-transcode`. This is a template/harness scaffold only; CUDA-origin result artifacts were intentionally not copied, and no ROCm timing, correctness, or profiler-counter evidence is claimed yet. Run on AMD hardware, attach ROCm version, hipcc flags, gfx target, and label HIP-event-only results as timing-only."
+  }
+}

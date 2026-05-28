@@ -1,0 +1,71 @@
+{
+  "schema_version": "0.1.0",
+  "id": "segmented-reduction-fixed-and-ragged",
+  "title": "Segmented Reduction Fixed and Ragged",
+  "domain": "reduction",
+  "language": "hip-cpp",
+  "tags": [
+    "reduction",
+    "segmented-reduction",
+    "ragged",
+    "fixed-segment",
+    "cub-competitor"
+  ],
+  "source_refs": [
+    "amd-rocm-programming-guide",
+    "rocm-rocprim"
+  ],
+  "problem": {
+    "summary": "Compute one sum per segment for either fixed-width contiguous segments or ragged segments described by offsets. The baseline assigns one thread to each segment and scans sequentially. The optimized seed maps one block to each segment and performs a cooperative shared-memory reduction.",
+    "inputs": [
+      "float* input",
+      "int* offsets",
+      "float* output",
+      "int segments",
+      "int fixed_segment_size",
+      "int mode"
+    ],
+    "outputs": [
+      "output[segment] contains the sum of input values in that segment"
+    ],
+    "constraints": [
+      "mode 0 uses fixed_segment_size and ignores offsets",
+      "mode 1 uses offsets[segment] through offsets[segment + 1]",
+      "optimized seed assumes one CTA can cover useful work per segment but loops for long ragged rows",
+      "floating-point addition order differs between baseline and optimized paths"
+    ]
+  },
+  "artifacts": {
+    "baseline": "source/baseline.hip",
+    "optimized": "source/optimized.hip"
+  },
+  "verification": {
+    "status": "template-only",
+    "method": "TODO: compare against CPU segmented sums and a hipCUB DeviceSegmentedReduce oracle for ragged offsets.",
+    "tolerances": {
+      "max_abs_error": 1e-05
+    }
+  },
+  "benchmarking": {
+    "status": "template-only",
+    "operation": "segmented-sum",
+    "required_metrics": [
+      "median kernel duration",
+      "segment length distribution",
+      "effective bandwidth",
+      "hipCUB temporary storage bytes",
+      "correctness max_abs_error"
+    ],
+    "recommended_shapes": [
+      "segments=65536 fixed=32",
+      "segments=16384 fixed=256",
+      "segments=8192 ragged avg=128 skewed",
+      "segments=4096 ragged power-law"
+    ]
+  },
+  "license": "Project seed example",
+  "curation": {
+    "status": "template-only",
+    "notes": "Template-only scaffold for fixed and ragged segmented reductions. Treat hipCUB/rocPRIM/hipCUB/rocThrust as the baseline, correctness oracle, and parts bin before claiming a custom win."
+  }
+}

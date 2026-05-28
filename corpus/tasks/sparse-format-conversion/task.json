@@ -1,0 +1,80 @@
+{
+  "schema_version": "0.1.0",
+  "id": "sparse-format-conversion",
+  "title": "Sparse Format Conversion Scaffold",
+  "domain": "sparse-linear-algebra",
+  "language": "hip-cpp",
+  "tags": [
+    "sparse",
+    "format-conversion",
+    "csr",
+    "coo",
+    "bsr",
+    "cub",
+    "template-only"
+  ],
+  "source_refs": [
+    "rocm-examples",
+    "rocm-rocprim",
+    "rocm-rocprim-docs",
+    "amd-rocm-programming-guide"
+  ],
+  "problem": {
+    "summary": "Convert between COO, CSR, CSC, ELL, and BSR-like sparse formats while exposing sorting, prefix, and metadata costs.",
+    "inputs": [
+      "source sparse format arrays",
+      "matrix shape",
+      "nnz",
+      "block size for BSR",
+      "sortedness policy"
+    ],
+    "outputs": [
+      "destination sparse format arrays",
+      "metadata arrays",
+      "optional permutation"
+    ],
+    "constraints": [
+      "Template-only; format contracts and index base must be explicit",
+      "Record whether sorting and duplicate coalescing are included",
+      "Compare against cuSPARSE and hipCUB sort/scan pieces where feasible"
+    ]
+  },
+  "artifacts": {
+    "baseline": "source/baseline.hip",
+    "optimized": "source/optimized.hip",
+    "harness": "source/harness_plan.md"
+  },
+  "verification": {
+    "status": "template-only",
+    "method": "Implement the baseline, optimized candidate, and CPU or strongest-library oracle where applicable; compare outputs before timing claims.",
+    "tolerances": {
+      "max_abs_error": 0.0001,
+      "max_rel_error": 0.0001
+    }
+  },
+  "benchmarking": {
+    "status": "template-only",
+    "operation": "sparse-format-conversion",
+    "required_metrics": [
+      "median latency",
+      "source format",
+      "destination format",
+      "nnz",
+      "shape",
+      "index dtype",
+      "sort included",
+      "temp storage bytes",
+      "correctness hash"
+    ],
+    "recommended_shapes": [
+      "COO->CSR nnz=1048576",
+      "CSR->COO nnz=16777216",
+      "CSR->BSR block=16 density=0.05"
+    ]
+  },
+  "license": "Project seed example",
+  "curation": {
+    "status": "template-only",
+    "notes": "Promoted from the v2 extension backlog as wave 2. No performance, correctness, or profiler evidence is claimed yet."
+  }
+}

@@ -1,0 +1,79 @@
+{
+  "schema_version": "0.1.0",
+  "id": "miopen-frontend-fusion",
+  "title": "MIOpen Frontend Fusion",
+  "domain": "library-fusion",
+  "language": "hip-cpp",
+  "tags": [
+    "cudnn",
+    "cutlass",
+    "frontend",
+    "fusion",
+    "operation-graph",
+    "rocm-parity",
+    "template-only",
+    "tensorrt"
+  ],
+  "source_refs": [
+    "amd-miopen-docs",
+    "amd-miopen",
+    "amd-migraphx-docs",
+    "amd-rocm-programming-guide"
+  ],
+  "problem": {
+    "summary": "Compare a MIOpen operation graph fusion plan against custom HIP, Composable Kernel, and MIGraphX paths for a fixed neural-network subgraph.",
+    "inputs": [
+      "activation tensor X with fixed N,H,W,C or B,S,H layout",
+      "weights, bias, scale, and optional residual tensors",
+      "MIOpen graph attributes and execution plan cache"
+    ],
+    "outputs": [
+      "fused output tensor Y",
+      "plan metadata describing selected MIOpen engine and fallback candidates"
+    ],
+    "constraints": [
+      "Template-only; no MIOpen, Composable Kernel, MIGraphX, or custom HIP result is claimed",
+      "Record dtype, layout, strides, alignment, math mode, workspace bytes, MIOpen version, and plan cache state",
+      "Do not accept a library result as unbeatable without documenting the narrower custom-kernel or extension surface"
+    ]
+  },
+  "artifacts": {
+    "baseline": "source/baseline.py",
+    "optimized": "source/optimized.hip",
+    "harness": "source/harness_plan.md",
+    "profiles": [],
+    "results": []
+  },
+  "verification": {
+    "status": "template-only",
+    "method": "Build the MIOpen graph and compare its output with a CPU or framework oracle and the custom HIP candidate over deterministic inputs before timing.",
+    "tolerances": {
+      "max_abs_error": 0.0001,
+      "max_rel_error": 0.0001
+    }
+  },
+  "benchmarking": {
+    "status": "template-only",
+    "operation": "cudnn-frontend-fused-subgraph",
+    "required_metrics": [
+      "median latency",
+      "plan build time",
+      "workspace bytes",
+      "cudnn engine id",
+      "dtype and layout",
+      "library baseline versions",
+      "correctness max error",
+      "hardware metadata"
+    ],
+    "recommended_shapes": [
+      "N=32,H=56,W=56,C=64 conv+bias+relu",
+      "B=16,S=2048,H=4096 layernorm+activation",
+      "B=1,S=128,H=8192 inference epilogue bucket"
+    ]
+  },
+  "license": "Project seed example",
+  "curation": {
+    "status": "template-only",
+    "notes": "ROCm parity port from CUDA task `cudnn-frontend-fusion`. This is a template/harness scaffold only; CUDA-origin result artifacts were intentionally not copied, and no ROCm timing, correctness, or profiler-counter evidence is claimed yet. Run on AMD hardware, attach ROCm version, hipcc flags, gfx target, and label HIP-event-only results as timing-only."
+  }
+}

@@ -1,0 +1,90 @@
+{
+  "schema_version": "0.1.0",
+  "id": "multi-tensor-adamw",
+  "title": "Multi Tensor RDNA3mW Update",
+  "domain": "ml-training",
+  "language": "hip-cpp",
+  "tags": [
+    "adamw",
+    "bitsandbytes",
+    "foreach",
+    "fused",
+    "multi-tensor",
+    "optimizer",
+    "rocm-parity",
+    "template-only"
+  ],
+  "source_refs": [
+    "pytorch",
+    "bitsandbytes",
+    "transformer-engine",
+    "amd-rocm-programming-guide"
+  ],
+  "problem": {
+    "summary": "Apply RDNA3mW updates across a tensor list, competing with PyTorch foreach/fused optimizers and bitsandbytes-style fused optimizer paths by amortizing launch overhead and handling mixed tensor sizes.",
+    "inputs": [
+      "float** params",
+      "float** grads",
+      "float** exp_avg",
+      "float** exp_avg_sq",
+      "int64_t* sizes",
+      "int tensor_count",
+      "float lr",
+      "float beta1",
+      "float beta2",
+      "float eps",
+      "float weight_decay"
+    ],
+    "outputs": [
+      "params updated in place",
+      "exp_avg updated in place",
+      "exp_avg_sq updated in place"
+    ],
+    "constraints": [
+      "Template-only; no timing or profiler evidence is claimed",
+      "Contiguous tensors in the seed contract",
+      "Document capturable/scalar hyperparameter behavior",
+      "Record tensor-size histogram and alignment"
+    ]
+  },
+  "artifacts": {
+    "baseline": "source/baseline.hip",
+    "optimized": "source/optimized.hip",
+    "harness": "source/harness_plan.md",
+    "profiles": [],
+    "results": []
+  },
+  "verification": {
+    "status": "template-only",
+    "method": "Compare every tensor against a CPU or PyTorch RDNA3mW reference for fixed seeds, varied tensor sizes, empty tensors, and alignment offsets.",
+    "tolerances": {
+      "max_abs_error": 1e-05,
+      "max_rel_error": 1e-05
+    }
+  },
+  "benchmarking": {
+    "status": "template-only",
+    "operation": "multi-tensor-adamw",
+    "required_metrics": [
+      "median optimizer step latency",
+      "tensor_count",
+      "total elements",
+      "tensor-size histogram",
+      "dtype/state dtype",
+      "library baseline",
+      "hardware and build metadata",
+      "evidence label"
+    ],
+    "recommended_shapes": [
+      "1024 tensors x 4096 elements fp32",
+      "128 tensors mixed 1K..1M elements",
+      "transformer block shard histogram",
+      "many tiny tensors total=262144 elements"
+    ]
+  },
+  "license": "Project seed example",
+  "curation": {
+    "status": "template-only",
+    "notes": "ROCm parity port from CUDA task `multi-tensor-adamw`. This is a template/harness scaffold only; CUDA-origin result artifacts were intentionally not copied, and no ROCm timing, correctness, or profiler-counter evidence is claimed yet. Run on AMD hardware, attach ROCm version, hipcc flags, gfx target, and label HIP-event-only results as timing-only."
+  }
+}

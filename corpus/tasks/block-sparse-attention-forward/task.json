@@ -1,0 +1,83 @@
+{
+  "schema_version": "0.1.0",
+  "id": "block-sparse-attention-forward",
+  "title": "Block Sparse Attention Forward",
+  "domain": "attention",
+  "language": "hip-cpp",
+  "tags": [
+    "attention",
+    "block-sparse",
+    "mask",
+    "online-softmax",
+    "llm-inference"
+  ],
+  "source_refs": [
+    "amd-rocm-programming-guide",
+    "flash-attention",
+    "rocm-composable-kernel",
+    "vllm",
+    "flashinfer"
+  ],
+  "problem": {
+    "summary": "Compute fp32 scaled dot-product attention with a block mask. The baseline scans every key and checks the block mask. The optimized skeleton iterates only listed key blocks for each query block and uses online softmax accumulation.",
+    "inputs": [
+      "float* q",
+      "float* k",
+      "float* v",
+      "int* block_mask",
+      "int* block_offsets",
+      "int* block_columns",
+      "float* output",
+      "int query_length",
+      "int key_length",
+      "int head_dim",
+      "int block_m",
+      "int block_n",
+      "float scale"
+    ],
+    "outputs": [
+      "output[query, dim] contains masked attention result for one head"
+    ],
+    "constraints": [
+      "fp32 educational seed only",
+      "baseline block_mask is dense query-block by key-block metadata",
+      "optimized seed expects CSR-style block_offsets and block_columns",
+      "no dropout, bias, rotary, matrix cores, or paged KV in this scaffold"
+    ]
+  },
+  "artifacts": {
+    "baseline": "source/baseline.hip",
+    "optimized": "source/optimized.hip"
+  },
+  "verification": {
+    "status": "template-only",
+    "method": "TODO: compare dense block-mask and block-list outputs against CPU masked attention for the same sparsity pattern.",
+    "tolerances": {
+      "max_abs_error": 0.0001
+    }
+  },
+  "benchmarking": {
+    "status": "template-only",
+    "operation": "block-sparse-attention-forward",
+    "required_metrics": [
+      "median kernel duration",
+      "query_length",
+      "key_length",
+      "head_dim",
+      "block size",
+      "mask density",
+      "visible block count",
+      "correctness max_abs_error"
+    ],
+    "recommended_shapes": [
+      "q=512 k=512 d=64 block=32 density=0.25",
+      "q=1024 k=4096 d=128 block=64 local-window",
+      "q=1 k=8192 d=128 block=64 decode-sparse"
+    ]
+  },
+  "license": "Project seed example",
+  "curation": {
+    "status": "template-only",
+    "notes": "Template-only block-sparse attention scaffold. FlashAttention, Composable Kernel, vLLM, and FlashInfer are reference and competitor paths; this seed makes the custom sparsity surface explicit before benchmarking."
+  }
+}

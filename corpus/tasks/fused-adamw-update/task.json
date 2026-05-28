@@ -1,0 +1,87 @@
+{
+  "schema_version": "0.1.0",
+  "id": "fused-adamw-update",
+  "title": "Fused RDNA3mW Parameter Update",
+  "domain": "ml-training",
+  "language": "hip-cpp",
+  "tags": [
+    "optimizer",
+    "adamw",
+    "fusion",
+    "vectorized",
+    "training",
+    "template-only"
+  ],
+  "source_refs": [
+    "amd-rocm-programming-guide",
+    "bitsandbytes",
+    "transformer-engine"
+  ],
+  "problem": {
+    "summary": "Apply one fp32 RDNA3mW update over contiguous parameter, gradient, first-moment, and second-moment arrays. The baseline materializes update stages through multiple simple kernels. The optimized scaffold fuses moment update, bias correction, decoupled weight decay, and parameter writeback with a float4 vector path plus scalar fallback.",
+    "inputs": [
+      "float* params",
+      "float* grads",
+      "float* exp_avg",
+      "float* exp_avg_sq",
+      "float* update_buffer",
+      "int n",
+      "float lr",
+      "float beta1",
+      "float beta2",
+      "float eps",
+      "float weight_decay",
+      "float bias_correction1",
+      "float bias_correction2"
+    ],
+    "outputs": [
+      "params updated in place",
+      "exp_avg updated in place",
+      "exp_avg_sq updated in place",
+      "update_buffer contains the baseline normalized RDNA3m step"
+    ],
+    "constraints": [
+      "fp32 educational scaffold only",
+      "contiguous arrays",
+      "decoupled RDNA3mW weight decay",
+      "bias_correction values are precomputed by the caller",
+      "optimized vector path requires 16-byte alignment and falls back to scalar code otherwise"
+    ]
+  },
+  "artifacts": {
+    "baseline": "source/baseline.hip",
+    "optimized": "source/optimized.hip"
+  },
+  "verification": {
+    "status": "template-only",
+    "method": "TODO: compare params, exp_avg, and exp_avg_sq against a CPU RDNA3mW reference for fixed seeds and multiple alignment offsets.",
+    "tolerances": {
+      "max_abs_error": 1e-05,
+      "max_rel_error": 1e-05
+    }
+  },
+  "benchmarking": {
+    "status": "template-only",
+    "operation": "adamw-parameter-update",
+    "required_metrics": [
+      "median kernel duration",
+      "n",
+      "alignment",
+      "logical bytes read and written",
+      "correctness max_abs_error",
+      "hardware and build metadata",
+      "evidence label"
+    ],
+    "recommended_shapes": [
+      "n=1048576 aligned",
+      "n=16777216 aligned",
+      "n=1048583 unaligned-tail",
+      "n=262144 small-optimizer-shard"
+    ]
+  },
+  "license": "Project seed example",
+  "curation": {
+    "status": "template-only",
+    "notes": "Template-only optimizer fusion task. bitsandbytes and Transformer Engine on ROCm are reference paths for optimizer and transformer-training integration; benchmark before claiming a custom fused update win."
+  }
+}

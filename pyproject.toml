@@ -1,0 +1,10 @@
+[project]
+name = "rocm-agent-corpus"
+version = "0.1.0"
+description = "Structured corpus scaffold for HIP/ROCm optimization agents"
+requires-python = ">=3.10"
+dependencies = []
+
+[tool.rocm-agent-corpus]
+schema_version = "0.1.0"
+

@@ -1,0 +1,79 @@
+{
+  "schema_version": "0.1.0",
+  "id": "spgemm-merge-hash",
+  "title": "SpGEMM Merge Hash Scaffold",
+  "domain": "sparse-linear-algebra",
+  "language": "hip-cpp",
+  "tags": [
+    "spgemm",
+    "sparse",
+    "cusparse",
+    "merge",
+    "hash",
+    "template-only"
+  ],
+  "source_refs": [
+    "rocm-examples",
+    "amd-rocm-programming-guide",
+    "rocm-rocprim"
+  ],
+  "problem": {
+    "summary": "Compare sparse matrix multiply strategies based on row-wise merge or hash accumulation against cuSPARSE SpGEMM-style planning boundaries.",
+    "inputs": [
+      "CSR matrix A",
+      "CSR matrix B",
+      "M/N/K",
+      "row pointer arrays",
+      "column/value arrays"
+    ],
+    "outputs": [
+      "CSR matrix C",
+      "row pointer, column, and value arrays"
+    ],
+    "constraints": [
+      "Template-only; record symbolic and numeric phases separately",
+      "Compare against cuSPARSE where available",
+      "Document memory planning, duplicate column accumulation, and output ordering"
+    ]
+  },
+  "artifacts": {
+    "baseline": "source/baseline.hip",
+    "optimized": "source/optimized.hip",
+    "harness": "source/harness_plan.md"
+  },
+  "verification": {
+    "status": "template-only",
+    "method": "Implement the baseline, optimized candidate, and CPU or strongest-library oracle where applicable; compare outputs before timing claims.",
+    "tolerances": {
+      "max_abs_error": 0.0001,
+      "max_rel_error": 0.0001
+    }
+  },
+  "benchmarking": {
+    "status": "template-only",
+    "operation": "spgemm-merge-hash",
+    "required_metrics": [
+      "symbolic time",
+      "numeric time",
+      "M",
+      "N",
+      "K",
+      "nnzA",
+      "nnzB",
+      "nnzC",
+      "row-length histogram",
+      "workspace bytes",
+      "correctness max error"
+    ],
+    "recommended_shapes": [
+      "uniform rows nnz=16",
+      "power-law rows nnz avg=32",
+      "blocky sparse M=N=K=4096 density=0.01"
+    ]
+  },
+  "license": "Project seed example",
+  "curation": {
+    "status": "template-only",
+    "notes": "Promoted from the v2 extension backlog as wave 2. No performance, correctness, or profiler evidence is claimed yet."
+  }
+}

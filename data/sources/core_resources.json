@@ -1,0 +1,1139 @@
+{
+  "schema_version": "0.1.0",
+  "observed_at": "2026-05-28",
+  "sources": [
+    {
+      "id": "amd-rocm-docs",
+      "name": "ROCm Documentation",
+      "url": "https://rocm.docs.amd.com/",
+      "kind": "official-docs",
+      "license": "AMD documentation terms; metadata and citations only unless separately reviewed",
+      "use_policy": "Use as the top-level entry point for ROCm installation, tools, libraries, release notes, and compatibility.",
+      "priority": 1,
+      "topics": [
+        "rocm",
+        "toolchain",
+        "libraries",
+        "release-notes"
+      ],
+      "notes": "Use as the top-level entry point for ROCm installation, tools, libraries, release notes, and compatibility."
+    },
+    {
+      "id": "amd-hip-programming-guide",
+      "name": "HIP Documentation",
+      "url": "https://rocm.docs.amd.com/projects/HIP/en/latest/",
+      "kind": "official-docs",
+      "license": "AMD documentation terms; metadata and citations only unless separately reviewed",
+      "use_policy": "Use for HIP programming model, runtime APIs, language extensions, and CUDA-to-HIP porting notes.",
+      "priority": 1,
+      "topics": [
+        "hip",
+        "programming-model",
+        "runtime-api",
+        "hip-cpp"
+      ],
+      "notes": "Use for HIP programming model, runtime APIs, language extensions, and CUDA-to-HIP porting notes."
+    },
+    {
+      "id": "amd-rocm-programming-guide",
+      "name": "AMD ROCm Programming Guide",
+      "url": "https://rocm-handbook.amd.com/projects/amd-rocm-programming-guide/en/latest/",
+      "kind": "official-docs",
+      "license": "AMD documentation terms; metadata and citations only unless separately reviewed",
+      "use_policy": "Use for optimization concepts, programming models, memory hierarchy, and library-versus-kernel guidance.",
+      "priority": 1,
+      "topics": [
+        "optimization",
+        "memory",
+        "programming-guide",
+        "performance"
+      ],
+      "notes": "Use for optimization concepts, programming models, memory hierarchy, and library-versus-kernel guidance."
+    },
+    {
+      "id": "amd-rocprofiler-docs",
+      "name": "rocprofiler and rocprof Documentation",
+      "url": "https://rocm.docs.amd.com/projects/rocprofiler-sdk/en/latest/",
+      "kind": "official-docs",
+      "license": "AMD documentation terms; metadata and citations only unless separately reviewed",
+      "use_policy": "Use for profiler workflows, tracing, counters, and counter-backed evidence rules.",
+      "priority": 1,
+      "topics": [
+        "profiling",
+        "rocprof",
+        "rocprofiler",
+        "counters"
+      ],
+      "notes": "Use for profiler workflows, tracing, counters, and counter-backed evidence rules."
+    },
+    {
+      "id": "amd-gcn-isa",
+      "name": "AMD GPU ISA Documentation",
+      "url": "https://gpuopen.com/amd-gpu-architecture-programming-documentation/",
+      "kind": "official-reference",
+      "license": "AMD documentation terms; metadata and citations only unless separately reviewed",
+      "use_policy": "Use for low-level AMD GCN/RDNA/CDNA instruction semantics and ISA-level optimization notes.",
+      "priority": 2,
+      "topics": [
+        "isa",
+        "gcn",
+        "rdna",
+        "cdna",
+        "mfma"
+      ],
+      "notes": "Use for low-level AMD GCN/RDNA/CDNA instruction semantics and ISA-level optimization notes."
+    },
+    {
+      "id": "amd-hip-graphs-guide",
+      "name": "HIP Graphs Documentation",
+      "url": "https://rocm.docs.amd.com/projects/HIP/en/latest/how-to/hip_runtime_api/hipgraph.html",
+      "kind": "official-docs",
+      "license": "AMD documentation terms; metadata and citations only unless separately reviewed",
+      "use_policy": "Use for HIP graph capture, instantiation, replay, and launch-overhead optimization references.",
+      "priority": 2,
+      "topics": [
+        "hip-graphs",
+        "launch-overhead",
+        "streams"
+      ],
+      "notes": "Use for HIP graph capture, instantiation, replay, and launch-overhead optimization references."
+    },
+    {
+      "id": "amd-hip-memory-performance",
+      "name": "HIP Memory Management Documentation",
+      "url": "https://rocm.docs.amd.com/projects/HIP/en/latest/how-to/hip_runtime_api/memory_management.html",
+      "kind": "official-docs",
+      "license": "AMD documentation terms; metadata and citations only unless separately reviewed",
+      "use_policy": "Use for HIP allocation, copies, managed memory, pinned memory, and memory movement references.",
+      "priority": 2,
+      "topics": [
+        "memory",
+        "copy",
+        "allocation",
+        "coalescing"
+      ],
+      "notes": "Use for HIP allocation, copies, managed memory, pinned memory, and memory movement references."
+    },
+    {
+      "id": "amd-hip-lds-memory",
+      "name": "HIP Shared Memory and Synchronization Documentation",
+      "url": "https://rocm.docs.amd.com/projects/HIP/en/latest/how-to/hip_cpp_language_extensions.html",
+      "kind": "official-docs",
+      "license": "AMD documentation terms; metadata and citations only unless separately reviewed",
+      "use_policy": "Use for shared memory/LDS, synchronization, launch bounds, and HIP language-extension facts.",
+      "priority": 2,
+      "topics": [
+        "lds",
+        "shared-memory",
+        "synchronization"
+      ],
+      "notes": "Use for shared memory/LDS, synchronization, launch bounds, and HIP language-extension facts."
+    },
+    {
+      "id": "amd-occupancy-api",
+      "name": "HIP Occupancy API Documentation",
+      "url": "https://rocm.docs.amd.com/projects/HIP/en/latest/reference/hip_runtime_api/modules/occupancy.html",
+      "kind": "official-docs",
+      "license": "AMD documentation terms; metadata and citations only unless separately reviewed",
+      "use_policy": "Use for occupancy and launch-configuration helper APIs.",
+      "priority": 3,
+      "topics": [
+        "occupancy",
+        "launch-config"
+      ],
+      "notes": "Use for occupancy and launch-configuration helper APIs."
+    },
+    {
+      "id": "rocm-examples",
+      "name": "ROCm Examples",
+      "url": "https://github.com/ROCm/rocm-examples",
+      "kind": "code-repository",
+      "license": "MIT; verify upstream license at pinned commit before importing code",
+      "use_policy": "Use for official HIP, library, profiler, and ROCm programming examples with pinned commits.",
+      "priority": 1,
+      "topics": [
+        "examples",
+        "hip",
+        "libraries",
+        "profiler"
+      ],
+      "notes": "Use for official HIP, library, profiler, and ROCm programming examples with pinned commits."
+    },
+    {
+      "id": "rocm-rocprim",
+      "name": "rocPRIM",
+      "url": "https://github.com/ROCm/rocPRIM",
+      "kind": "code-repository",
+      "license": "MIT; repository may be retired into ROCm/rocm-libraries, verify current license at pinned commit",
+      "use_policy": "Use for HIP parallel primitive implementation patterns and historical source navigation.",
+      "priority": 1,
+      "topics": [
+        "rocprim",
+        "parallel-primitives",
+        "reductions",
+        "scans"
+      ],
+      "notes": "Use for HIP parallel primitive implementation patterns and historical source navigation."
+    },
+    {
+      "id": "rocm-rocprim-docs",
+      "name": "rocPRIM Documentation",
+      "url": "https://rocm.docs.amd.com/projects/rocPRIM/en/latest/",
+      "kind": "official-docs",
+      "license": "AMD documentation terms and upstream component licenses",
+      "use_policy": "Use for rocPRIM APIs, examples, and primitive semantics.",
+      "priority": 1,
+      "topics": [
+        "rocprim",
+        "hipcub",
+        "rocthrust",
+        "parallel-primitives"
+      ],
+      "notes": "Use for rocPRIM APIs, examples, and primitive semantics."
+    },
+    {
+      "id": "rocm-composable-kernel",
+      "name": "Composable Kernel",
+      "url": "https://github.com/ROCm/composable_kernel",
+      "kind": "code-repository",
+      "license": "MIT; repository is mirrored into ROCm/rocm-libraries, verify current license at pinned commit",
+      "use_policy": "Use for high-performance GEMM, convolution, attention, epilogue, and CK Tile patterns.",
+      "priority": 1,
+      "topics": [
+        "composable-kernel",
+        "ck-tile",
+        "gemm",
+        "attention",
+        "epilogue"
+      ],
+      "notes": "Use for high-performance GEMM, convolution, attention, epilogue, and CK Tile patterns."
+    },
+    {
+      "id": "amd-hipblaslt-rocblas-docs",
+      "name": "hipBLASLt, hipBLAS, and rocBLAS Documentation",
+      "url": "https://rocm.docs.amd.com/projects/hipBLASLt/en/latest/",
+      "kind": "official-docs",
+      "license": "AMD documentation terms and upstream component licenses",
+      "use_policy": "Use for BLAS, GEMM, matmul descriptors, algorithm selection, and library-baseline metadata.",
+      "priority": 1,
+      "topics": [
+        "hipblaslt",
+        "hipblas",
+        "rocblas",
+        "gemm",
+        "batched-gemm"
+      ],
+      "notes": "Use for BLAS, GEMM, matmul descriptors, algorithm selection, and library-baseline metadata."
+    },
+    {
+      "id": "amd-miopen-docs",
+      "name": "MIOpen Documentation",
+      "url": "https://rocm.docs.amd.com/projects/MIOpen/en/latest/",
+      "kind": "official-docs",
+      "license": "AMD documentation terms and upstream component licenses",
+      "use_policy": "Use for neural network primitives, convolution, attention-adjacent operations, and fusion/reference baselines.",
+      "priority": 1,
+      "topics": [
+        "miopen",
+        "convolution",
+        "attention",
+        "fusion"
+      ],
+      "notes": "Use for neural network primitives, convolution, attention-adjacent operations, and fusion/reference baselines."
+    },
+    {
+      "id": "amd-miopen",
+      "name": "MIOpen",
+      "url": "https://github.com/ROCm/MIOpen",
+      "kind": "code-repository",
+      "license": "MIT; repository may be mirrored into ROCm/rocm-libraries, verify current license at pinned commit",
+      "use_policy": "Use for MIOpen operator internals, solver selection, and custom-kernel reference patterns.",
+      "priority": 2,
+      "topics": [
+        "miopen",
+        "solvers",
+        "convolution",
+        "ck"
+      ],
+      "notes": "Use for MIOpen operator internals, solver selection, and custom-kernel reference patterns."
+    },
+    {
+      "id": "amd-rccl",
+      "name": "RCCL",
+      "url": "https://github.com/ROCm/rccl",
+      "kind": "code-repository",
+      "license": "BSD-3-Clause; verify current license at pinned commit",
+      "use_policy": "Use for ROCm collective communication and overlap examples.",
+      "priority": 1,
+      "topics": [
+        "rccl",
+        "multi-gpu",
+        "collectives"
+      ],
+      "notes": "Use for ROCm collective communication and overlap examples."
+    },
+    {
+      "id": "amd-rccl-docs",
+      "name": "RCCL Documentation",
+      "url": "https://rocm.docs.amd.com/projects/rccl/en/latest/",
+      "kind": "official-docs",
+      "license": "AMD documentation terms and upstream component licenses",
+      "use_policy": "Use for RCCL API semantics, collectives, topology, and environment knobs.",
+      "priority": 1,
+      "topics": [
+        "rccl",
+        "multi-gpu",
+        "collectives",
+        "topology"
+      ],
+      "notes": "Use for RCCL API semantics, collectives, topology, and environment knobs."
+    },
+    {
+      "id": "amd-rocshmem",
+      "name": "rocSHMEM",
+      "url": "https://github.com/ROCm/rocSHMEM",
+      "kind": "code-repository",
+      "license": "BSD-3-Clause; verify current license at pinned commit",
+      "use_policy": "Use for GPU-initiated one-sided communication and OpenSHMEM-style ROCm examples.",
+      "priority": 2,
+      "topics": [
+        "rocshmem",
+        "multi-gpu",
+        "one-sided",
+        "gpu-initiated-communication"
+      ],
+      "notes": "Use for GPU-initiated one-sided communication and OpenSHMEM-style ROCm examples."
+    },
+    {
+      "id": "amd-migraphx-docs",
+      "name": "MIGraphX Documentation",
+      "url": "https://rocm.docs.amd.com/projects/AMDMIGraphX/en/latest/",
+      "kind": "official-docs",
+      "license": "AMD documentation terms and upstream component licenses",
+      "use_policy": "Use for graph inference, model compilation, driver workflows, and tuning references.",
+      "priority": 1,
+      "topics": [
+        "migraphx",
+        "inference",
+        "graph-compiler",
+        "onnx"
+      ],
+      "notes": "Use for graph inference, model compilation, driver workflows, and tuning references."
+    },
+    {
+      "id": "amd-migraphx",
+      "name": "AMD MIGraphX",
+      "url": "https://github.com/ROCm/AMDMIGraphX",
+      "kind": "code-repository",
+      "license": "MIT; verify current license at pinned commit",
+      "use_policy": "Use for inference graph compiler internals, driver behavior, and custom integration patterns.",
+      "priority": 1,
+      "topics": [
+        "migraphx",
+        "inference",
+        "compiler",
+        "onnx"
+      ],
+      "notes": "Use for inference graph compiler internals, driver behavior, and custom integration patterns."
+    },
+    {
+      "id": "vllm-rocm-docs",
+      "name": "vLLM ROCm Support Documentation",
+      "url": "https://docs.vllm.ai/en/latest/getting_started/installation/amd.html",
+      "kind": "project-docs",
+      "license": "vLLM documentation terms and upstream project license",
+      "use_policy": "Use for ROCm LLM serving setup, limitations, and integration notes.",
+      "priority": 2,
+      "topics": [
+        "vllm",
+        "rocm",
+        "llm-serving"
+      ],
+      "notes": "Use for ROCm LLM serving setup, limitations, and integration notes."
+    },
+    {
+      "id": "flash-attention",
+      "name": "FlashAttention",
+      "url": "https://github.com/Dao-AILab/flash-attention",
+      "kind": "code-repository",
+      "license": "BSD-3-Clause; verify ROCm support and license at pinned commit",
+      "use_policy": "Use as an attention optimization reference where ROCm support applies.",
+      "priority": 1,
+      "topics": [
+        "attention",
+        "softmax",
+        "tiling",
+        "io-aware"
+      ],
+      "notes": "Use as an attention optimization reference where ROCm support applies."
+    },
+    {
+      "id": "vllm",
+      "name": "vLLM",
+      "url": "https://github.com/vllm-project/vllm",
+      "kind": "code-repository",
+      "license": "Apache-2.0",
+      "use_policy": "Use for LLM serving, paged attention, KV cache, scheduling, and ROCm-compatible inference paths.",
+      "priority": 1,
+      "topics": [
+        "llm-serving",
+        "paged-attention",
+        "kv-cache",
+        "rocm"
+      ],
+      "notes": "Use for LLM serving, paged attention, KV cache, scheduling, and ROCm-compatible inference paths."
+    },
+    {
+      "id": "flashinfer",
+      "name": "FlashInfer",
+      "url": "https://github.com/flashinfer-ai/flashinfer",
+      "kind": "code-repository",
+      "license": "Apache-2.0; verify ROCm support at pinned commit",
+      "use_policy": "Use for inference attention, sampling, paged KV cache, and decode/prefill reference contracts.",
+      "priority": 2,
+      "topics": [
+        "flashinfer",
+        "attention",
+        "paged-kv",
+        "sampling"
+      ],
+      "notes": "Use for inference attention, sampling, paged KV cache, and decode/prefill reference contracts."
+    },
+    {
+      "id": "bitsandbytes",
+      "name": "bitsandbytes",
+      "url": "https://github.com/bitsandbytes-foundation/bitsandbytes",
+      "kind": "code-repository",
+      "license": "MIT; verify ROCm backend status at pinned commit",
+      "use_policy": "Use for quantization, optimizer, and low-bit operation references where ROCm support applies.",
+      "priority": 2,
+      "topics": [
+        "quantization",
+        "optimizers",
+        "low-bit"
+      ],
+      "notes": "Use for quantization, optimizer, and low-bit operation references where ROCm support applies."
+    },
+    {
+      "id": "transformer-engine",
+      "name": "Transformer Engine",
+      "url": "https://github.com/NVIDIA/TransformerEngine",
+      "kind": "code-repository",
+      "license": "BSD-3-Clause; verify ROCm backend status and license at pinned commit",
+      "use_policy": "Use for transformer FP8, normalization, and framework-integration references where ROCm support applies.",
+      "priority": 2,
+      "topics": [
+        "transformer-engine",
+        "fp8",
+        "normalization"
+      ],
+      "notes": "Use for transformer FP8, normalization, and framework-integration references where ROCm support applies."
+    },
+    {
+      "id": "rocm-hip-python",
+      "name": "hip-python",
+      "url": "https://github.com/ROCm/hip-python",
+      "kind": "code-repository",
+      "license": "MIT; verify current license at pinned commit",
+      "use_policy": "Use for Python HIP driver/runtime integration and harness tooling references.",
+      "priority": 3,
+      "topics": [
+        "hip-python",
+        "python-integration",
+        "runtime-api"
+      ],
+      "notes": "Use for Python HIP driver/runtime integration and harness tooling references."
+    },
+    {
+      "id": "pytorch",
+      "name": "PyTorch",
+      "url": "https://github.com/pytorch/pytorch",
+      "kind": "code-repository",
+      "license": "BSD-style",
+      "use_policy": "Track as a source reference for ROCm kernels, extension APIs, dispatcher behavior, and framework baselines.",
+      "priority": 1,
+      "topics": [
+        "pytorch",
+        "framework",
+        "rocm",
+        "extensions",
+        "inductor"
+      ],
+      "notes": "Track as a source reference for ROCm kernels, extension APIs, dispatcher behavior, and framework baselines."
+    },
+    {
+      "id": "oneflow",
+      "name": "OneFlow",
+      "url": "https://github.com/Oneflow-Inc/oneflow",
+      "kind": "code-repository",
+      "license": "Apache-2.0",
+      "use_policy": "Use for framework operator implementation patterns and distributed runtime design; verify ROCm relevance before importing code.",
+      "priority": 3,
+      "topics": [
+        "oneflow",
+        "framework",
+        "operators"
+      ],
+      "notes": "Use for framework operator implementation patterns and distributed runtime design; verify ROCm relevance before importing code."
+    },
+    {
+      "id": "oneflow-docs",
+      "name": "OneFlow Documentation",
+      "url": "https://docs.oneflow.org/en/master/",
+      "kind": "framework-docs",
+      "license": "OneFlow documentation terms; metadata and citations only unless separately reviewed",
+      "use_policy": "Use for framework APIs and operator extension contracts.",
+      "priority": 3,
+      "topics": [
+        "oneflow",
+        "framework"
+      ],
+      "notes": "Use for framework APIs and operator extension contracts."
+    },
+    {
+      "id": "triton",
+      "name": "Triton",
+      "url": "https://github.com/triton-lang/triton",
+      "kind": "code-repository",
+      "license": "MIT",
+      "use_policy": "Use for Python-authored GPU kernels and AMD backend lowering examples.",
+      "priority": 1,
+      "topics": [
+        "triton",
+        "gpu-kernels",
+        "compiler",
+        "amd-backend"
+      ],
+      "notes": "Use for Python-authored GPU kernels and AMD backend lowering examples."
+    },
+    {
+      "id": "megatron-lm",
+      "name": "Megatron-LM",
+      "url": "https://github.com/NVIDIA/Megatron-LM",
+      "kind": "code-repository",
+      "license": "Apache-2.0; verify ROCm support at pinned commit",
+      "use_policy": "Use for transformer training/inference integration and parallelism patterns where ROCm support applies.",
+      "priority": 2,
+      "topics": [
+        "megatron-lm",
+        "transformers",
+        "parallelism"
+      ],
+      "notes": "Use for transformer training/inference integration and parallelism patterns where ROCm support applies."
+    },
+    {
+      "id": "tiny-cuda-nn",
+      "name": "tiny-cuda-nn",
+      "url": "https://github.com/NVlabs/tiny-cuda-nn",
+      "kind": "code-repository",
+      "license": "BSD-3-Clause; CUDA-first reference, verify HIP portability before use",
+      "use_policy": "Keep as a CUDA-first contrast reference for fully-fused kernels, not as a ROCm baseline unless ported.",
+      "priority": 4,
+      "topics": [
+        "fully-fused-mlp",
+        "cuda-first-reference"
+      ],
+      "notes": "Keep as a CUDA-first contrast reference for fully-fused kernels, not as a ROCm baseline unless ported."
+    },
+    {
+      "id": "jax",
+      "name": "JAX",
+      "url": "https://github.com/jax-ml/jax",
+      "kind": "code-repository",
+      "license": "Apache-2.0",
+      "use_policy": "Track as a framework/compiler competitor path for generated GPU kernels; verify ROCm backend status.",
+      "priority": 3,
+      "topics": [
+        "jax",
+        "xla",
+        "compiler",
+        "framework"
+      ],
+      "notes": "Track as a framework/compiler competitor path for generated GPU kernels; verify ROCm backend status."
+    },
+    {
+      "id": "kernelbench",
+      "name": "KernelBench",
+      "url": "https://github.com/ScalingIntelligence/KernelBench",
+      "kind": "benchmark",
+      "license": "MIT",
+      "use_policy": "Use as an evaluation/task source for generated GPU kernels; adapt CUDA-first tasks before ROCm use.",
+      "priority": 2,
+      "topics": [
+        "benchmark",
+        "llm",
+        "kernel-generation"
+      ],
+      "notes": "Use as an evaluation/task source for generated GPU kernels; adapt CUDA-first tasks before ROCm use."
+    },
+    {
+      "id": "gpu-mode",
+      "name": "GPU MODE",
+      "url": "https://github.com/gpu-mode",
+      "kind": "community-repository",
+      "license": "Varies by repository; verify per repo and commit",
+      "use_policy": "Use lectures, reference kernels, and leaderboard tasks with per-repository license tracking.",
+      "priority": 2,
+      "topics": [
+        "lectures",
+        "reference-kernels",
+        "gpu-programming"
+      ],
+      "notes": "Use lectures, reference kernels, and leaderboard tasks with per-repository license tracking."
+    },
+    {
+      "id": "amd-rocm-gpu-support",
+      "name": "ROCm GPU Support Matrix",
+      "url": "https://rocm.docs.amd.com/projects/install-on-linux/en/latest/reference/system-requirements.html",
+      "kind": "official-reference",
+      "license": "AMD documentation terms; metadata and citations only unless separately reviewed",
+      "use_policy": "Use to map supported AMD GPUs to ROCm releases and gfx targets.",
+      "priority": 1,
+      "topics": [
+        "gpu-support",
+        "gfx-target",
+        "compatibility"
+      ],
+      "notes": "Use to map supported AMD GPUs to ROCm releases and gfx targets."
+    },
+    {
+      "id": "amd-cdna2-tuning-guide",
+      "name": "AMD CDNA2 Architecture Documentation",
+      "url": "https://gpuopen.com/amd-gpu-architecture-programming-documentation/",
+      "kind": "official-reference",
+      "license": "AMD documentation terms; metadata and citations only unless separately reviewed",
+      "use_policy": "Use for MI200/gfx90a architecture-specific tuning notes.",
+      "priority": 2,
+      "topics": [
+        "cdna2",
+        "gfx90a",
+        "architecture"
+      ],
+      "notes": "Use for MI200/gfx90a architecture-specific tuning notes."
+    },
+    {
+      "id": "amd-cdna3-tuning-guide",
+      "name": "AMD CDNA3 Architecture Documentation",
+      "url": "https://gpuopen.com/amd-gpu-architecture-programming-documentation/",
+      "kind": "official-reference",
+      "license": "AMD documentation terms; metadata and citations only unless separately reviewed",
+      "use_policy": "Use for MI300/gfx942 architecture-specific tuning notes.",
+      "priority": 2,
+      "topics": [
+        "cdna3",
+        "gfx942",
+        "architecture"
+      ],
+      "notes": "Use for MI300/gfx942 architecture-specific tuning notes."
+    },
+    {
+      "id": "amd-cdna4-tuning-guide",
+      "name": "AMD CDNA4 Architecture Documentation",
+      "url": "https://gpuopen.com/amd-gpu-architecture-programming-documentation/",
+      "kind": "official-reference",
+      "license": "AMD documentation terms; metadata and citations only unless separately reviewed",
+      "use_policy": "Use for CDNA4/gfx950 architecture-specific tuning notes when public documentation is available.",
+      "priority": 2,
+      "topics": [
+        "cdna4",
+        "gfx950",
+        "architecture"
+      ],
+      "notes": "Use for CDNA4/gfx950 architecture-specific tuning notes when public documentation is available."
+    },
+    {
+      "id": "amd-rdna3-tuning-guide",
+      "name": "AMD RDNA3 Architecture Documentation",
+      "url": "https://gpuopen.com/amd-gpu-architecture-programming-documentation/",
+      "kind": "official-reference",
+      "license": "AMD documentation terms; metadata and citations only unless separately reviewed",
+      "use_policy": "Use for Radeon/RDNA3 architecture-specific tuning boundaries.",
+      "priority": 3,
+      "topics": [
+        "rdna3",
+        "gfx1100",
+        "architecture"
+      ],
+      "notes": "Use for Radeon/RDNA3 architecture-specific tuning boundaries."
+    },
+    {
+      "id": "rocm-rocprofiler-sdk",
+      "name": "rocprofiler-sdk Examples",
+      "url": "https://github.com/ROCm/rocm-systems",
+      "kind": "code-repository",
+      "license": "MIT-style; verify current license at pinned commit",
+      "use_policy": "Use for profiler SDK examples, tracing, and counter collection workflows.",
+      "priority": 2,
+      "topics": [
+        "rocprofiler-sdk",
+        "profiling",
+        "counters"
+      ],
+      "notes": "Use for profiler SDK examples, tracing, and counter collection workflows."
+    },
+    {
+      "id": "flashinfer-docs-sampling",
+      "name": "FlashInfer Sampling Documentation",
+      "url": "https://docs.flashinfer.ai/api/sampling.html",
+      "kind": "framework-docs",
+      "license": "FlashInfer documentation and repository terms; cite and summarize unless license is reviewed",
+      "use_policy": "Use for Top-K, Top-P, min-p, logits/probability sampling API contracts, deterministic mode, seed handling, and HIP Graph compatibility notes.",
+      "priority": 1,
+      "topics": [
+        "flashinfer",
+        "sampling",
+        "top-k",
+        "top-p",
+        "llm-inference"
+      ],
+      "notes": "Primary public docs for FlashInfer sampling APIs referenced by the Top-K roadmap."
+    },
+    {
+      "id": "pytorch-topk-docs",
+      "name": "PyTorch torch.topk Documentation",
+      "url": "https://docs.pytorch.org/docs/stable/generated/torch.topk.html",
+      "kind": "framework-docs",
+      "license": "PyTorch documentation terms; cite and summarize unless license is reviewed",
+      "use_policy": "Use for framework Top-K baseline contract, sorted flag behavior, output shape, and caveats.",
+      "priority": 2,
+      "topics": [
+        "pytorch",
+        "top-k",
+        "framework-baseline",
+        "selection"
+      ],
+      "notes": "Practical oracle and baseline entry point for Top-K comparisons."
+    },
+    {
+      "id": "pytorch-topk-cuda-dispatch-source",
+      "name": "PyTorch CUDA Top-K Dispatch Source",
+      "url": "https://github.com/pytorch/pytorch/blob/main/aten/src/ATen/native/cuda/TensorTopK.cpp",
+      "kind": "source-file",
+      "license": "PyTorch BSD-style license; verify upstream license before copying code",
+      "use_policy": "Use for ATen CUDA Top-K dispatch, selected-result sorting behavior, full-sort fallback checks, and framework baseline implementation notes. Treat this as CUDA-origin/PyTorch GPU-source context only; do not cite it as ROCm measurement evidence.",
+      "priority": 1,
+      "topics": [
+        "pytorch",
+        "top-k",
+        "cuda-source",
+        "framework-baseline"
+      ],
+      "notes": "Shows dispatch to gather Top-K and selected-result sort when sorted output is requested."
+    },
+    {
+      "id": "pytorch-topk-cuda-kernel-source",
+      "name": "PyTorch CUDA Top-K Kernel Source",
+      "url": "https://github.com/pytorch/pytorch/blob/main/aten/src/ATen/native/cuda/TensorTopK.cu",
+      "kind": "source-file",
+      "license": "PyTorch BSD-style license; verify upstream license before copying code",
+      "use_policy": "Use for radix kth-value selection, single-block and multi-block gather paths, and PyTorch Top-K kernel implementation notes. Treat this as CUDA-origin/PyTorch GPU-source context only; do not cite it as ROCm measurement evidence.",
+      "priority": 1,
+      "topics": [
+        "pytorch",
+        "top-k",
+        "radix-select",
+        "cuda-source"
+      ],
+      "notes": "Primary GPU source for PyTorch Top-K selection and gather implementation."
+    },
+    {
+      "id": "flashinfer-topk-docs",
+      "name": "FlashInfer Top-K Documentation",
+      "url": "https://docs.flashinfer.ai/generated/flashinfer.top_k.html",
+      "kind": "framework-docs",
+      "license": "FlashInfer documentation and repository terms; cite and summarize unless license is reviewed",
+      "use_policy": "Use for FlashInfer Top-K API contract, sorted/deterministic/tie-break flags, small-vocab caveats, and radix selection notes.",
+      "priority": 1,
+      "topics": [
+        "flashinfer",
+        "top-k",
+        "radix-select",
+        "llm-inference"
+      ],
+      "notes": "Top-K-specific documentation complementing the FlashInfer sampling API docs."
+    },
+    {
+      "id": "vllm-topk-topp-triton-source",
+      "name": "vLLM Top-K Top-P Triton Source",
+      "url": "https://github.com/vllm-project/vllm/blob/main/vllm/v1/sample/ops/topk_topp_triton.py",
+      "kind": "source-file",
+      "license": "Apache-2.0",
+      "use_policy": "Use for vLLM Qrita-inspired pivot masking, duplicate-boundary handling, and Top-K/Top-P dispatch implementation notes.",
+      "priority": 1,
+      "topics": [
+        "vllm",
+        "top-k",
+        "top-p",
+        "triton",
+        "sampling"
+      ],
+      "notes": "Important because vLLM may use masking/pivot selection rather than materialized sorted Top-K."
+    },
+    {
+      "id": "oneflow-topk-source",
+      "name": "OneFlow CUDA Top-K Source",
+      "url": "https://github.com/Oneflow-Inc/oneflow/blob/master/oneflow/user/kernels/top_k_kernel.cu",
+      "kind": "source-file",
+      "license": "Apache-2.0",
+      "use_policy": "Use for heap-based small-k Top-K, full-sort fallback, and framework Top-K implementation comparison.",
+      "priority": 2,
+      "topics": [
+        "oneflow",
+        "top-k",
+        "heap",
+        "sort",
+        "framework"
+      ],
+      "notes": "Compact reference for heap versus hipCUB sort crossover."
+    },
+    {
+      "id": "transformer-engine-fused-router-topk-source",
+      "name": "Transformer Engine Fused Router Top-K Source",
+      "url": "https://github.com/NVIDIA/TransformerEngine/blob/main/transformer_engine/common/fused_router/fused_topk_with_score_function.cu",
+      "kind": "source-file",
+      "license": "BSD-3-Clause",
+      "use_policy": "Use for MoE expert-routing Top-K, grouped Top-K, score-function fusion, and forward/backward routing behavior.",
+      "priority": 1,
+      "topics": [
+        "transformer-engine",
+        "moe",
+        "top-k",
+        "routing",
+        "cuda-source"
+      ],
+      "notes": "MoE routing reference, not a generic row-major vocabulary Top-K baseline."
+    },
+    {
+      "id": "qrita-topk-topp",
+      "name": "Qrita: High-performance Top-k and Top-p Algorithm for GPUs using Pivot-based Truncation and Selection",
+      "url": "https://arxiv.org/abs/2602.01518",
+      "kind": "research-paper",
+      "license": "arXiv paper; metadata and citations only unless license is reviewed",
+      "use_policy": "Use as a research target for deterministic pivot/truncation Top-K and Top-P algorithms and reproduction planning.",
+      "priority": 1,
+      "topics": [
+        "top-k",
+        "top-p",
+        "sampling",
+        "pivot-selection",
+        "triton"
+      ],
+      "notes": "2026 paper reporting deterministic Top-K/Top-P speedups versus serving-stack baselines."
+    },
+    {
+      "id": "flashsampling-exact-sampling",
+      "name": "FlashSampling: Fast and Memory-Efficient Exact Sampling",
+      "url": "https://arxiv.org/abs/2603.15854",
+      "kind": "research-paper",
+      "license": "arXiv paper; metadata and citations only unless license is reviewed",
+      "use_policy": "Use for exact sampling and fused matmul-sample design ideas when the Top-K project can move the boundary before materialized logits.",
+      "priority": 2,
+      "topics": [
+        "sampling",
+        "top-k",
+        "top-p",
+        "llm-decode",
+        "fusion"
+      ],
+      "notes": "Relevant to decode-regime sampling and logits materialization boundaries."
+    },
+    {
+      "id": "rtopk-rowwise-gpu",
+      "name": "RTop-K: Ultra-Fast Row-Wise Top-K Algorithm and GPU Implementation for Neural Networks",
+      "url": "https://arxiv.org/abs/2409.00822",
+      "kind": "research-paper",
+      "license": "arXiv paper; metadata and citations only unless license is reviewed",
+      "use_policy": "Use for row-wise Top-K algorithm ideas and pivot/search alternatives to sort-based baselines.",
+      "priority": 2,
+      "topics": [
+        "top-k",
+        "row-wise",
+        "gpu-selection",
+        "neural-networks"
+      ],
+      "notes": "Useful background for row-wise Top-K regimes beyond tiny fixed-k insertion lists."
+    },
+    {
+      "id": "radik-radix-topk",
+      "name": "RadiK: Scalable and Optimized GPU-Parallel Radix Top-K Selection",
+      "url": "https://arxiv.org/abs/2501.14336",
+      "kind": "research-paper",
+      "license": "arXiv paper; metadata and citations only unless license is reviewed",
+      "use_policy": "Use for medium and large-k radix-selection design and scalability comparisons.",
+      "priority": 2,
+      "topics": [
+        "top-k",
+        "radix-select",
+        "gpu-selection",
+        "large-k"
+      ],
+      "notes": "Research reference for larger k, input length, and batch-size scalability."
+    },
+    {
+      "id": "faiss-gpu-k-selection",
+      "name": "Billion-scale Similarity Search with GPUs",
+      "url": "https://arxiv.org/abs/1702.08734",
+      "kind": "research-paper",
+      "license": "arXiv paper; metadata and citations only unless license is reviewed",
+      "use_policy": "Use as classic background for register-heavy GPU k-selection; do not treat as an LLM sampling baseline without matching the contract.",
+      "priority": 2,
+      "topics": [
+        "k-selection",
+        "similarity-search",
+        "faiss",
+        "gpu-selection"
+      ],
+      "notes": "Classic FAISS GPU k-selection reference for small-k thinking."
+    },
+    {
+      "id": "split-bucket-partition-topk",
+      "name": "Split-bucket partition: a novel execution model for top-K and selection algorithms on GPUs",
+      "url": "https://link.springer.com/article/10.1007/s11227-024-06031-x",
+      "kind": "research-paper",
+      "license": "Open-access article; metadata and citations only unless license is reviewed",
+      "use_policy": "Use for bucket-partition Top-K execution models, bucket/select/merge decomposition, and fused bucket-selection experiment design.",
+      "priority": 2,
+      "topics": [
+        "top-k",
+        "selection",
+        "bucket-partition",
+        "gpu-selection"
+      ],
+      "notes": "Useful grounding for split-bucket and score-bin wild ideas."
+    },
+    {
+      "id": "topk-decoding-foundations",
+      "name": "Foundations of Top-k Decoding For Language Models",
+      "url": "https://arxiv.org/abs/2505.19371",
+      "kind": "research-paper",
+      "license": "arXiv paper; metadata and citations only unless license is reviewed",
+      "use_policy": "Use for Top-K decoding policy semantics and policy-level comparisons separate from exact CUDA Top-K selection.",
+      "priority": 3,
+      "topics": [
+        "top-k",
+        "decoding",
+        "language-models",
+        "sampling-policy"
+      ],
+      "notes": "Policy reference; not a HIP kernel baseline."
+    },
+    {
+      "id": "probability-simplex-decoding",
+      "name": "Decoding as Optimisation on the Probability Simplex: From Top-K to Top-P (Nucleus) to Best-of-K Samplers",
+      "url": "https://huggingface.co/papers/2602.18292",
+      "kind": "research-paper",
+      "license": "Paper metadata page; cite and summarize unless full license is reviewed",
+      "use_policy": "Use for contract-changing decoding-policy experiments such as simplex/projection threshold kernels, not as exact Top-K evidence.",
+      "priority": 3,
+      "topics": [
+        "decoding",
+        "top-k",
+        "top-p",
+        "simplex",
+        "sampling-policy"
+      ],
+      "notes": "Supports the sparsemax/simplex decoder hypothesis as a policy experiment."
+    },
+    {
+      "id": "kascade-topk-index-reuse",
+      "name": "Kascade: A Practical Sparse Attention Method for Long-Context LLM Inference",
+      "url": "https://arxiv.org/abs/2512.16391",
+      "kind": "research-paper",
+      "license": "arXiv paper; metadata and citations only unless license is reviewed",
+      "use_policy": "Use for sparse-attention Top-K index reuse ideas, with explicit quality and exactness labels.",
+      "priority": 2,
+      "topics": [
+        "sparse-attention",
+        "top-k",
+        "index-reuse",
+        "long-context"
+      ],
+      "notes": "Relevant to cross-layer Top-K index reuse for sparse attention."
+    },
+    {
+      "id": "indexcache-topk-index-reuse",
+      "name": "IndexCache: Accelerating Sparse Attention via Cross-Layer Index Reuse",
+      "url": "https://arxiv.org/abs/2603.12201",
+      "kind": "research-paper",
+      "license": "arXiv paper; metadata and citations only unless license is reviewed",
+      "use_policy": "Use for cross-layer sparse-attention Top-K index reuse experiments and trace-based validation plans.",
+      "priority": 2,
+      "topics": [
+        "sparse-attention",
+        "top-k",
+        "index-reuse",
+        "long-context",
+        "llm-inference"
+      ],
+      "notes": "Supports reuse-layer and repair-rate experiments in the Top-K wild ideas lab."
+    },
+    {
+      "id": "pytorch-torch-api",
+      "name": "PyTorch torch Reference API",
+      "url": "https://docs.pytorch.org/docs/2.12/torch.html",
+      "kind": "official-docs",
+      "license": "PyTorch documentation license; cite and summarize unless copying is reviewed",
+      "use_policy": "Use for public torch API categories, function names, and reference links for PyTorch-baseline challenge tasks.",
+      "priority": 1,
+      "topics": [
+        "pytorch",
+        "torch",
+        "public-api",
+        "cuda-baseline",
+        "kernels"
+      ],
+      "notes": "Stable PyTorch docs redirected to 2.12 on 2026-05-21 in this environment."
+    },
+    {
+      "id": "pytorch-nn-functional-api",
+      "name": "PyTorch torch.nn.functional Reference API",
+      "url": "https://docs.pytorch.org/docs/2.12/nn.functional.html",
+      "kind": "official-docs",
+      "license": "PyTorch documentation license; cite and summarize unless copying is reviewed",
+      "use_policy": "Use for public neural-network functional APIs such as convolution, pooling, attention, activation, normalization, and losses.",
+      "priority": 1,
+      "topics": [
+        "pytorch",
+        "nn-functional",
+        "attention",
+        "convolution",
+        "normalization",
+        "losses"
+      ],
+      "notes": "Primary public contract source for functional neural-network ops in PyTorch challenge references."
+    },
+    {
+      "id": "pytorch-nn-api",
+      "name": "PyTorch torch.nn Reference API",
+      "url": "https://docs.pytorch.org/docs/2.12/nn.html",
+      "kind": "official-docs",
+      "license": "PyTorch documentation license; cite and summarize unless copying is reviewed",
+      "use_policy": "Use for module-level public contracts such as Conv, Linear, MultiheadAttention, Transformer, and normalization modules.",
+      "priority": 1,
+      "topics": [
+        "pytorch",
+        "torch-nn",
+        "modules",
+        "transformer",
+        "conv",
+        "linear"
+      ],
+      "notes": "Module API reference for constructing PyTorch baseline models."
+    },
+    {
+      "id": "pytorch-linalg-api",
+      "name": "PyTorch torch.linalg Reference API",
+      "url": "https://docs.pytorch.org/docs/2.12/linalg.html",
+      "kind": "official-docs",
+      "license": "PyTorch documentation license; cite and summarize unless copying is reviewed",
+      "use_policy": "Use for public dense linear algebra semantics and solver/decomposition baseline tasks.",
+      "priority": 2,
+      "topics": [
+        "pytorch",
+        "linalg",
+        "solver",
+        "decomposition",
+        "gemm-adjacent"
+      ],
+      "notes": "Linear algebra public API reference for solver and decomposition challenge ideas."
+    },
+    {
+      "id": "pytorch-fft-api",
+      "name": "PyTorch torch.fft Reference API",
+      "url": "https://docs.pytorch.org/docs/2.12/fft.html",
+      "kind": "official-docs",
+      "license": "PyTorch documentation license; cite and summarize unless copying is reviewed",
+      "use_policy": "Use for public FFT and spectral operation contracts, especially audio and signal challenge tasks.",
+      "priority": 2,
+      "topics": [
+        "pytorch",
+        "fft",
+        "spectral",
+        "audio",
+        "signal"
+      ],
+      "notes": "FFT public API reference for fixed-size signal and audio kernels."
+    },
+    {
+      "id": "pytorch-sparse-api",
+      "name": "PyTorch torch.sparse Reference API",
+      "url": "https://docs.pytorch.org/docs/2.12/sparse.html",
+      "kind": "official-docs",
+      "license": "PyTorch documentation license; cite and summarize unless copying is reviewed",
+      "use_policy": "Use for sparse tensor layout invariants, sparse operation contracts, and semi-structured sparse challenge tasks.",
+      "priority": 2,
+      "topics": [
+        "pytorch",
+        "sparse",
+        "spmm",
+        "sddmm",
+        "semi-structured-sparsity"
+      ],
+      "notes": "Sparse public API reference, including CUDA-origin semi-structured sparse constraints."
+    },
+    {
+      "id": "pytorch-special-api",
+      "name": "PyTorch torch.special Reference API",
+      "url": "https://docs.pytorch.org/docs/2.12/special.html",
+      "kind": "official-docs",
+      "license": "PyTorch documentation license; cite and summarize unless copying is reviewed",
+      "use_policy": "Use for special-function public API semantics and special-math HIP/ROCm challenge categories.",
+      "priority": 2,
+      "topics": [
+        "pytorch",
+        "special-functions",
+        "pointwise",
+        "math"
+      ],
+      "notes": "Special mathematical functions are mostly pointwise but can dominate probability/statistics workloads."
+    },
+    {
+      "id": "pytorch-masked-api",
+      "name": "PyTorch torch.masked Reference API",
+      "url": "https://docs.pytorch.org/docs/2.12/masked.html",
+      "kind": "official-docs",
+      "license": "PyTorch documentation license; cite and summarize unless copying is reviewed",
+      "use_policy": "Use for masked operation contracts, masked reductions, and mask semantics in challenge tasks.",
+      "priority": 2,
+      "topics": [
+        "pytorch",
+        "masked",
+        "masked-reduction",
+        "mask-semantics"
+      ],
+      "notes": "Masked APIs are useful public contracts for fused mask and reduction kernels."
+    },
+    {
+      "id": "pytorch-nested-api",
+      "name": "PyTorch torch.nested Reference API",
+      "url": "https://docs.pytorch.org/docs/2.12/nested.html",
+      "kind": "official-docs",
+      "license": "PyTorch documentation license; cite and summarize unless copying is reviewed",
+      "use_policy": "Use for nested/ragged tensor public semantics and ragged batch challenge design.",
+      "priority": 2,
+      "topics": [
+        "pytorch",
+        "nested",
+        "ragged",
+        "variable-length"
+      ],
+      "notes": "Nested tensor APIs provide public contracts for ragged sequence and variable-length workloads."
+    },
+    {
+      "id": "pytorch-distributions-api",
+      "name": "PyTorch torch.distributions Reference API",
+      "url": "https://docs.pytorch.org/docs/2.12/distributions.html",
+      "kind": "official-docs",
+      "license": "PyTorch documentation license; cite and summarize unless copying is reviewed",
+      "use_policy": "Use for distribution sampling/log-prob contracts and correctness policies for sampling challenges.",
+      "priority": 2,
+      "topics": [
+        "pytorch",
+        "distributions",
+        "sampling",
+        "probability"
+      ],
+      "notes": "Distribution APIs matter for sampling tasks where exact replay and distributional correctness differ."
+    }
+  ]
+}

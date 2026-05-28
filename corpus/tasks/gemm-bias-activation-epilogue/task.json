@@ -1,0 +1,79 @@
+{
+  "schema_version": "0.1.0",
+  "id": "gemm-bias-activation-epilogue",
+  "title": "GEMM Bias Activation Epilogue Fusion",
+  "domain": "gemm",
+  "language": "hip-cpp",
+  "tags": [
+    "gemm",
+    "epilogue",
+    "bias",
+    "activation",
+    "hipblaslt",
+    "composable-kernel",
+    "template-only",
+    "todo"
+  ],
+  "source_refs": [
+    "amd-hipblaslt-rocblas-docs",
+    "rocm-composable-kernel",
+    "triton",
+    "amd-rocm-programming-guide"
+  ],
+  "problem": {
+    "summary": "Compare a custom HIP GEMM with fused bias and activation epilogue against hipBLAS/rocBLAS/hipBLASLt/Composable Kernel baseline paths for scoped shapes.",
+    "inputs": [
+      "float* A shaped [M,K]",
+      "float* B shaped [K,N]",
+      "float* bias shaped [N]",
+      "float* D shaped [M,N]",
+      "int M",
+      "int N",
+      "int K"
+    ],
+    "outputs": [
+      "D = relu(A * B + bias) for row-major contiguous tensors"
+    ],
+    "constraints": [
+      "Template-only scaffold; no performance claim is attached",
+      "hipBLASLt epilogue and Composable Kernel custom epilogue are mandatory baselines before claiming a custom win",
+      "Record layout mapping, math mode, workspace, selected algorithm, and epilogue semantics"
+    ]
+  },
+  "artifacts": {
+    "baseline": "source/hipblaslt_composable_kernel_baseline_notes.hip",
+    "optimized": "source/custom_epilogue_kernel.hip",
+    "harness": "source/host_reference.cpp"
+  },
+  "verification": {
+    "status": "template-only",
+    "method": "Compare custom, hipBLASLt/Composable Kernel, and host reference outputs for rectangular shapes that expose bias broadcast errors.",
+    "tolerances": {
+      "max_abs_error": 0.0001,
+      "max_rel_error": 0.0001
+    }
+  },
+  "benchmarking": {
+    "status": "template-only",
+    "operation": "gemm-bias-relu-epilogue",
+    "required_metrics": [
+      "median kernel duration",
+      "end-to-end fused-op latency",
+      "math mode",
+      "workspace bytes",
+      "selected hipBLASLt algorithm",
+      "Composable Kernel tile and epilogue operator",
+      "hardware_metadata"
+    ],
+    "recommended_shapes": [
+      "M=512,N=2048,K=2048",
+      "M=16,N=4096,K=4096",
+      "M=1,N=4096,K=4096"
+    ]
+  },
+  "license": "Project seed example",
+  "curation": {
+    "status": "template-only",
+    "notes": "Compile-oriented scaffold for epilogue fusion competition; treat results as timing-only only after an actual HIP-event run."
+  }
+}

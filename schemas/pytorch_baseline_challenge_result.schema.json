@@ -1,0 +1,140 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.local/rocm-agent-corpus/pytorch_baseline_challenge_result.schema.json",
+  "title": "PyTorch Baseline Challenge Result",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "task_id",
+    "task_level",
+    "shape_id",
+    "submission_id",
+    "public_pytorch_reference",
+    "primary_baseline_id",
+    "candidate_id",
+    "correctness",
+    "timing",
+    "score",
+    "classification",
+    "evidence_label",
+    "timing_boundary",
+    "hardware",
+    "software",
+    "declared_dropped_generality"
+  ],
+  "properties": {
+    "schema_version": {"type": "string"},
+    "task_id": {"type": "string"},
+    "task_level": {"type": "string", "enum": ["L0", "L1", "L2", "L3", "L4"]},
+    "shape_id": {"type": "string"},
+    "submission_id": {"type": "string"},
+    "public_pytorch_reference": {"type": "string"},
+    "primary_baseline_id": {"type": "string"},
+    "candidate_id": {"type": "string"},
+    "optional_baseline_ids": {"type": "array", "items": {"type": "string"}},
+    "correctness": {
+      "type": "object",
+      "required": ["status", "mode", "tolerance", "max_abs_error", "max_rel_error"],
+      "properties": {
+        "status": {"type": "string", "enum": ["pass", "fail", "not_checked"]},
+        "mode": {"type": "string"},
+        "tolerance": {"type": "string"},
+        "max_abs_error": {"type": "number", "minimum": 0},
+        "max_rel_error": {"type": "number", "minimum": 0},
+        "mismatch_count": {"type": "integer", "minimum": 0},
+        "notes": {"type": "string"}
+      },
+      "additionalProperties": false
+    },
+    "timing": {
+      "type": "object",
+      "required": ["baseline_median_ms", "candidate_median_ms", "speedup_vs_baseline"],
+      "properties": {
+        "baseline_median_ms": {"type": "number", "minimum": 0},
+        "baseline_p10_ms": {"type": "number", "minimum": 0},
+        "baseline_p90_ms": {"type": "number", "minimum": 0},
+        "candidate_median_ms": {"type": "number", "minimum": 0},
+        "candidate_p10_ms": {"type": "number", "minimum": 0},
+        "candidate_p90_ms": {"type": "number", "minimum": 0},
+        "speedup_vs_baseline": {"type": "number", "minimum": 0},
+        "warmup_iterations": {"type": "integer", "minimum": 0},
+        "timed_iterations": {"type": "integer", "minimum": 0},
+        "launch_count": {"type": "integer", "minimum": 0},
+        "workspace_bytes": {"type": "integer", "minimum": 0},
+        "allocation_timed": {"type": "boolean"},
+        "contiguous_copy_timed": {"type": "boolean"},
+        "synchronization_policy": {"type": "string"}
+      },
+      "additionalProperties": false
+    },
+    "score": {
+      "type": "object",
+      "required": ["total", "correctness_points", "performance_points", "evidence_points", "generality_points"],
+      "properties": {
+        "total": {"type": "number", "minimum": 0, "maximum": 100},
+        "correctness_points": {"type": "number", "minimum": 0, "maximum": 40},
+        "performance_points": {"type": "number", "minimum": 0, "maximum": 45},
+        "evidence_points": {"type": "number", "minimum": 0, "maximum": 10},
+        "generality_points": {"type": "number", "minimum": 0, "maximum": 5}
+      },
+      "additionalProperties": false
+    },
+    "classification": {
+      "type": "string",
+      "enum": [
+        "win",
+        "match",
+        "specialized-win",
+        "loss",
+        "neutral",
+        "negative-example",
+        "correctness-fail",
+        "compile-fail",
+        "measurement-invalid",
+        "unsupported-configuration"
+      ]
+    },
+    "evidence_label": {
+      "type": "string",
+      "enum": ["template-only", "timing-only-measured", "counter-backed-measured", "profile-attempted-blocked"]
+    },
+    "timing_boundary": {
+      "type": "string",
+      "enum": ["kernel_only", "steady_state_api", "api_with_allocation", "graph_replay", "framework_call", "serving_step", "not_timed"]
+    },
+    "hardware": {
+      "type": "object",
+      "required": ["gpu_name"],
+      "properties": {
+        "gpu_name": {"type": "string"},
+        "gfx_target": {"type": "string"},
+        "compute_capability": {"type": "string"},
+        "driver_version": {"type": "string"},
+        "hip_visible_devices": {"type": "string"},
+        "cuda_visible_devices": {"type": "string"}
+      },
+      "additionalProperties": false
+    },
+    "software": {
+      "type": "object",
+      "required": ["pytorch_version"],
+      "properties": {
+        "pytorch_version": {"type": "string"},
+        "rocm_version": {"type": "string"},
+        "rocm_or_cuda_runtime_version": {"type": "string"},
+        "cuda_toolkit_version": {"type": "string"},
+        "compiler": {"type": "string"},
+        "build_command_or_python_invocation": {"type": "string"}
+      },
+      "additionalProperties": false
+    },
+    "declared_dropped_generality": {
+      "type": "array",
+      "items": {"type": "string"}
+    },
+    "notes": {"type": "string"},
+    "next_attack_surface": {"type": "string"}
+  },
+  "additionalProperties": false
+}
+

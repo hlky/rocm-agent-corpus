@@ -1,0 +1,79 @@
+{
+  "schema_version": "0.1.0",
+  "id": "vllm-rocm-custom-plugin",
+  "title": "vLLM on ROCm Custom Plugin Boundary",
+  "domain": "llm-inference",
+  "language": "hip-cpp",
+  "tags": [
+    "decode",
+    "kv-cache",
+    "normalization",
+    "plugin",
+    "rocm-parity",
+    "sampling",
+    "template-only",
+    "tensorrt-llm"
+  ],
+  "source_refs": [
+    "vllm",
+    "vllm-rocm-docs",
+    "flashinfer",
+    "amd-hip-programming-guide"
+  ],
+  "problem": {
+    "summary": "Sketch the boundary where a vLLM on ROCm plugin or kernel modification specializes decode, sampling, normalization, or KV-cache work for a fixed serving contract.",
+    "inputs": [
+      "runtime batch and sequence metadata",
+      "logits, hidden states, or KV-cache tensors",
+      "plugin fields describing dtype, head layout, beam width, and block size"
+    ],
+    "outputs": [
+      "plugin output tensor or updated KV-cache state",
+      "serving-stage latency record with plugin metadata"
+    ],
+    "constraints": [
+      "Template-only; no vLLM on ROCm, FlashInfer, vLLM, or custom plugin win is claimed",
+      "Plugin enqueue must use the provided CUDA stream and avoid allocation or synchronization",
+      "Record model, vLLM on ROCm version, batching policy, KV-cache policy, precision, and timing boundary"
+    ]
+  },
+  "artifacts": {
+    "baseline": "source/baseline.py",
+    "optimized": "source/optimized.hip",
+    "harness": "source/harness_plan.md",
+    "profiles": [],
+    "results": []
+  },
+  "verification": {
+    "status": "template-only",
+    "method": "Compare plugin outputs with vLLM on ROCm or framework references for decode, sampling, normalization, and KV-cache edge cases before timing.",
+    "tolerances": {
+      "max_abs_error": 0.0001,
+      "max_rel_error": 0.0001
+    }
+  },
+  "benchmarking": {
+    "status": "template-only",
+    "operation": "vllm-rocm-custom-plugin-boundary",
+    "required_metrics": [
+      "prefill latency",
+      "inter-token latency",
+      "tokens per second",
+      "plugin enqueue latency",
+      "batching policy",
+      "KV-cache policy",
+      "precision",
+      "hardware metadata"
+    ],
+    "recommended_shapes": [
+      "batch=1 beam=1 hidden=4096 vocab=32000 decode",
+      "batch=16 hidden=8192 top_k=4 top_p=0.9 sampling",
+      "batch=32 heads=32 kv_heads=8 head_dim=128 block=16 paged KV"
+    ]
+  },
+  "license": "Project seed example",
+  "curation": {
+    "status": "template-only",
+    "notes": "ROCm parity port from CUDA task `tensorrt-llm-custom-plugin`. This is a template/harness scaffold only; CUDA-origin result artifacts were intentionally not copied, and no ROCm timing, correctness, or profiler-counter evidence is claimed yet. Run on AMD hardware, attach ROCm version, hipcc flags, gfx target, and label HIP-event-only results as timing-only."
+  }
+}

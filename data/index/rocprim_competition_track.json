@@ -1,0 +1,402 @@
+{
+  "schema_version": "0.1.0",
+  "track_id": "cccl-reductions-scans-competition",
+  "status": "scaffold",
+  "mission": "Teach agents to write custom HIP kernels that beat, match, specialize beyond, or intelligently reuse hipCUB, rocPRIM/hipCUB/rocThrust, and rocThrust for reductions, scans, histograms, selection, and top-k.",
+  "guide": "docs/ROCPRIM_COMPETITION_TRACK.md",
+  "examples_dir": "examples/rocprim",
+  "upstream_references": [
+    {
+      "name": "hipCUB DeviceReduce",
+      "paths": [
+        "third_party/rocm-libraries/cub/cub/device/device_reduce.hpp",
+        "third_party/rocm-libraries/cub/test/catch2_test_device_reduce.hip",
+        "third_party/rocm-libraries/cub/test/catch2_test_device_transform_reduce.hip"
+      ]
+    },
+    {
+      "name": "hipCUB DeviceScan",
+      "paths": [
+        "third_party/rocm-libraries/cub/cub/device/device_scan.hpp",
+        "third_party/rocm-libraries/cub/test/catch2_test_device_scan.hip"
+      ]
+    },
+    {
+      "name": "hipCUB Block and Warp collectives",
+      "paths": [
+        "third_party/rocm-libraries/cub/cub/block/block_reduce.hpp",
+        "third_party/rocm-libraries/cub/cub/block/block_scan.hpp",
+        "third_party/rocm-libraries/cub/cub/warp/warp_reduce.hpp",
+        "third_party/rocm-libraries/cub/cub/warp/warp_scan.hpp"
+      ]
+    },
+    {
+      "name": "hipCUB Histogram",
+      "paths": [
+        "third_party/rocm-libraries/cub/cub/device/device_histogram.hpp"
+      ]
+    },
+    {
+      "name": "hipCUB Select and TopK",
+      "paths": [
+        "third_party/rocm-libraries/cub/cub/device/device_select.hpp",
+        "third_party/rocm-libraries/cub/cub/device/device_partition.hpp",
+        "third_party/rocm-libraries/cub/cub/device/device_topk.hpp",
+        "third_party/rocm-libraries/cub/test/catch2_test_device_topk_api.hip"
+      ]
+    }
+  ],
+  "evidence_labels": [
+    "template-only",
+    "correctness-only",
+    "timing-only-measured",
+    "timing-only-measured-negative",
+    "counter-backed-measured"
+  ],
+  "library_roles": [
+    "baseline",
+    "correctness_oracle",
+    "temporary_storage_reference",
+    "edge_case_reference",
+    "warp_block_parts_bin",
+    "architecture_policy_reference"
+  ],
+  "tasks": [
+    {
+      "id": "cccl-fused-transform-reduce",
+      "priority": "p0",
+      "category": "reduction",
+      "status": "template-only",
+      "baseline_apis": [
+        "hipcub::DeviceReduce::TransformReduce",
+        "hipcub::DeviceReduce::Reduce with transform iterator",
+        "rocthrust::transform_reduce"
+      ],
+      "custom_strategy": "Fuse the transform, local accumulation, block reduction, and final write or atomic into a single workload-specific kernel.",
+      "discarded_generality": [
+        "single dtype and accumulator",
+        "known transform",
+        "known alignment",
+        "fixed item count family",
+        "no arbitrary binary operator dispatch"
+      ],
+      "candidate_shapes": [
+        "n=1048576 float32 contiguous",
+        "n=16777216 float32 contiguous",
+        "rows=4096 cols=256 rowwise statistics"
+      ],
+      "correctness_oracles": [
+        "hipCUB TransformReduce output",
+        "CPU double-precision reference for tolerance checks"
+      ],
+      "artifacts_to_capture": [
+        "hipCUB temp_storage_bytes",
+        "baseline launch count",
+        "custom launch count",
+        "allocation timed or excluded",
+        "accumulator dtype",
+        "evidence label"
+      ],
+      "negative_examples": [
+        "generic two-pass custom reduction slower than hipCUB",
+        "vectorized load variant slower due to register pressure or alignment guards"
+      ],
+      "example_files": [
+        "examples/rocprim/fused_transform_reduce_competitor.hip"
+      ]
+    },
+    {
+      "id": "cccl-fixed-row-reduction",
+      "priority": "p0",
+      "category": "reduction",
+      "status": "planned",
+      "baseline_apis": [
+        "hipcub::DeviceReduce::Sum",
+        "hipcub::DeviceReduce::Reduce",
+        "rocthrust::reduce"
+      ],
+      "custom_strategy": "Map one warp or one CTA to each fixed-size row and use hipCUB BlockReduce or WarpReduce inside a fused row kernel.",
+      "discarded_generality": [
+        "arbitrary row length",
+        "arbitrary strides",
+        "generic reduction operator",
+        "standalone primitive boundary"
+      ],
+      "candidate_shapes": [
+        "rows=4096 cols=128",
+        "rows=2048 cols=1024",
+        "rows=65536 cols=32"
+      ],
+      "correctness_oracles": [
+        "hipCUB DeviceReduce per flattened region when applicable",
+        "CPU rowwise reference"
+      ],
+      "artifacts_to_capture": [
+        "row length",
+        "rows per CTA or warp",
+        "hipCUB comparison boundary",
+        "whether post-reduction epilogue is fused"
+      ],
+      "negative_examples": [
+        "raw shuffle tree loses to hipCUB BlockReduce inside same custom kernel",
+        "one CTA per tiny row under-occupies relative to warp-per-row mapping"
+      ],
+      "example_files": []
+    },
+    {
+      "id": "cccl-fixed-segment-scan",
+      "priority": "p0",
+      "category": "scan",
+      "status": "template-only",
+      "baseline_apis": [
+        "hipcub::DeviceScan::InclusiveSum",
+        "hipcub::DeviceScan::ExclusiveSum",
+        "rocthrust::inclusive_scan",
+        "rocthrust::exclusive_scan",
+        "rocthrust::inclusive_scan_by_key"
+      ],
+      "custom_strategy": "Use one CTA per fixed segment with hipcub::BlockScan, optionally fusing transform, mask, and writeback.",
+      "discarded_generality": [
+        "global arbitrary-length scan",
+        "variable segment sizes",
+        "generic operator dispatch",
+        "multiple dtypes"
+      ],
+      "candidate_shapes": [
+        "segments=4096 segment_size=256",
+        "segments=16384 segment_size=128",
+        "segments=1024 segment_size=1024"
+      ],
+      "correctness_oracles": [
+        "hipCUB DeviceScan for flattened single-segment cases",
+        "rocThrust scan-by-key for segmented prototype",
+        "CPU segmented scan"
+      ],
+      "artifacts_to_capture": [
+        "inclusive or exclusive semantics",
+        "initial value",
+        "segment boundary contract",
+        "carry propagation if segment spans CTAs"
+      ],
+      "negative_examples": [
+        "custom scan missing inter-CTA carry propagation",
+        "scan-by-key baseline faster for variable segments than fixed CTA mapping"
+      ],
+      "example_files": [
+        "examples/rocprim/fixed_segment_scan_competitor.hip"
+      ]
+    },
+    {
+      "id": "cccl-predicate-scan-scatter-compaction",
+      "priority": "p1",
+      "category": "select",
+      "status": "planned",
+      "baseline_apis": [
+        "hipcub::DeviceSelect::If",
+        "hipcub::DeviceSelect::Flagged",
+        "hipcub::DevicePartition::If",
+        "rocthrust::copy_if"
+      ],
+      "custom_strategy": "Fuse predicate generation, local prefix count, scatter, and optional downstream transform for known masks or densities.",
+      "discarded_generality": [
+        "arbitrary predicate",
+        "stable ordering if not required",
+        "generic output iterator",
+        "standalone selection boundary"
+      ],
+      "candidate_shapes": [
+        "n=1048576 dense mask",
+        "n=1048576 sparse mask",
+        "batch=4096 row_items=256 per-row compaction"
+      ],
+      "correctness_oracles": [
+        "hipCUB DeviceSelect",
+        "rocThrust copy_if",
+        "CPU stable or unstable compaction depending on task contract"
+      ],
+      "artifacts_to_capture": [
+        "mask density",
+        "stable ordering requirement",
+        "num_selected output semantics",
+        "launch count"
+      ],
+      "negative_examples": [
+        "custom unstable compaction used where stable output is required",
+        "global atomic position allocation slower than hipCUB prefix path"
+      ],
+      "example_files": []
+    },
+    {
+      "id": "cccl-small-fixed-bin-histogram",
+      "priority": "p1",
+      "category": "histogram",
+      "status": "planned",
+      "baseline_apis": [
+        "hipcub::DeviceHistogram::HistogramEven",
+        "hipcub::DeviceHistogram::HistogramRange",
+        "hipcub::DeviceHistogram::MultiHistogramEven",
+        "hipcub::DeviceHistogram::MultiHistogramRange"
+      ],
+      "custom_strategy": "Use warp or block privatized bins for fixed small bin counts, then reduce to global counters with controlled atomics.",
+      "discarded_generality": [
+        "arbitrary bin ranges",
+        "large dynamic bin counts",
+        "multi-channel generality when unused",
+        "unknown input distribution"
+      ],
+      "candidate_shapes": [
+        "n=1048576 bins=16 uint8",
+        "n=16777216 bins=256 uint8",
+        "rows=4096 cols=1024 bins=32 per-row"
+      ],
+      "correctness_oracles": [
+        "hipCUB DeviceHistogram",
+        "CPU histogram with 64-bit counters"
+      ],
+      "artifacts_to_capture": [
+        "bin count",
+        "counter dtype",
+        "distribution skew",
+        "privatization level",
+        "overflow contract"
+      ],
+      "negative_examples": [
+        "shared-memory atomics lose under skewed distribution",
+        "global atomics collapse under hot bins",
+        "counter overflow ignored"
+      ],
+      "example_files": []
+    },
+    {
+      "id": "cccl-tiny-fixed-k-topk",
+      "priority": "p1",
+      "category": "topk",
+      "status": "planned",
+      "baseline_apis": [
+        "hipcub::DeviceTopK::MaxKeys",
+        "hipcub::DeviceTopK::MinKeys",
+        "hipcub::DeviceTopK::MaxPairs",
+        "hipcub::DeviceTopK::MinPairs",
+        "hipcub::DeviceRadixSort::SortPairs",
+        "rocthrust::sort"
+      ],
+      "custom_strategy": "Use a fixed-k per-thread candidate list and warp or CTA merge network, optionally fused with mask, bias, temperature, or sampling.",
+      "discarded_generality": [
+        "arbitrary k",
+        "sorted output when downstream accepts unsorted",
+        "generic key type",
+        "dynamic segment sizes"
+      ],
+      "candidate_shapes": [
+        "rows=4096 cols=32000 k=1",
+        "rows=1024 cols=32000 k=4",
+        "rows=256 cols=128000 k=8"
+      ],
+      "correctness_oracles": [
+        "hipCUB DeviceTopK",
+        "full sort for sorted contract",
+        "CPU stable tie-break reference when required"
+      ],
+      "artifacts_to_capture": [
+        "k",
+        "sorted or unsorted output contract",
+        "tie-break semantics",
+        "mask or bias fusion",
+        "register pressure notes"
+      ],
+      "negative_examples": [
+        "custom sorted top-k loses to unsorted hipCUB baseline plus downstream tolerance",
+        "fixed-k network spills registers for k=16",
+        "tie handling differs from oracle"
+      ],
+      "example_files": []
+    },
+    {
+      "id": "cccl-argmax-pair-reduction",
+      "priority": "p1",
+      "category": "reduction",
+      "status": "planned",
+      "baseline_apis": [
+        "hipcub::DeviceReduce::ArgMax",
+        "hipcub::DeviceReduce::ArgMin",
+        "hipcub::DeviceReduce::Reduce"
+      ],
+      "custom_strategy": "Reduce pair state containing value and index with deterministic tie handling, fused with masking or rowwise postprocessing.",
+      "discarded_generality": [
+        "generic pair type",
+        "arbitrary tie policy",
+        "standalone argmax output",
+        "unmasked full input"
+      ],
+      "candidate_shapes": [
+        "rows=4096 cols=1024 argmax",
+        "rows=1024 cols=32000 masked argmax",
+        "n=16777216 global argmax"
+      ],
+      "correctness_oracles": [
+        "hipCUB ArgMax",
+        "CPU deterministic tie reference"
+      ],
+      "artifacts_to_capture": [
+        "tie policy",
+        "index type",
+        "mask semantics",
+        "NaN handling"
+      ],
+      "negative_examples": [
+        "custom pair comparison picks different index on ties",
+        "NaN behavior not documented"
+      ],
+      "example_files": []
+    }
+  ],
+  "cross_cutting_negative_examples": [
+    {
+      "id": "cccl-negative-generic-shuffle-reduction",
+      "lesson": "A generic shuffle tree is often slower and less correct than hipCUB BlockReduce or DeviceReduce unless the task has fixed shape or fusion value.",
+      "expected_label": "timing-only-measured-negative"
+    },
+    {
+      "id": "cccl-negative-atomic-histogram-hot-bins",
+      "lesson": "Direct global atomics can look acceptable on uniform data and collapse on skewed distributions.",
+      "expected_label": "timing-only-measured-negative"
+    },
+    {
+      "id": "cccl-negative-vectorized-reduce",
+      "lesson": "Vectorized loads can lose when alignment checks, tails, or register pressure exceed memory-transaction savings.",
+      "expected_label": "timing-only-measured-negative"
+    },
+    {
+      "id": "cccl-negative-topk-sorted-contract",
+      "lesson": "Sorting a custom top-k result can erase wins when the downstream operation accepts unsorted candidates.",
+      "expected_label": "timing-only-measured-negative"
+    }
+  ],
+  "skeleton_files": [
+    {
+      "path": "examples/rocprim/cub_device_reduce_skeleton.hip",
+      "role": "existing hipCUB DeviceReduce baseline sketch"
+    },
+    {
+      "path": "examples/rocprim/fused_transform_reduce_competitor.hip",
+      "role": "custom fused transform plus reduction competitor scaffold"
+    },
+    {
+      "path": "examples/rocprim/fixed_segment_scan_competitor.hip",
+      "role": "fixed segment BlockScan competitor scaffold"
+    }
+  ],
+  "measurement_requirements": {
+    "required_before_claiming_win": [
+      "same inputs and output contract as baseline",
+      "same stream timing boundary",
+      "warmup and median timing",
+      "hipCUB temporary storage bytes recorded",
+      "workspace allocation included or excluded explicitly",
+      "hardware and compile flags recorded",
+      "evidence label assigned"
+    ],
+    "profiler_counter_policy": "Do not invent rocprofiler/rocprof counters. If only CUDA event timings are available, label results timing-only."
+  }
+}
+

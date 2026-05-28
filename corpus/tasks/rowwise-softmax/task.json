@@ -1,0 +1,66 @@
+{
+  "schema_version": "0.1.0",
+  "id": "rowwise-softmax",
+  "title": "Row-Wise Softmax",
+  "domain": "deep-learning",
+  "language": "hip-cpp",
+  "tags": [
+    "softmax",
+    "row-reduction",
+    "numerical-stability",
+    "shared-memory"
+  ],
+  "source_refs": [
+    "amd-rocm-programming-guide",
+    "kernelbench",
+    "gpu-mode"
+  ],
+  "problem": {
+    "summary": "Compute a numerically stable softmax for each row of a row-major matrix. The baseline assigns one thread to each row. The optimized version assigns one block to each row and uses shared-memory reductions for max and sum.",
+    "inputs": [
+      "float* input",
+      "float* output",
+      "int rows",
+      "int cols"
+    ],
+    "outputs": [
+      "Each output row is softmax(input row) and sums approximately to 1"
+    ],
+    "constraints": [
+      "The optimized seed assumes moderate column counts that fit one block-per-row reduction",
+      "floating-point differences are expected"
+    ]
+  },
+  "artifacts": {
+    "baseline": "source/baseline.hip",
+    "optimized": "source/optimized.hip"
+  },
+  "verification": {
+    "status": "port-pending-rocm-run",
+    "method": "Compare against CPU stable softmax and check row sums. Ported from the CUDA corpus; rerun on ROCm hardware before marking passed.",
+    "tolerances": {
+      "max_abs_error": 1e-05,
+      "max_row_sum_error": 0.0001
+    }
+  },
+  "benchmarking": {
+    "status": "rocm-measurement-pending",
+    "operation": "rowwise-softmax",
+    "required_metrics": [
+      "median kernel duration",
+      "max_abs_error",
+      "max_row_sum_error"
+    ],
+    "recommended_shapes": [
+      "4096x1024",
+      "1024x2048",
+      "4096x1000",
+      "128x128"
+    ]
+  },
+  "license": "Project seed example",
+  "curation": {
+    "status": "ported-seed",
+    "notes": "Ported from the CUDA corpus on 2026-05-20. CUDA-origin timing artifacts were removed; rerun on ROCm hardware before making performance claims."
+  }
+}

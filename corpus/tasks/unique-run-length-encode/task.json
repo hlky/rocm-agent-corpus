@@ -1,0 +1,75 @@
+{
+  "schema_version": "0.1.0",
+  "id": "unique-run-length-encode",
+  "title": "Unique Run Length Encode Scaffold",
+  "domain": "parallel-primitives",
+  "language": "hip-cpp",
+  "tags": [
+    "unique",
+    "run-length-encode",
+    "cub",
+    "rocthrust",
+    "dedupe",
+    "template-only"
+  ],
+  "source_refs": [
+    "rocm-rocprim",
+    "rocm-rocprim-docs",
+    "amd-rocm-programming-guide"
+  ],
+  "problem": {
+    "summary": "Detect runs in sorted input, emit unique values and counts, and compare direct custom run detection against hipCUB/rocThrust primitives.",
+    "inputs": [
+      "sorted input keys",
+      "num_items",
+      "optional values",
+      "run boundary policy"
+    ],
+    "outputs": [
+      "unique keys",
+      "run lengths",
+      "num_runs"
+    ],
+    "constraints": [
+      "Template-only; input sortedness and equality policy must be explicit",
+      "Record run-length distribution and output sizing policy",
+      "Keep dedupe-only and count-by-key results separate"
+    ]
+  },
+  "artifacts": {
+    "baseline": "source/baseline.hip",
+    "optimized": "source/optimized.hip",
+    "harness": "source/harness_plan.md"
+  },
+  "verification": {
+    "status": "template-only",
+    "method": "Implement the baseline, optimized candidate, and CPU or strongest-library oracle where applicable; compare outputs before timing claims.",
+    "tolerances": {
+      "max_abs_error": 0.0001,
+      "max_rel_error": 0.0001
+    }
+  },
+  "benchmarking": {
+    "status": "template-only",
+    "operation": "unique-run-length-encode",
+    "required_metrics": [
+      "median latency",
+      "num_items",
+      "num_runs",
+      "run-length histogram",
+      "temp storage bytes",
+      "output sizing policy",
+      "correctness hash"
+    ],
+    "recommended_shapes": [
+      "n=1048576 avg_run=1",
+      "n=1048576 avg_run=8",
+      "n=16777216 skewed runs"
+    ]
+  },
+  "license": "Project seed example",
+  "curation": {
+    "status": "template-only",
+    "notes": "Promoted from the v2 extension backlog as wave 2. No performance, correctness, or profiler evidence is claimed yet."
+  }
+}

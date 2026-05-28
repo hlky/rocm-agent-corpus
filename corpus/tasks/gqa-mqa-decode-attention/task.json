@@ -1,0 +1,76 @@
+{
+  "schema_version": "0.1.0",
+  "id": "gqa-mqa-decode-attention",
+  "title": "GQA MQA Decode Attention",
+  "domain": "llm-inference",
+  "language": "hip-cpp",
+  "tags": [
+    "attention",
+    "decode",
+    "gqa",
+    "mqa",
+    "kv-cache",
+    "template-only"
+  ],
+  "source_refs": [
+    "vllm",
+    "flashinfer",
+    "flash-attention",
+    "amd-rocm-programming-guide"
+  ],
+  "problem": {
+    "summary": "Specialize decode attention for grouped-query and multi-query attention where many query heads share fewer KV heads.",
+    "inputs": [
+      "Q shaped [tokens, query_heads, head_dim]",
+      "K/V cache shaped by kv_heads",
+      "query-to-kv head mapping",
+      "sequence lengths",
+      "scale"
+    ],
+    "outputs": [
+      "decode attention output"
+    ],
+    "constraints": [
+      "Template-only; record query_heads, kv_heads, grouping factor, and cache layout",
+      "Compare against vLLM on ROCm, FlashInfer, vLLM, and FlashAttention paths where applicable",
+      "Keep paged and contiguous KV cache claims separate"
+    ]
+  },
+  "artifacts": {
+    "baseline": "source/baseline.hip",
+    "optimized": "source/optimized.hip",
+    "harness": "source/harness_plan.md"
+  },
+  "verification": {
+    "status": "template-only",
+    "method": "Implement CPU and strongest-library references, then compare outputs before timing claims.",
+    "tolerances": {
+      "max_abs_error": 0.0001,
+      "max_rel_error": 0.0001
+    }
+  },
+  "benchmarking": {
+    "status": "template-only",
+    "operation": "gqa-mqa-decode-attention",
+    "required_metrics": [
+      "median decode latency",
+      "query_heads",
+      "kv_heads",
+      "head_dim",
+      "tokens",
+      "cache layout",
+      "KV bytes read estimate",
+      "correctness max error"
+    ],
+    "recommended_shapes": [
+      "tokens=1 q_heads=32 kv_heads=8 head_dim=128",
+      "tokens=16 q_heads=40 kv_heads=8 head_dim=128",
+      "tokens=64 q_heads=64 kv_heads=1 head_dim=128"
+    ]
+  },
+  "license": "Project seed example",
+  "curation": {
+    "status": "template-only",
+    "notes": "Promoted from the v2 extension backlog as a template-only task. No performance, correctness, or profiler evidence is claimed yet."
+  }
+}

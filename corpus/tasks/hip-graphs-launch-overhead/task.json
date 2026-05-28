@@ -1,0 +1,67 @@
+{
+  "schema_version": "0.1.0",
+  "id": "hip-graphs-launch-overhead",
+  "title": "HIP Graphs Launch Overhead Scaffold",
+  "domain": "runtime-launch",
+  "language": "hip-cpp",
+  "tags": [
+    "hip-graphs",
+    "launch-overhead",
+    "streams",
+    "template-only",
+    "todo"
+  ],
+  "source_refs": [
+    "amd-hip-programming-guide",
+    "amd-hip-graphs-guide",
+    "amd-rocm-programming-guide"
+  ],
+  "problem": {
+    "summary": "Compare repeated ordinary kernel launches against captured HIP Graph replay for a tiny fixed workflow. This is a template-only scaffold for launch-bound workloads; no timing claim is attached.",
+    "inputs": [
+      "float* x",
+      "float* y",
+      "int n",
+      "int iterations"
+    ],
+    "outputs": [
+      "y[i] contains the result of a repeated axpy-style workflow"
+    ],
+    "constraints": [
+      "Fixed allocation and shape during graph replay",
+      "Measure graph instantiation separately from graph launch",
+      "Report timing-only unless profiler artifacts are attached"
+    ]
+  },
+  "artifacts": {
+    "baseline": "source/baseline.hip",
+    "optimized": "source/optimized.hip"
+  },
+  "verification": {
+    "status": "template-only",
+    "method": "Compare graph replay output with ordinary-launch output for the same inputs before collecting timings.",
+    "tolerances": {
+      "max_abs_error": 1e-06
+    }
+  },
+  "benchmarking": {
+    "status": "template-only",
+    "operation": "repeated-small-kernel-workflow",
+    "required_metrics": [
+      "median end-to-end replay duration",
+      "graph instantiation time",
+      "ordinary launch median duration",
+      "timer_type",
+      "hardware_metadata"
+    ],
+    "recommended_shapes": [
+      "n=1024,iterations=1000",
+      "n=65536,iterations=1000"
+    ]
+  },
+  "license": "Project seed example",
+  "curation": {
+    "status": "template-only",
+    "notes": "Use this when launch overhead, not kernel body throughput, is the hypothesis. Attach hardware and build metadata to any future timing-only result."
+  }
+}

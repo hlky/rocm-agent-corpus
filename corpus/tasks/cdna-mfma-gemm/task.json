@@ -1,0 +1,74 @@
+{
+  "schema_version": "0.1.0",
+  "id": "cdna-mfma-gemm",
+  "title": "CDNA3 WGMFMA global-to-LDS staging GEMM Skeleton",
+  "domain": "linear-algebra",
+  "language": "hip-cpp",
+  "tags": [
+    "hopper",
+    "wgmma",
+    "tma",
+    "gemm",
+    "composable-kernel",
+    "template-only",
+    "todo"
+  ],
+  "source_refs": [
+    "amd-hip-programming-guide",
+    "amd-gcn-isa",
+    "rocm-composable-kernel",
+    "amd-rocm-programming-guide"
+  ],
+  "problem": {
+    "summary": "Create a CDNA3-specific GEMM task skeleton that records WGMFMA/global-to-LDS staging as the intended extension surface while keeping a portable scalar baseline.",
+    "inputs": [
+      "half* A",
+      "half* B",
+      "float* C",
+      "int M",
+      "int N",
+      "int K"
+    ],
+    "outputs": [
+      "C = A * B with FP32 accumulation"
+    ],
+    "constraints": [
+      "WGMFMA/global-to-LDS staging path is TODO and should target gfx950 explicitly",
+      "Composable Kernel/CK Tile is the reference extension path",
+      "Record gfx942 versus gfx950 metadata separately"
+    ]
+  },
+  "artifacts": {
+    "baseline": "source/baseline.hip",
+    "optimized": "source/optimized.hip"
+  },
+  "verification": {
+    "status": "template-only",
+    "method": "Compare with CPU FP32 accumulation over rounded half inputs.",
+    "tolerances": {
+      "default_max_abs_error": 0.05,
+      "default_max_rel_error": 0.02
+    }
+  },
+  "benchmarking": {
+    "status": "template-only",
+    "operation": "hopper-hgemm-wgmma-tma",
+    "required_metrics": [
+      "median kernel duration",
+      "gflop_per_s",
+      "sm target",
+      "pipeline stages",
+      "tma descriptor metadata",
+      "baseline_versions"
+    ],
+    "recommended_shapes": [
+      "M=128,N=128,K=128",
+      "M=4096,N=4096,K=4096"
+    ]
+  },
+  "license": "Project seed example",
+  "curation": {
+    "status": "template-only",
+    "notes": "This skeleton exists so agents do not mix CDNA3 WGMFMA/global-to-LDS staging claims into generic rocWMMA tasks. No GPU benchmarking is attached."
+  }
+}

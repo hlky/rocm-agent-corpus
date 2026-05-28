@@ -1,0 +1,79 @@
+{
+  "schema_version": "0.1.0",
+  "id": "structured-sparsity-2to4",
+  "title": "2:4 Structured Sparsity Scaffold",
+  "domain": "sparse-gemm",
+  "language": "hip-cpp",
+  "tags": [
+    "structured-sparsity",
+    "2to4",
+    "cusparselt",
+    "composable-kernel",
+    "migraphx",
+    "template-only"
+  ],
+  "source_refs": [
+    "rocm-composable-kernel",
+    "amd-miopen-docs",
+    "amd-migraphx-docs",
+    "rocm-examples",
+    "amd-rocm-programming-guide"
+  ],
+  "problem": {
+    "summary": "Capture the 2:4 structured sparsity path, including metadata packing, pruning layout, sparse Matrix Core eligibility, and dense fallback comparison.",
+    "inputs": [
+      "dense or pruned weights",
+      "2:4 metadata",
+      "activation matrix",
+      "M/N/K",
+      "dtype"
+    ],
+    "outputs": [
+      "sparse GEMM output"
+    ],
+    "constraints": [
+      "Template-only; source refs include general CUDA/Composable Kernel/MIGraphX samples until a cuSPARSELt source entry is added",
+      "Record legal 2:4 pattern and metadata layout",
+      "Compare against dense GEMM and cuSPARSELt/Composable Kernel/MIGraphX where available"
+    ]
+  },
+  "artifacts": {
+    "baseline": "source/baseline.hip",
+    "optimized": "source/optimized.hip",
+    "harness": "source/harness_plan.md"
+  },
+  "verification": {
+    "status": "template-only",
+    "method": "Implement CPU and strongest-library references, then compare outputs before timing claims.",
+    "tolerances": {
+      "max_abs_error": 0.0001,
+      "max_rel_error": 0.0001
+    }
+  },
+  "benchmarking": {
+    "status": "template-only",
+    "operation": "structured-sparsity-2to4",
+    "required_metrics": [
+      "median latency",
+      "sparsity validity",
+      "metadata bytes",
+      "M",
+      "N",
+      "K",
+      "dtype",
+      "dense baseline",
+      "sparse library path",
+      "correctness max error"
+    ],
+    "recommended_shapes": [
+      "M=128 N=4096 K=4096 fp16",
+      "M=4096 N=4096 K=4096 fp16",
+      "M=1 N=4096 K=4096 int8/fp16 mixed"
+    ]
+  },
+  "license": "Project seed example",
+  "curation": {
+    "status": "template-only",
+    "notes": "Promoted from the v2 extension backlog as a template-only task. No performance, correctness, or profiler evidence is claimed yet."
+  }
+}

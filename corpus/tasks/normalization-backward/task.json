@@ -1,0 +1,91 @@
+{
+  "schema_version": "0.1.0",
+  "id": "normalization-backward",
+  "title": "LayerNorm RMSNorm Backward Reductions",
+  "domain": "ml-training",
+  "language": "hip-cpp",
+  "tags": [
+    "backward",
+    "layernorm",
+    "normalization",
+    "pytorch",
+    "reductions",
+    "rmsnorm",
+    "rocm-parity",
+    "template-only",
+    "transformer-engine",
+    "triton"
+  ],
+  "source_refs": [
+    "pytorch",
+    "transformer-engine",
+    "triton",
+    "amd-rocm-programming-guide",
+    "rocm-rocprim"
+  ],
+  "problem": {
+    "summary": "Compute LayerNorm and RMSNorm backward gradients with explicit row reductions and parameter-gradient reductions, using PyTorch, Transformer Engine, and Triton as library/framework baselines.",
+    "inputs": [
+      "float* x",
+      "float* dy",
+      "float* gamma",
+      "float* saved_mean",
+      "float* saved_invvar_or_invrms",
+      "int rows",
+      "int cols",
+      "int mode"
+    ],
+    "outputs": [
+      "float* dx",
+      "float* dgamma",
+      "float* dbeta"
+    ],
+    "constraints": [
+      "Template-only ROCm parity port; CUDA-origin timing records were not copied and no ROCm profiler-counter evidence is claimed",
+      "Support LayerNorm and RMSNorm contracts separately",
+      "Record whether saved statistics come from forward or are recomputed",
+      "Accumulate dgamma/dbeta in fp32 and document reduction strategy"
+    ]
+  },
+  "artifacts": {
+    "baseline": "source/baseline.hip",
+    "optimized": "source/optimized.hip",
+    "harness": "../../../harnesses/normalization_backward_benchmark.hip",
+    "profiles": [],
+    "results": []
+  },
+  "verification": {
+    "status": "template-only",
+    "method": "The HIP harness compares dx, dgamma, and dbeta against a deterministic CPU reference using deterministic inputs and saved-statistic reuse. PyTorch and Triton baseline runners are provided for future ROCm timing, but no ROCm result artifacts are attached yet.",
+    "tolerances": {
+      "max_abs_error": 0.005,
+      "max_rel_error": 0.005
+    }
+  },
+  "benchmarking": {
+    "status": "template-only",
+    "operation": "normalization-backward",
+    "required_metrics": [
+      "median latency",
+      "rows",
+      "cols",
+      "mode",
+      "dtype",
+      "dgamma/dbeta reduction policy",
+      "library baseline",
+      "hardware and build metadata",
+      "evidence label"
+    ],
+    "recommended_shapes": [
+      "rows=8192 cols=768 layernorm",
+      "rows=4096 cols=4096 rmsnorm",
+      "rows=32768 cols=1024 layernorm",
+      "rows=2048 cols=8192 rmsnorm"
+    ]
+  },
+  "license": "Project seed example",
+  "curation": {
+    "status": "template-only",
+    "notes": "ROCm parity port from CUDA task `normalization-backward`. This is a template/harness scaffold only; CUDA-origin result artifacts were intentionally not copied, and no ROCm timing, correctness, or profiler-counter evidence is claimed yet. Run on AMD hardware, attach ROCm version, hipcc flags, gfx target, and label HIP-event-only results as timing-only."
+  }
+}

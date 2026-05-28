@@ -1,0 +1,79 @@
+{
+  "schema_version": "0.1.0",
+  "id": "strided-batched-layout-transform",
+  "title": "Strided Batched Layout Transform",
+  "domain": "memory",
+  "language": "hip-cpp",
+  "tags": [
+    "batched",
+    "cub",
+    "framework-copy",
+    "layout-transform",
+    "pitched-memory",
+    "rocm-parity",
+    "strided",
+    "template-only",
+    "thrust"
+  ],
+  "source_refs": [
+    "amd-hip-programming-guide",
+    "amd-rocm-programming-guide",
+    "amd-hip-memory-performance",
+    "rocm-rocprim-docs",
+    "rocm-rocprim"
+  ],
+  "problem": {
+    "summary": "Transform a batched non-contiguous tensor between strided, pitched, and contiguous layouts while preserving element order. The baseline models generic framework or rocThrust-style elementwise copies; the optimized path specializes known batch strides, pitches, and vectorizable inner dimensions.",
+    "inputs": [
+      "input tensor pointer",
+      "output tensor pointer",
+      "logical extents B, H, W, C",
+      "input strides and output strides in elements",
+      "optional pitch in bytes for 2D slices"
+    ],
+    "outputs": [
+      "output tensor contains the same logical values in the requested destination layout"
+    ],
+    "constraints": [
+      "Template-only; no timing or profiler evidence is claimed",
+      "Record whether source and destination alias, whether pitches are byte or element counts, and whether inner dimensions are aligned for vectorized loads/stores",
+      "Library baselines should include rocThrust transform/copy, hipCUB block load/store where used inside a custom kernel, and the relevant framework tensor copy or contiguous conversion",
+      "A custom kernel should state which layout generality it drops, such as fixed rank, fixed channel count, aligned pitch, or no overlap"
+    ]
+  },
+  "artifacts": {
+    "baseline": "source/baseline.hip",
+    "optimized": "source/optimized.hip",
+    "harness": "source/harness_plan.md",
+    "profiles": [],
+    "results": []
+  },
+  "verification": {
+    "status": "template-only",
+    "method": "Build a CPU index-mapping oracle for every logical element and compare the transformed output across contiguous, strided, pitched, and batched cases before recording timing-only results.",
+    "tolerances": {}
+  },
+  "benchmarking": {
+    "status": "template-only",
+    "operation": "strided-batched-layout-transform",
+    "required_metrics": [
+      "median kernel duration",
+      "effective bytes moved",
+      "effective memory bandwidth",
+      "stride and pitch metadata",
+      "alignment contract",
+      "library/framework baseline timing",
+      "correctness mismatch count"
+    ],
+    "recommended_shapes": [
+      "B=64 H=32 W=128 C=4 NHWC-strided-to-contiguous",
+      "B=16 H=224 W=224 C=3 pitched-HWC-to-NCHW",
+      "B=4096 H=1 W=64 C=16 batched-slice-pack"
+    ]
+  },
+  "license": "Project seed example",
+  "curation": {
+    "status": "template-only",
+    "notes": "ROCm parity port from CUDA task `strided-batched-layout-transform`. This is a template/harness scaffold only; CUDA-origin result artifacts were intentionally not copied, and no ROCm timing, correctness, or profiler-counter evidence is claimed yet. Run on AMD hardware, attach ROCm version, hipcc flags, gfx target, and label HIP-event-only results as timing-only."
+  }
+}

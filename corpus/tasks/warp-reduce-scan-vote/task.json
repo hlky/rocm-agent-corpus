@@ -1,0 +1,69 @@
+{
+  "schema_version": "0.1.0",
+  "id": "warp-reduce-scan-vote",
+  "title": "Warp Reduce Scan Vote Scaffold",
+  "domain": "warp-primitives",
+  "language": "hip-cpp",
+  "tags": [
+    "warp",
+    "shuffle",
+    "vote",
+    "reduction",
+    "scan",
+    "template-only",
+    "todo"
+  ],
+  "source_refs": [
+    "amd-hip-programming-guide",
+    "amd-rocm-programming-guide"
+  ],
+  "problem": {
+    "summary": "Teach warp-level reduction, inclusive scan, and vote masks with a shared-memory block baseline and shuffle/vote optimized path.",
+    "inputs": [
+      "float* input",
+      "float* sums",
+      "float* scans",
+      "unsigned* masks",
+      "int groups"
+    ],
+    "outputs": [
+      "one sum and one predicate mask per warp-sized group",
+      "one inclusive scan value per input element"
+    ],
+    "constraints": [
+      "Assumes 32-element groups",
+      "Masks must use active-lane aware intrinsics for ragged future variants",
+      "Compare against hipCUB/rocPRIM/hipCUB/rocThrust before production claims"
+    ]
+  },
+  "artifacts": {
+    "baseline": "source/baseline.hip",
+    "optimized": "source/optimized.hip"
+  },
+  "verification": {
+    "status": "template-only",
+    "method": "CPU reference computes per-group sum, inclusive scan values, and predicate ballot mask.",
+    "tolerances": {
+      "max_abs_error": 1e-06
+    }
+  },
+  "benchmarking": {
+    "status": "template-only",
+    "operation": "warp-group-reduce-vote",
+    "required_metrics": [
+      "median kernel duration",
+      "groups",
+      "evidence_label",
+      "hardware_metadata"
+    ],
+    "recommended_shapes": [
+      "groups=65536",
+      "groups=1048576"
+    ]
+  },
+  "license": "Project seed example",
+  "curation": {
+    "status": "template-only",
+    "notes": "This task is an educational low-level primitive scaffold, not a replacement for hipCUB without measured evidence."
+  }
+}

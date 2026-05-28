@@ -1,0 +1,73 @@
+{
+  "schema_version": "0.1.0",
+  "id": "csr-spmv-load-balance",
+  "title": "CSR SpMV Load Balance",
+  "domain": "sparse-linear-algebra",
+  "language": "hip-cpp",
+  "tags": [
+    "spmv",
+    "csr",
+    "load-balance",
+    "warp-per-row",
+    "sparse"
+  ],
+  "source_refs": [
+    "amd-rocm-programming-guide",
+    "rocm-examples",
+    "rocm-rocprim"
+  ],
+  "problem": {
+    "summary": "Compute y = A * x for a CSR matrix while contrasting a one-thread-per-row baseline with a simple warp-per-row load-balanced seed for short and medium rows.",
+    "inputs": [
+      "int* row_offsets",
+      "int* column_indices",
+      "float* values",
+      "float* x",
+      "float* y",
+      "int rows"
+    ],
+    "outputs": [
+      "y[row] contains the dot product for one CSR row"
+    ],
+    "constraints": [
+      "CSR row_offsets has rows + 1 entries",
+      "column_indices and values have row_offsets[rows] entries",
+      "optimized seed maps one warp to one row and loops over nonzeros",
+      "long rows and empty rows need separate policy studies before measured claims"
+    ]
+  },
+  "artifacts": {
+    "baseline": "source/baseline.hip",
+    "optimized": "source/optimized.hip"
+  },
+  "verification": {
+    "status": "template-only",
+    "method": "TODO: compare against CPU CSR SpMV and cuSPARSE sample-derived oracle where available.",
+    "tolerances": {
+      "max_abs_error": 0.0001
+    }
+  },
+  "benchmarking": {
+    "status": "template-only",
+    "operation": "csr-spmv",
+    "required_metrics": [
+      "median kernel duration",
+      "nnz",
+      "row length histogram",
+      "effective nnz/s",
+      "library baseline version",
+      "correctness max_abs_error"
+    ],
+    "recommended_shapes": [
+      "rows=65536 nnz_per_row=4",
+      "rows=65536 nnz_per_row=32",
+      "rows=131072 poisson avg=8",
+      "rows=32768 power-law avg=24"
+    ]
+  },
+  "license": "Project seed example",
+  "curation": {
+    "status": "template-only",
+    "notes": "Template-only CSR SpMV scaffold. The optimized seed is a simple warp-per-row split idea, not a claim against cuSPARSE or production load-balanced SpMV."
+  }
+}

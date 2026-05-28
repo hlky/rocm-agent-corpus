@@ -1,0 +1,122 @@
+{
+  "schema_version": "0.1.0",
+  "doc": "docs/PYTORCH_BASELINE_CHALLENGE.md",
+  "status": "scaffolded-with-first-pytorch-baselines",
+  "purpose": "Challenge design for custom HIP kernels scored against public PyTorch API baselines and real model shapes.",
+  "real_shape_matrix": "data/index/pytorch_api_real_world_shape_matrix.json",
+  "admission_rule": "Every public_api_contracts entry used by a scored challenge task must cite real_shape_matrix_refs from docs/PYTORCH_API_REAL_WORLD_SHAPE_MATRIX.md.",
+  "primary_baseline": "pytorch-eager-public-api",
+  "measured_seed_records": [
+    {
+      "task_id": "rowwise-softmax",
+      "record": "data/records/runpod_rtx4000ada_softmax_pytorch_20260525.jsonl",
+      "classification": "timing-only-measured",
+      "note": "PyTorch eager torch.softmax(dim=1) versus custom one-block-per-row CUDA on fp32 4096x1024."
+    },
+    {
+      "task_id": "block-topk-sampling",
+      "record": "data/records/runpod_rtx4000ada_topk_pytorch_20260525.jsonl",
+      "classification": "timing-only-measured",
+      "note": "Exact-contract PyTorch eager tie-adjusted topk+sample versus custom block top-k sampler on 1024x32768 k=4."
+    }
+  ],
+  "baseline_ladder": [
+    "pytorch-eager-public-api",
+    "pytorch-compile-default",
+    "pytorch-compile-specialized",
+    "pytorch-library-backed",
+    "strongest-external-competitor"
+  ],
+  "score_components": {
+    "correctness_points": 40,
+    "performance_points": 45,
+    "evidence_points": 10,
+    "generality_discipline_points": 5
+  },
+  "performance_bands": [
+    {"min_speedup": 0.0, "max_speedup": 0.75, "points": 0},
+    {"min_speedup": 0.75, "max_speedup": 0.95, "points": 5},
+    {"min_speedup": 0.95, "max_speedup": 1.05, "points": 10},
+    {"min_speedup": 1.05, "max_speedup": 1.25, "points": 20},
+    {"min_speedup": 1.25, "max_speedup": 1.5, "points": 30},
+    {"min_speedup": 1.5, "max_speedup": 2.0, "points": 38},
+    {"min_speedup": 2.0, "max_speedup": null, "points": 45}
+  ],
+  "challenge_tracks": [
+    {
+      "id": "torch_pointwise_fusion",
+      "public_api_contracts": ["torch.where", "torch.add", "torch.mul", "torch.nn.functional.silu"],
+      "real_shape_matrix_refs": ["pt_pointwise_cfg_scheduler", "pt_layout_latent_pack_concat"],
+      "shape_suites": ["image_vae_conv_islands"],
+      "first_tasks": ["latent_scale_shift_clip", "cfg_arithmetic_fusion"]
+    },
+    {
+      "id": "torch_reduction_norm",
+      "public_api_contracts": ["torch.sum", "torch.amax", "torch.nn.functional.rms_norm", "torch.nn.functional.layer_norm", "torch.nn.functional.softmax"],
+      "real_shape_matrix_refs": ["pt_reduction_norm_rows", "pt_softmax_attention_rows"],
+      "shape_suites": ["llm_dense_decode", "image_transformer_denoisers"],
+      "first_tasks": ["rmsnorm_hidden_widths", "masked_softmax_rows"]
+    },
+    {
+      "id": "torch_selection_sampling",
+      "public_api_contracts": ["torch.topk", "torch.sort", "torch.multinomial"],
+      "real_shape_matrix_refs": ["pt_selection_sampling_rows"],
+      "shape_suites": ["llm_dense_decode", "moe_routing"],
+      "first_tasks": ["qwen_vocab_topk20", "qwen3_moe_router_topk8", "wide_k_rows"]
+    },
+    {
+      "id": "torch_dense_linear",
+      "public_api_contracts": ["torch.matmul", "torch.nn.functional.linear", "torch.addmm", "torch.bmm"],
+      "real_shape_matrix_refs": ["pt_dense_linear_gemm_rows"],
+      "shape_suites": ["llm_dense_decode", "image_transformer_denoisers", "vision_classic_transformers"],
+      "first_tasks": ["fixed_qkv_projection", "lm_head_last_token", "patch_projection"]
+    },
+    {
+      "id": "torch_attention",
+      "public_api_contracts": ["torch.nn.functional.scaled_dot_product_attention"],
+      "real_shape_matrix_refs": ["pt_softmax_attention_rows", "pt_dense_linear_gemm_rows"],
+      "shape_suites": ["image_transformer_denoisers", "video_transformer_denoisers", "llm_dense_decode"],
+      "first_tasks": ["flux_joint_attention", "gqa_decode_attention", "wan_video_attention"]
+    },
+    {
+      "id": "torch_position_scan_rope",
+      "public_api_contracts": ["torch.cumsum", "torch.arange", "torch.sin", "torch.cos", "torch.clamp", "torch.repeat_interleave", "torch.meshgrid", "torch.cartesian_prod"],
+      "real_shape_matrix_refs": ["pt_position_scan_rope_rows"],
+      "shape_suites": ["position_scan_rope", "llm_dense_decode", "video_transformer_denoisers", "vision_classic_transformers"],
+      "first_tasks": ["allegro_3d_rope_apply", "qwen3_vl_cu_seqlens_mrope", "detr_2d_sine_position_scan"]
+    },
+    {
+      "id": "torch_conv_codec",
+      "public_api_contracts": ["torch.nn.functional.conv2d", "torch.nn.functional.conv3d", "torch.nn.functional.interpolate", "torch.nn.functional.group_norm"],
+      "real_shape_matrix_refs": ["pt_conv_resample_codec_rows", "pt_pointwise_cfg_scheduler"],
+      "shape_suites": ["image_vae_conv_islands", "video_transformer_denoisers"],
+      "first_tasks": ["sdxl_vae_conv_block", "wan_conv3d_patchify"]
+    },
+    {
+      "id": "torch_gather_scatter_moe",
+      "public_api_contracts": ["torch.gather", "torch.scatter_add", "torch.index_select", "torch.nonzero"],
+      "real_shape_matrix_refs": ["pt_gather_scatter_compaction", "pt_selection_sampling_rows"],
+      "shape_suites": ["moe_routing"],
+      "first_tasks": ["moe_token_grouping", "expert_scatter_add"]
+    }
+  ],
+  "result_schema": "schemas/pytorch_baseline_challenge_result.schema.json",
+  "classification_taxonomy": [
+    "win",
+    "match",
+    "specialized-win",
+    "loss",
+    "neutral",
+    "negative-example",
+    "correctness-fail",
+    "compile-fail",
+    "measurement-invalid",
+    "unsupported-configuration"
+  ],
+  "evidence_labels": [
+    "template-only",
+    "timing-only-measured",
+    "counter-backed-measured",
+    "profile-attempted-blocked"
+  ]
+}

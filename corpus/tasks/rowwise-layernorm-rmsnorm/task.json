@@ -1,0 +1,88 @@
+{
+  "schema_version": "0.1.0",
+  "id": "rowwise-layernorm-rmsnorm",
+  "title": "Row-Wise LayerNorm and RMSNorm",
+  "domain": "deep-learning",
+  "language": "hip-cpp",
+  "tags": [
+    "layernorm",
+    "rmsnorm",
+    "row-reduction",
+    "shared-memory",
+    "normalization",
+    "transformer"
+  ],
+  "source_refs": [
+    "amd-rocm-programming-guide",
+    "kernelbench",
+    "gpu-mode",
+    "transformer-engine",
+    "vllm"
+  ],
+  "problem": {
+    "summary": "Normalize each row of a row-major activation matrix. RMSNorm computes x * rsqrt(mean(x^2) + epsilon) * gamma. LayerNorm computes (x - mean(x)) * rsqrt(var(x) + epsilon) * gamma + beta. The baseline assigns one thread to each row. The optimized seed assigns one block to each row and uses shared-memory reductions.",
+    "inputs": [
+      "float* input",
+      "float* gamma",
+      "float* beta",
+      "float* output",
+      "int rows",
+      "int cols",
+      "float epsilon",
+      "int mode where 0 is rmsnorm and 1 is layernorm"
+    ],
+    "outputs": [
+      "Each output row is normalized independently with per-column gamma and optional beta"
+    ],
+    "constraints": [
+      "Input is contiguous row-major float32.",
+      "Gamma and beta are contiguous vectors of length cols.",
+      "RMSNorm ignores beta in this scaffold.",
+      "The optimized seed assumes one block can cover each row with strided per-thread work.",
+      "This is a correctness-first seed; future entries should add vectorized loads, warp reductions, persistent shape specialization, and fused residual/add paths."
+    ]
+  },
+  "artifacts": {
+    "baseline": "source/baseline.hip",
+    "optimized": "source/optimized.hip",
+    "harness": "../../../harnesses/layernorm_rmsnorm_benchmark.hip"
+  },
+  "verification": {
+    "status": "port-pending-rocm-run",
+    "method": "Compare CUDA output against a double-precision CPU reference for RMSNorm or LayerNorm. Ported from the CUDA corpus; rerun on ROCm hardware before marking passed.",
+    "tolerances": {
+      "max_abs_error": 0.0001,
+      "max_rel_error": 0.001
+    }
+  },
+  "benchmarking": {
+    "status": "rocm-measurement-pending",
+    "operation": "rowwise-layernorm-rmsnorm",
+    "required_metrics": [
+      "median kernel duration",
+      "p10 kernel duration",
+      "p90 kernel duration",
+      "effective GiB/s",
+      "max_abs_error",
+      "max_rel_error",
+      "bad_count"
+    ],
+    "recommended_shapes": [
+      "128x768",
+      "1024x768",
+      "4096x768",
+      "1024x1024",
+      "4096x1024",
+      "1024x2048",
+      "4096x4096",
+      "32768x128",
+      "32768x256",
+      "16384x8192"
+    ]
+  },
+  "license": "Project seed example",
+  "curation": {
+    "status": "ported-seed",
+    "notes": "Ported from the CUDA corpus on 2026-05-20. CUDA-origin timing artifacts were removed; rerun on ROCm hardware before making performance claims."
+  }
+}

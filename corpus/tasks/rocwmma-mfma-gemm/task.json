@@ -1,0 +1,96 @@
+{
+  "schema_version": "0.1.0",
+  "id": "rocwmma-mfma-gemm",
+  "title": "rocWMMA Matrix Core HGEMM Seed",
+  "domain": "linear-algebra",
+  "language": "hip-cpp",
+  "tags": [
+    "gemm",
+    "hgemm",
+    "matrix-core",
+    "rocwmma",
+    "mma",
+    "fp16",
+    "fp32-accumulate",
+    "custom-kernel-competition",
+    "composable-kernel",
+    "hipblaslt"
+  ],
+  "source_refs": [
+    "amd-hip-programming-guide",
+    "amd-gcn-isa",
+    "rocm-examples",
+    "amd-hipblaslt-rocblas-docs",
+    "rocm-composable-kernel",
+    "triton",
+    "flashinfer",
+    "vllm"
+  ],
+  "problem": {
+    "summary": "Compute C = A * B for one FP16 GEMM using FP32 accumulation, with A row-major, B column-major, and C row-major. The task teaches the first custom Matrix Core rung: a scalar CUDA baseline, a CPU FP32 reference over the exact FP16 inputs, and a simple rocWMMA 16x16x16 optimized path that future agents can extend with shared-memory staging, inline mfma, Composable Kernel/CK Tile, and fused epilogues.",
+    "inputs": [
+      "half* a: row-major matrix shaped [M, K], leading dimension K",
+      "half* b: column-major matrix shaped [K, N], leading dimension K",
+      "float* c: row-major output matrix shaped [M, N], leading dimension N",
+      "int M",
+      "int N",
+      "int K"
+    ],
+    "outputs": [
+      "c[row, col] equals sum_k float(a[row, k]) * float(b[k, col]) with FP32 accumulation"
+    ],
+    "constraints": [
+      "FP16 inputs, FP32 accumulation, FP32 output",
+      "No alpha, beta, bias, activation, residual, scale, or quantization in the seed task",
+      "The optimized path uses rocWMMA 16x16x16 for M, N, and K multiples of 16 and falls back to a scalar HIP kernel for ragged dimensions",
+      "The seed optimized kernel uses one warp per output tile and no shared-memory staging; it is a correctness-first Matrix Core scaffold, not a claimed best kernel",
+      "Future measured records must compare against hipBLASLt and Composable Kernel where the same layout, dtype, accumulator, and output contract are supported"
+    ]
+  },
+  "artifacts": {
+    "baseline": "source/baseline.hip",
+    "optimized": "source/optimized.hip",
+    "harness": "../../../harnesses/rocwmma_gemm_benchmark.hip"
+  },
+  "verification": {
+    "status": "port-pending-rocm-run",
+    "method": "The harness computes a CPU FP32 reference from the same host FP16 inputs and reports max_abs_error, max_rel_error, bad_count, and passed. No GPU run is included in this scaffold. Ported from the CUDA corpus; rerun on ROCm hardware before marking passed.",
+    "tolerances": {
+      "default_max_abs_error": 0.05,
+      "default_max_rel_error": 0.02
+    }
+  },
+  "benchmarking": {
+    "status": "rocm-measurement-pending",
+    "operation": "rocwmma-hgemm-f32-accumulate",
+    "required_metrics": [
+      "median kernel duration",
+      "p10 kernel duration",
+      "p90 kernel duration",
+      "gflop_per_s",
+      "minimum_logical_gib_per_s",
+      "max_abs_error",
+      "max_rel_error",
+      "bad_count",
+      "evidence_label",
+      "result_class",
+      "arch_flags",
+      "library_baseline_metadata"
+    ],
+    "recommended_shapes": [
+      "M=16,N=16,K=16",
+      "M=128,N=128,K=128",
+      "M=256,N=256,K=256",
+      "M=512,N=128,K=256",
+      "M=128,N=512,K=256",
+      "M=256,N=256,K=240",
+      "M=1024,N=1024,K=1024",
+      "M=4096,N=4096,K=4096"
+    ]
+  },
+  "license": "Project seed example",
+  "curation": {
+    "status": "ported-seed",
+    "notes": "Ported from the CUDA corpus on 2026-05-20. CUDA-origin timing artifacts were removed; rerun on ROCm hardware before making performance claims."
+  }
+}

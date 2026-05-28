@@ -1,0 +1,431 @@
+{
+  "schema_version": "0.1.0",
+  "guide": "docs/V2_EXTENSION_PROMOTION_WAVE.md",
+  "status": "template-only-promotion-waves",
+  "mission": "Track v2 CASE_CATALOG rows that have been promoted from proposed backlog into concrete task scaffolds.",
+  "evidence_policy": {
+    "current_label": "template-only",
+    "timing_label": "timing-only-measured after HIP-event timing and correctness",
+    "counter_label": "counter-backed-measured only after Nsight report artifacts are attached",
+    "must_not_claim": [
+      "custom win without same-hardware library baseline",
+      "Nsight counter evidence without a report artifact",
+      "library comparison without matching dtype, layout, shape, and timing boundary"
+    ]
+  },
+  "tasks": [
+    {
+      "id": "paged-kv-cache-attention",
+      "family": "Transformer and ML fusion",
+      "path": "corpus/tasks/paged-kv-cache-attention/task.json",
+      "baselines": [
+        "vLLM on ROCm",
+        "vLLM",
+        "FlashInfer",
+        "FlashAttention"
+      ],
+      "first_evidence_target": "decode latency with page-table metadata",
+      "wave": "wave-1"
+    },
+    {
+      "id": "gqa-mqa-decode-attention",
+      "family": "Transformer and ML fusion",
+      "path": "corpus/tasks/gqa-mqa-decode-attention/task.json",
+      "baselines": [
+        "vLLM on ROCm",
+        "vLLM",
+        "FlashInfer",
+        "FlashAttention"
+      ],
+      "first_evidence_target": "grouped-head decode timing",
+      "wave": "wave-1"
+    },
+    {
+      "id": "varlen-packed-attention",
+      "family": "Transformer and ML fusion",
+      "path": "corpus/tasks/varlen-packed-attention/task.json",
+      "baselines": [
+        "FlashAttention varlen",
+        "MIOpen",
+        "FlashInfer",
+        "Triton"
+      ],
+      "first_evidence_target": "packed versus padded attention timing",
+      "wave": "wave-1"
+    },
+    {
+      "id": "fused-mlp-swiglu",
+      "family": "Transformer and ML fusion",
+      "path": "corpus/tasks/fused-mlp-swiglu/task.json",
+      "baselines": [
+        "hipBLASLt",
+        "Composable Kernel",
+        "vLLM on ROCm",
+        "Transformer Engine on ROCm",
+        "Triton"
+      ],
+      "first_evidence_target": "end-to-end MLP launch and intermediate-byte count",
+      "wave": "wave-1"
+    },
+    {
+      "id": "direct-convolution-2d",
+      "family": "Convolution and signal",
+      "path": "corpus/tasks/direct-convolution-2d/task.json",
+      "baselines": [
+        "MIOpen",
+        "Composable Kernel convolution"
+      ],
+      "first_evidence_target": "direct tiled convolution versus MIOpen",
+      "wave": "wave-1"
+    },
+    {
+      "id": "conv2d-fused-bias-activation",
+      "family": "Convolution and signal",
+      "path": "corpus/tasks/conv2d-fused-bias-activation/task.json",
+      "baselines": [
+        "MIOpen",
+        "MIGraphX",
+        "Composable Kernel convolution epilogues"
+      ],
+      "first_evidence_target": "fused epilogue versus staged post-op",
+      "wave": "wave-1"
+    },
+    {
+      "id": "radix-sort-key-value",
+      "family": "Sorting and grouping",
+      "path": "corpus/tasks/radix-sort-key-value/task.json",
+      "baselines": [
+        "hipCUB DeviceRadixSort",
+        "rocThrust sort_by_key"
+      ],
+      "first_evidence_target": "temp-storage-aware sort timing",
+      "wave": "wave-1"
+    },
+    {
+      "id": "top-p-nucleus-sampling",
+      "family": "Sorting and grouping",
+      "path": "corpus/tasks/top-p-nucleus-sampling/task.json",
+      "baselines": [
+        "vLLM on ROCm",
+        "vLLM",
+        "FlashInfer",
+        "hipCUB/rocThrust",
+        "PyTorch"
+      ],
+      "first_evidence_target": "logits-to-token sampling latency",
+      "wave": "wave-1"
+    },
+    {
+      "id": "fp8-cast-scale-amax",
+      "family": "Quantization and numeric formats",
+      "path": "corpus/tasks/fp8-cast-scale-amax/task.json",
+      "baselines": [
+        "Transformer Engine on ROCm",
+        "Composable Kernel",
+        "hipBLASLt"
+      ],
+      "first_evidence_target": "fused cast/scale/amax bandwidth",
+      "wave": "wave-1"
+    },
+    {
+      "id": "block-scaled-fp4-gemm",
+      "family": "Quantization and numeric formats",
+      "path": "corpus/tasks/block-scaled-fp4-gemm/task.json",
+      "baselines": [
+        "Transformer Engine on ROCm",
+        "Composable Kernel",
+        "hipBLASLt",
+        "MIGraphX"
+      ],
+      "first_evidence_target": "format-aware low-precision GEMM contract",
+      "wave": "wave-1"
+    },
+    {
+      "id": "int8-dot-mfma-gemm",
+      "family": "Quantization and numeric formats",
+      "path": "corpus/tasks/int8-dot-mfma-gemm/task.json",
+      "baselines": [
+        "hipBLASLt",
+        "Composable Kernel",
+        "MIGraphX",
+        "bitsandbytes"
+      ],
+      "first_evidence_target": "DP4A fallback versus library INT8 path",
+      "wave": "wave-1"
+    },
+    {
+      "id": "structured-sparsity-2to4",
+      "family": "Sparse and structured sparsity",
+      "path": "corpus/tasks/structured-sparsity-2to4/task.json",
+      "baselines": [
+        "cuSPARSELt when added",
+        "Composable Kernel sparse",
+        "MIGraphX",
+        "dense GEMM"
+      ],
+      "first_evidence_target": "2:4 metadata and sparse/dense comparison",
+      "wave": "wave-1"
+    },
+    {
+      "id": "ragged-grouped-gemm",
+      "family": "Matrix Core and Composable Kernel internals",
+      "path": "corpus/tasks/ragged-grouped-gemm/task.json",
+      "baselines": [
+        "hipBLASLt",
+        "Composable Kernel grouped GEMM",
+        "Triton",
+        "vLLM on ROCm"
+      ],
+      "first_evidence_target": "grouped scheduler versus looped GEMMs",
+      "wave": "wave-1"
+    },
+    {
+      "id": "composable-kernel-custom-epilogue",
+      "family": "Matrix Core and Composable Kernel internals",
+      "path": "corpus/tasks/composable-kernel-custom-epilogue/task.json",
+      "baselines": [
+        "Composable Kernel",
+        "hipBLASLt epilogues"
+      ],
+      "first_evidence_target": "custom visitor versus staged postprocessing",
+      "wave": "wave-1"
+    },
+    {
+      "id": "pytorch-inductor-generated-kernel",
+      "family": "Framework and compiler integration",
+      "path": "corpus/tasks/pytorch-inductor-generated-kernel/task.json",
+      "baselines": [
+        "PyTorch eager",
+        "torch.compile/Inductor",
+        "nvFuser",
+        "Triton"
+      ],
+      "first_evidence_target": "generated-kernel versus handwritten HIP boundary",
+      "wave": "wave-1"
+    },
+    {
+      "id": "rocprof-counter-roofline",
+      "family": "Tooling and evidence",
+      "path": "corpus/tasks/rocprof-counter-roofline/task.json",
+      "baselines": [
+        "rocprofiler/rocprof",
+        "Nsight Systems"
+      ],
+      "first_evidence_target": "counter-backed artifact template or blocked-counter label",
+      "wave": "wave-1"
+    },
+    {
+      "wave": "wave-2",
+      "id": "select-filter-compact",
+      "family": "Sorting and grouping",
+      "path": "corpus/tasks/select-filter-compact/task.json",
+      "baselines": [
+        "hipCUB DeviceSelect",
+        "hipCUB DevicePartition",
+        "rocThrust copy_if"
+      ],
+      "first_evidence_target": "density-aware compact timing"
+    },
+    {
+      "wave": "wave-2",
+      "id": "groupby-reduce-by-key",
+      "family": "Sorting and grouping",
+      "path": "corpus/tasks/groupby-reduce-by-key/task.json",
+      "baselines": [
+        "hipCUB/rocPRIM/hipCUB/rocThrust reduce-by-key",
+        "rocThrust reduce_by_key",
+        "sort plus segmented reduce"
+      ],
+      "first_evidence_target": "skew-aware grouped aggregation timing"
+    },
+    {
+      "wave": "wave-2",
+      "id": "unique-run-length-encode",
+      "family": "Sorting and grouping",
+      "path": "corpus/tasks/unique-run-length-encode/task.json",
+      "baselines": [
+        "hipCUB DeviceRunLengthEncode",
+        "rocThrust unique",
+        "rocThrust reduce_by_key"
+      ],
+      "first_evidence_target": "run-length distribution timing"
+    },
+    {
+      "wave": "wave-2",
+      "id": "sddmm-sparse-attention-score",
+      "family": "Sparse and structured sparsity",
+      "path": "corpus/tasks/sddmm-sparse-attention-score/task.json",
+      "baselines": [
+        "cuSPARSE where applicable",
+        "Composable Kernel sparse",
+        "dense masked attention"
+      ],
+      "first_evidence_target": "sampled score construction timing"
+    },
+    {
+      "wave": "wave-2",
+      "id": "spgemm-merge-hash",
+      "family": "Sparse and structured sparsity",
+      "path": "corpus/tasks/spgemm-merge-hash/task.json",
+      "baselines": [
+        "cuSPARSE SpGEMM",
+        "custom merge path",
+        "custom hash path"
+      ],
+      "first_evidence_target": "symbolic plus numeric SpGEMM timing"
+    },
+    {
+      "wave": "wave-2",
+      "id": "sparse-format-conversion",
+      "family": "Sparse and structured sparsity",
+      "path": "corpus/tasks/sparse-format-conversion/task.json",
+      "baselines": [
+        "cuSPARSE conversion APIs",
+        "hipCUB sort/scan",
+        "rocThrust sort/scan"
+      ],
+      "first_evidence_target": "COO/CSR/BSR conversion timing"
+    },
+    {
+      "wave": "wave-2",
+      "id": "reduce-scatter-overlap",
+      "family": "Multi-GPU and runtime systems",
+      "path": "corpus/tasks/reduce-scatter-overlap/task.json",
+      "baselines": [
+        "RCCL ReduceScatter",
+        "framework distributed collectives"
+      ],
+      "first_evidence_target": "phase-separated versus overlapped timeline"
+    },
+    {
+      "wave": "wave-2",
+      "id": "allgather-overlap",
+      "family": "Multi-GPU and runtime systems",
+      "path": "corpus/tasks/allgather-overlap/task.json",
+      "baselines": [
+        "RCCL AllGather",
+        "framework distributed collectives"
+      ],
+      "first_evidence_target": "pipelined shard-consume timeline"
+    },
+    {
+      "wave": "wave-2",
+      "id": "alltoall-moe-exchange",
+      "family": "Multi-GPU and runtime systems",
+      "path": "corpus/tasks/alltoall-moe-exchange/task.json",
+      "baselines": [
+        "RCCL send/recv or all-to-all equivalent",
+        "rocSHMEM",
+        "Megatron-like references"
+      ],
+      "first_evidence_target": "MoE exchange with permutation costs"
+    },
+    {
+      "wave": "wave-2",
+      "id": "rocm-sanitizer-racecheck",
+      "family": "Tooling and evidence",
+      "path": "corpus/tasks/rocm-sanitizer-racecheck/task.json",
+      "baselines": [
+        "rocm-sanitizer racecheck",
+        "rocm-sanitizer initcheck",
+        "rocm-sanitizer synccheck"
+      ],
+      "first_evidence_target": "sanitizer log artifact contract"
+    },
+    {
+      "wave": "wave-2",
+      "id": "amdisa-diff-regression",
+      "family": "Tooling and evidence",
+      "path": "corpus/tasks/amdisa-diff-regression/task.json",
+      "baselines": [
+        "amdclang++ logs",
+        "cuobjdump",
+        "nvdisasm",
+        "rocprofiler/rocprof summaries"
+      ],
+      "first_evidence_target": "register/spill/instruction diff artifact"
+    },
+    {
+      "wave": "wave-2",
+      "id": "autotune-parameter-sweep",
+      "family": "Tooling and evidence",
+      "path": "corpus/tasks/autotune-parameter-sweep/task.json",
+      "baselines": [
+        "rocprofiler-sdk examples or Google Benchmark",
+        "Composable Kernel profiler",
+        "Triton autotune"
+      ],
+      "first_evidence_target": "reproducible sweep plus holdout result"
+    },
+    {
+      "wave": "wave-2",
+      "id": "gfx90a-gfx942-cdna-split",
+      "family": "Architecture-specific extension paths",
+      "path": "corpus/tasks/gfx90a-gfx942-cdna-split/task.json",
+      "baselines": [
+        "CDNA2 tuning guide",
+        "hipBLASLt",
+        "Composable Kernel",
+        "MIGraphX"
+      ],
+      "first_evidence_target": "same-task gfx90a versus gfx1030 comparison"
+    },
+    {
+      "wave": "wave-2",
+      "id": "gfx942-cdna3-mfma-lab",
+      "family": "Architecture-specific extension paths",
+      "path": "corpus/tasks/gfx942-cdna3-mfma-lab/task.json",
+      "baselines": [
+        "CDNA3 tuning guide",
+        "Composable Kernel/CK Tile",
+        "hipBLASLt",
+        "MIGraphX"
+      ],
+      "first_evidence_target": "gfx942 versus gfx950 WGMFMA/global-to-LDS staging boundary"
+    }
+  ],
+  "waves": [
+    {
+      "id": "wave-1",
+      "status": "template-only",
+      "task_ids": [
+        "paged-kv-cache-attention",
+        "gqa-mqa-decode-attention",
+        "varlen-packed-attention",
+        "fused-mlp-swiglu",
+        "direct-convolution-2d",
+        "conv2d-fused-bias-activation",
+        "radix-sort-key-value",
+        "top-p-nucleus-sampling",
+        "fp8-cast-scale-amax",
+        "block-scaled-fp4-gemm",
+        "int8-dot-mfma-gemm",
+        "structured-sparsity-2to4",
+        "ragged-grouped-gemm",
+        "composable-kernel-custom-epilogue",
+        "pytorch-inductor-generated-kernel",
+        "rocprof-counter-roofline"
+      ]
+    },
+    {
+      "id": "wave-2",
+      "status": "template-only",
+      "task_ids": [
+        "select-filter-compact",
+        "groupby-reduce-by-key",
+        "unique-run-length-encode",
+        "sddmm-sparse-attention-score",
+        "spgemm-merge-hash",
+        "sparse-format-conversion",
+        "reduce-scatter-overlap",
+        "allgather-overlap",
+        "alltoall-moe-exchange",
+        "rocm-sanitizer-racecheck",
+        "amdisa-diff-regression",
+        "autotune-parameter-sweep",
+        "gfx90a-gfx942-cdna-split",
+        "gfx942-cdna3-mfma-lab"
+      ]
+    }
+  ]
+}

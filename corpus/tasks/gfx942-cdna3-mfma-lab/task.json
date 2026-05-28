@@ -1,0 +1,80 @@
+{
+  "schema_version": "0.1.0",
+  "id": "gfx942-cdna3-mfma-lab",
+  "title": "SM90A CDNA3 WGMFMA global-to-LDS staging Lab",
+  "domain": "architecture-lab",
+  "language": "architecture-workflow",
+  "tags": [
+    "hopper",
+    "sm90",
+    "sm90a",
+    "wgmma",
+    "tma",
+    "clusters",
+    "architecture",
+    "template-only"
+  ],
+  "source_refs": [
+    "amd-cdna3-tuning-guide",
+    "amd-rocm-gpu-support",
+    "rocm-composable-kernel",
+    "amd-hipblaslt-rocblas-docs",
+    "amd-rocm-programming-guide"
+  ],
+  "problem": {
+    "summary": "Document CDNA3-specific WGMFMA, global-to-LDS staging, cluster, and gfx942 versus gfx950 portability boundaries with Composable Kernel/cuTe and library baselines.",
+    "inputs": [
+      "CDNA3 GPU",
+      "gfx942 and gfx950 builds",
+      "Composable Kernel/CK Tile examples",
+      "library baselines",
+      "profile commands"
+    ],
+    "outputs": [
+      "CDNA3 architecture lab record",
+      "compile results",
+      "timing/profile artifacts",
+      "portability notes"
+    ],
+    "constraints": [
+      "Template-only; gfx950 features must not be claimed portable to gfx942",
+      "Record ROCm toolkit and Composable Kernel version",
+      "Keep compile-only, timing-only, and counter-backed evidence separate"
+    ]
+  },
+  "artifacts": {
+    "baseline": "source/baseline_plan.md",
+    "optimized": "source/optimized_plan.md",
+    "harness": "source/evidence_checklist.md"
+  },
+  "verification": {
+    "status": "template-only",
+    "method": "Attach this workflow to a task-specific correctness harness or compile/profile artifact before claiming evidence.",
+    "tolerances": {}
+  },
+  "benchmarking": {
+    "status": "template-only",
+    "operation": "gfx942-cdna3-mfma-lab",
+    "required_metrics": [
+      "gpu model",
+      "arch flags",
+      "gfx942 vs gfx950",
+      "WGMFMA used",
+      "global-to-LDS staging used",
+      "cluster dims",
+      "median latency",
+      "library algorithm",
+      "profile status"
+    ],
+    "recommended_shapes": [
+      "CDNA3 GEMM",
+      "global-to-LDS staging tiled copy",
+      "attention-like tile"
+    ]
+  },
+  "license": "Project seed example",
+  "curation": {
+    "status": "template-only",
+    "notes": "Promoted from the v2 extension backlog as wave 2. No performance, correctness, or profiler evidence is claimed yet."
+  }
+}

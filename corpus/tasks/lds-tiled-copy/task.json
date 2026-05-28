@@ -1,0 +1,70 @@
+{
+  "schema_version": "0.1.0",
+  "id": "lds-tiled-copy",
+  "title": "global-to-LDS staging Tiled Copy Scaffold",
+  "domain": "memory-tiling",
+  "language": "hip-cpp",
+  "tags": [
+    "global-to-LDS staging",
+    "shared-memory",
+    "tiling",
+    "ampere",
+    "template-only",
+    "todo"
+  ],
+  "source_refs": [
+    "amd-hip-programming-guide",
+    "amd-gcn-isa",
+    "rocm-composable-kernel",
+    "amd-rocm-programming-guide"
+  ],
+  "problem": {
+    "summary": "Compare a direct global-memory tile transform against a shared-memory tiled path intended for global-to-LDS staging replacement on gfx90a+.",
+    "inputs": [
+      "float* input",
+      "float* output",
+      "int rows",
+      "int cols"
+    ],
+    "outputs": [
+      "output contains a copied or lightly transformed row-major matrix"
+    ],
+    "constraints": [
+      "Actual global-to-LDS staging inline LLVM IR / AMD GCN ISA or libcudacxx path is TODO",
+      "Record sm target and fallback path",
+      "Do not claim async-copy benefit without profiler or timing evidence"
+    ]
+  },
+  "artifacts": {
+    "baseline": "source/baseline.hip",
+    "optimized": "source/optimized.hip"
+  },
+  "verification": {
+    "status": "template-only",
+    "method": "Compare copied output against input for all elements.",
+    "tolerances": {
+      "max_abs_error": 0.0
+    }
+  },
+  "benchmarking": {
+    "status": "template-only",
+    "operation": "tiled-copy-staging",
+    "required_metrics": [
+      "median kernel duration",
+      "effective bandwidth",
+      "sm target",
+      "pipeline stages",
+      "hardware_metadata"
+    ],
+    "recommended_shapes": [
+      "4096x4096",
+      "8192x8192",
+      "4096x1024"
+    ]
+  },
+  "license": "Project seed example",
+  "curation": {
+    "status": "template-only",
+    "notes": "The optimized source is a safe shared-memory staging placeholder with TODO markers for global-to-LDS staging groups and waits."
+  }
+}

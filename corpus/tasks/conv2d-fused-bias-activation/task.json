@@ -1,0 +1,74 @@
+{
+  "schema_version": "0.1.0",
+  "id": "conv2d-fused-bias-activation",
+  "title": "Fused Conv2D Bias Activation",
+  "domain": "convolution",
+  "language": "hip-cpp",
+  "tags": [
+    "convolution",
+    "bias",
+    "activation",
+    "miopen-frontend",
+    "migraphx",
+    "template-only"
+  ],
+  "source_refs": [
+    "amd-miopen-docs",
+    "amd-miopen",
+    "amd-migraphx-docs",
+    "rocm-composable-kernel"
+  ],
+  "problem": {
+    "summary": "Represent the inference boundary where convolution output, bias, activation, and optional quantization can be fused or delegated to MIOpen/MIGraphX plans.",
+    "inputs": [
+      "conv input",
+      "weights",
+      "bias",
+      "activation kind",
+      "optional output scale"
+    ],
+    "outputs": [
+      "activated convolution output"
+    ],
+    "constraints": [
+      "Template-only; distinguish custom direct conv fusion from MIOpen or MIGraphX tactic fusion",
+      "Record activation approximation and output dtype",
+      "No engine-level win without matching MIGraphX build/runtime evidence"
+    ]
+  },
+  "artifacts": {
+    "baseline": "source/baseline.hip",
+    "optimized": "source/optimized.hip",
+    "harness": "source/harness_plan.md"
+  },
+  "verification": {
+    "status": "template-only",
+    "method": "Implement the baseline, optimized candidate, and CPU or library oracle; compare all outputs across edge cases before timing claims.",
+    "tolerances": {
+      "max_abs_error": 0.0001,
+      "max_rel_error": 0.0001
+    }
+  },
+  "benchmarking": {
+    "status": "template-only",
+    "operation": "conv2d-fused-bias-activation",
+    "required_metrics": [
+      "end-to-end latency",
+      "intermediate bytes",
+      "activation kind",
+      "MIOpen/MIGraphX plan",
+      "workspace bytes",
+      "correctness max error"
+    ],
+    "recommended_shapes": [
+      "N=1 C=64 H=W=56 K=64 R=S=3 relu",
+      "N=32 C=128 H=W=28 K=256 R=S=3 silu",
+      "N=1 C=256 H=W=14 K=256 R=S=1 gelu"
+    ]
+  },
+  "license": "Project seed example",
+  "curation": {
+    "status": "template-only",
+    "notes": "Promoted from the v2 extension backlog as a template-only task. No performance, correctness, or profiler evidence is claimed yet."
+  }
+}

@@ -1,0 +1,109 @@
+{
+  "schema_version": "0.1.0",
+  "id": "wide-k-topk-selection",
+  "title": "Wide-K Top-K Selection",
+  "domain": "selection-sampling",
+  "language": "hip-cpp",
+  "tags": [
+    "cub",
+    "flashinfer",
+    "radix-select",
+    "rocm-parity",
+    "selection",
+    "sort",
+    "template-only",
+    "top-k",
+    "wide-k"
+  ],
+  "source_refs": [
+    "rocm-rocprim",
+    "rocm-rocprim-docs",
+    "flashinfer",
+    "pytorch",
+    "vllm",
+    "oneflow",
+    "transformer-engine",
+    "rocm-composable-kernel"
+  ],
+  "problem": {
+    "summary": "Cover Top-K selection across a wide range of k values, from argmax and tiny-k decode paths through medium-k reranking and large-k/full-sort boundaries. This task separates wide-k selection from the existing k<=8 fused sampling seed.",
+    "inputs": [
+      "float or half logits/score matrix shaped [rows, vocab_or_segment]",
+      "int rows",
+      "int vocab_or_segment_length",
+      "int k, including k=1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, and k close to n",
+      "sorted or unsorted output contract",
+      "optional masks or ragged segment offsets"
+    ],
+    "outputs": [
+      "top-k values shaped [rows, k]",
+      "top-k indices shaped [rows, k]",
+      "optional selected-count or threshold metadata for partition/radix paths"
+    ],
+    "constraints": [
+      "Template-only; no timing or correctness evidence is claimed until a CUDA harness and result artifacts are attached",
+      "Do not reuse the block-topk-sampling k<=8 fused-sampling result as a wide-k claim",
+      "Record sortedness, tie policy, NaN policy, mask policy, k/n ratio, output materialization, temporary storage, and allocation timing boundary",
+      "Compare against hipCUB DeviceTopK for unsorted membership, hipCUB DeviceRadixSort or rocThrust sort for sorted/full-sort contracts, PyTorch torch.topk for framework baseline, and FlashInfer/vLLM/vLLM on ROCm where the operation is sampling-facing",
+      "For k above 32, justify why the candidate is a network/list/heap, two-pass block candidate, radix-select, threshold-partition, or full-sort path"
+    ]
+  },
+  "artifacts": {
+    "baseline": "source/baseline.hip",
+    "optimized": "source/optimized.hip",
+    "harness": "source/harness_plan.md",
+    "benchmark_blueprint": "../../../docs/TOPK_BASELINE_HARNESS_BLUEPRINT.md",
+    "profiles": [],
+    "results": []
+  },
+  "verification": {
+    "status": "template-only",
+    "method": "Use a CPU stable sorted reference and at least one library oracle. Check exact values/indices for deterministic contracts, top-k set membership for unsorted contracts, and boundary ties around the kth element.",
+    "tolerances": {
+      "max_value_abs_error": 0.0001,
+      "topk_index_mismatch_count": 0
+    }
+  },
+  "benchmarking": {
+    "status": "template-only",
+    "operation": "wide-k-topk-selection",
+    "required_metrics": [
+      "median latency",
+      "p10 and p90 latency",
+      "rows",
+      "vocab_or_segment_length",
+      "k",
+      "k_over_n",
+      "sorted_output_contract",
+      "tie_policy",
+      "temporary_storage_bytes",
+      "allocation_included",
+      "kernel_launch_count",
+      "registers_per_thread",
+      "static_shared_memory",
+      "dynamic_shared_memory",
+      "correctness hash",
+      "baseline versions"
+    ],
+    "recommended_shapes": [
+      "rows=4096 n=32000 k=1 sorted=false",
+      "rows=1024 n=32768 k=4 sorted=true",
+      "rows=1024 n=32768 k=8 sorted=true",
+      "rows=512 n=32768 k=16 sorted=true",
+      "rows=256 n=32768 k=32 sorted=true",
+      "rows=256 n=65536 k=64 sorted=true",
+      "rows=128 n=65536 k=128 sorted=true",
+      "rows=64 n=131072 k=256 sorted=true",
+      "rows=32 n=131072 k=512 sorted=true",
+      "rows=16 n=131072 k=1024 sorted=true",
+      "rows=16 n=32768 k=8192 sorted=true",
+      "rows=128 n=1009 k=32 sorted=true",
+      "ragged rows=4096 n_min=1 n_max=65536 k=1..128"
+    ]
+  },
+  "license": "Project seed example",
+  "curation": {
+    "status": "template-only",
+    "notes": "ROCm parity port from CUDA task `wide-k-topk-selection`. This is a template/harness scaffold only; CUDA-origin result artifacts were intentionally not copied, and no ROCm timing, correctness, or profiler-counter evidence is claimed yet. Run on AMD hardware, attach ROCm version, hipcc flags, gfx target, and label HIP-event-only results as timing-only."
+  }
+}

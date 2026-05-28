@@ -1,0 +1,63 @@
+{
+  "schema_version": "0.1.0",
+  "id": "block-reduction-sum",
+  "title": "Block Reduction Sum",
+  "domain": "reduction",
+  "language": "hip-cpp",
+  "tags": [
+    "reduction",
+    "atomic-contention",
+    "shared-memory",
+    "block-reduction"
+  ],
+  "source_refs": [
+    "amd-rocm-programming-guide",
+    "rocm-rocprim"
+  ],
+  "problem": {
+    "summary": "Sum an array of floats into one scalar. The baseline atomically adds every element to one global output. The optimized version reduces within each block and performs one atomic add per block.",
+    "inputs": [
+      "float* input",
+      "float* output",
+      "int n"
+    ],
+    "outputs": [
+      "output[0] contains the sum of input values"
+    ],
+    "constraints": [
+      "floating-point addition order may differ",
+      "input values in the seed harness are chosen for stable correctness checks"
+    ]
+  },
+  "artifacts": {
+    "baseline": "source/baseline.hip",
+    "optimized": "source/optimized.hip"
+  },
+  "verification": {
+    "status": "port-pending-rocm-run",
+    "method": "Compare against CPU reference with absolute tolerance appropriate for input range. Ported from the CUDA corpus; rerun on ROCm hardware before marking passed.",
+    "tolerances": {
+      "max_abs_error": 0.5
+    }
+  },
+  "benchmarking": {
+    "status": "rocm-measurement-pending",
+    "operation": "sum",
+    "required_metrics": [
+      "median kernel duration",
+      "speedup over per-element atomic baseline",
+      "absolute error"
+    ],
+    "recommended_shapes": [
+      "16777216",
+      "16777219",
+      "1048576",
+      "65539"
+    ]
+  },
+  "license": "Project seed example",
+  "curation": {
+    "status": "ported-seed",
+    "notes": "Ported from the CUDA corpus on 2026-05-20. CUDA-origin timing artifacts were removed; rerun on ROCm hardware before making performance claims."
+  }
+}

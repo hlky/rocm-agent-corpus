@@ -1,0 +1,79 @@
+{
+  "schema_version": "0.1.0",
+  "id": "block-scaled-fp4-gemm",
+  "title": "Block Scaled FP4 GEMM Scaffold",
+  "domain": "quantized-gemm",
+  "language": "hip-cpp",
+  "tags": [
+    "fp4",
+    "nvfp4",
+    "block-scale",
+    "gemm",
+    "blackwell",
+    "template-only"
+  ],
+  "source_refs": [
+    "transformer-engine",
+    "rocm-composable-kernel",
+    "amd-hipblaslt-rocblas-docs",
+    "amd-migraphx-docs",
+    "amd-cdna4-tuning-guide"
+  ],
+  "problem": {
+    "summary": "Define the low-precision block-scaled FP4/NVFP4 GEMM task boundary, including packing, scale metadata, accumulator, and architecture feature checks.",
+    "inputs": [
+      "packed FP4 A/B",
+      "block scales",
+      "M/N/K",
+      "scale block shape",
+      "output dtype"
+    ],
+    "outputs": [
+      "GEMM output with requested accumulator/output policy"
+    ],
+    "constraints": [
+      "Template-only; verify exact format and CUDA/Composable Kernel/Transformer Engine on ROCm support before compiling",
+      "Record scale block shape and packing order",
+      "Do not claim CDNA4/RDNA4-specific behavior on non-CDNA4/RDNA4 hardware"
+    ]
+  },
+  "artifacts": {
+    "baseline": "source/baseline.hip",
+    "optimized": "source/optimized.hip",
+    "harness": "source/harness_plan.md"
+  },
+  "verification": {
+    "status": "template-only",
+    "method": "Implement CPU and strongest-library references, then compare outputs before timing claims.",
+    "tolerances": {
+      "max_abs_error": 0.0001,
+      "max_rel_error": 0.0001
+    }
+  },
+  "benchmarking": {
+    "status": "template-only",
+    "operation": "block-scaled-fp4-gemm",
+    "required_metrics": [
+      "median latency",
+      "M",
+      "N",
+      "K",
+      "FP4 format",
+      "scale block shape",
+      "accumulator dtype",
+      "arch flags",
+      "library algorithm",
+      "correctness tolerance"
+    ],
+    "recommended_shapes": [
+      "M=128 N=4096 K=4096",
+      "M=4096 N=4096 K=4096",
+      "M=4096 N=11008 K=4096"
+    ]
+  },
+  "license": "Project seed example",
+  "curation": {
+    "status": "template-only",
+    "notes": "Promoted from the v2 extension backlog as a template-only task. No performance, correctness, or profiler evidence is claimed yet."
+  }
+}

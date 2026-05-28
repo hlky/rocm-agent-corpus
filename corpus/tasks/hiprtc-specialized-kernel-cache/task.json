@@ -1,0 +1,68 @@
+{
+  "schema_version": "0.1.0",
+  "id": "hiprtc-specialized-kernel-cache",
+  "title": "hipRTC Specialized Kernel Cache Scaffold",
+  "domain": "runtime-compilation",
+  "language": "hip-cpp",
+  "tags": [
+    "hiprtc",
+    "jit",
+    "specialization",
+    "kernel-cache",
+    "template-only",
+    "todo"
+  ],
+  "source_refs": [
+    "amd-hip-programming-guide",
+    "amd-rocm-programming-guide"
+  ],
+  "problem": {
+    "summary": "Compare a generic runtime kernel path against a shape-specialized hipRTC/nvJitLink cache design. Source files are concise notes-style C++ scaffolds and do not claim measured compile or run times.",
+    "inputs": [
+      "kernel key: dtype, shape, architecture, flags",
+      "float* input",
+      "float* output",
+      "int n"
+    ],
+    "outputs": [
+      "output produced by a cached specialized kernel when available"
+    ],
+    "constraints": [
+      "Cache key must include architecture and compilation options",
+      "Measure compile latency separately from steady-state launch latency",
+      "Keep generic fallback for cache miss or compile failure"
+    ]
+  },
+  "artifacts": {
+    "baseline": "source/baseline.cpp",
+    "optimized": "source/optimized.cpp"
+  },
+  "verification": {
+    "status": "template-only",
+    "method": "Run the generic and specialized kernels on identical inputs and compare outputs.",
+    "tolerances": {
+      "max_abs_error": 1e-06
+    }
+  },
+  "benchmarking": {
+    "status": "template-only",
+    "operation": "runtime-specialized-elementwise-kernel",
+    "required_metrics": [
+      "compile latency",
+      "cache hit rate",
+      "steady-state launch latency",
+      "kernel median duration",
+      "cache key metadata"
+    ],
+    "recommended_shapes": [
+      "n=1024",
+      "n=1048576",
+      "n fixed at production shape"
+    ]
+  },
+  "license": "Project seed example",
+  "curation": {
+    "status": "template-only",
+    "notes": "This is a planning scaffold for hipRTC/nvJitLink specialization. Future records must separate JIT overhead from cached execution."
+  }
+}

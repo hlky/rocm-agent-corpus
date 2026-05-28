@@ -1,0 +1,64 @@
+{
+  "schema_version": "0.1.0",
+  "id": "shared-memory-tiled-transpose",
+  "title": "Shared-Memory Tiled Matrix Transpose",
+  "domain": "memory",
+  "language": "hip-cpp",
+  "tags": [
+    "shared-memory",
+    "tiling",
+    "coalescing",
+    "bank-conflict"
+  ],
+  "source_refs": [
+    "amd-rocm-programming-guide",
+    "amd-hip-programming-guide",
+    "amd-rocprofiler-docs"
+  ],
+  "problem": {
+    "summary": "Transpose a row-major matrix. The baseline reads coalesced but writes with a stride. The optimized version stages tiles in shared memory and pads the shared tile to reduce bank conflicts.",
+    "inputs": [
+      "float* input",
+      "float* output",
+      "int rows",
+      "int cols"
+    ],
+    "outputs": [
+      "output[col * rows + row] equals input[row * cols + col]"
+    ],
+    "constraints": [
+      "rows and cols may not be multiples of tile dimensions",
+      "input and output do not alias"
+    ]
+  },
+  "artifacts": {
+    "baseline": "source/baseline.hip",
+    "optimized": "source/optimized.hip"
+  },
+  "verification": {
+    "status": "port-pending-rocm-run",
+    "method": "Compare output against CPU transpose for square and rectangular matrices. Ported from the CUDA corpus; rerun on ROCm hardware before marking passed.",
+    "tolerances": {}
+  },
+  "benchmarking": {
+    "status": "rocm-measurement-pending",
+    "operation": "transpose",
+    "required_metrics": [
+      "median kernel duration",
+      "global load/store sectors per request",
+      "shared memory bank conflict counters",
+      "effective memory bandwidth"
+    ],
+    "recommended_shapes": [
+      "4096x4096",
+      "8192x1024",
+      "1024x8192",
+      "1009x2039"
+    ]
+  },
+  "license": "Project seed example",
+  "curation": {
+    "status": "ported-seed",
+    "notes": "Ported from the CUDA corpus on 2026-05-20. CUDA-origin timing artifacts were removed; rerun on ROCm hardware before making performance claims."
+  }
+}

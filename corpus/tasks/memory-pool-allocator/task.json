@@ -1,0 +1,82 @@
+{
+  "schema_version": "0.1.0",
+  "id": "memory-pool-allocator",
+  "title": "HIP Memory Pool Allocator",
+  "domain": "system",
+  "language": "hip-cpp",
+  "tags": [
+    "allocator",
+    "fragmentation",
+    "harness-ready",
+    "hipmalloc",
+    "hipmallocasync",
+    "memory-pool",
+    "reuse",
+    "rocm-parity",
+    "scratch-buffer",
+    "template-only"
+  ],
+  "source_refs": [
+    "amd-hip-programming-guide",
+    "amd-rocm-docs",
+    "rocm-examples",
+    "pytorch",
+    "oneflow"
+  ],
+  "problem": {
+    "summary": "Measure device allocation overhead, stream-ordered reuse, and scratch-buffer behavior for repeated workloads. The baseline uses per-iteration hipMalloc/hipFree or framework allocator behavior; the optimized path uses hipMallocAsync, explicit memory pools, or a custom scratch allocator with stable reuse.",
+    "inputs": [
+      "allocation size distribution",
+      "iteration count",
+      "stream count",
+      "reuse pattern",
+      "optional graph-capture mode"
+    ],
+    "outputs": [
+      "allocated device buffers for a synthetic or real workload",
+      "allocator timing and reuse statistics"
+    ],
+    "constraints": [
+      "Harness-ready; no ROCm timing or profiler evidence is claimed until a HIP run writes result artifacts",
+      "Record whether timing includes allocation calls, kernel work, synchronization, graph capture, and pool warmup",
+      "Baselines should include hipMalloc/hipFree, hipMallocAsync/hipFreeAsync with default and explicit pools when supported, and relevant framework caching allocator behavior when used",
+      "A custom allocator must document ownership, stream ordering, alignment, maximum live bytes, fragmentation behavior, and failure mode"
+    ]
+  },
+  "artifacts": {
+    "baseline": "source/baseline.hip",
+    "optimized": "source/optimized.hip",
+    "harness": "../../../harnesses/memory_pool_allocator_benchmark.hip",
+    "profiles": [],
+    "results": []
+  },
+  "verification": {
+    "status": "template-only",
+    "method": "The harness allocates scratch buffers, launches a sentinel touch kernel, accumulates a device checksum, and synchronizes streams before comparing checksum against zero.",
+    "tolerances": {}
+  },
+  "benchmarking": {
+    "status": "template-only",
+    "operation": "memory-pool-allocator",
+    "required_metrics": [
+      "median allocation latency",
+      "median end-to-end iteration latency",
+      "pool warmup policy",
+      "peak live bytes",
+      "reserved bytes",
+      "reuse hit rate",
+      "stream count",
+      "synchronization boundary"
+    ],
+    "recommended_shapes": [
+      "allocation_bytes=4096 streams=1 allocations_per_stream=32",
+      "allocation_bytes=65536 streams=1 allocations_per_stream=16",
+      "allocation_bytes=1048576 streams=4 allocations_per_stream=4"
+    ]
+  },
+  "license": "Project seed example",
+  "curation": {
+    "status": "template-only",
+    "notes": "ROCm parity port from CUDA task `memory-pool-allocator`. This is a template/harness scaffold only; CUDA-origin result artifacts were intentionally not copied, and no ROCm timing, correctness, or profiler-counter evidence is claimed yet. Run on AMD hardware, attach ROCm version, hipcc flags, gfx target, and label HIP-event-only results as timing-only."
+  }
+}

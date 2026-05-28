@@ -1,0 +1,622 @@
+{
+  "schema_version": "0.1.0",
+  "index_id": "quantization-library-baselines",
+  "guide": "docs/QUANTIZATION_LIBRARY_BASELINES.md",
+  "task_id": "fused-int4-dequant-gemv",
+  "status": "guidance-only-no-gpu",
+  "mission": "Define fair and partial library baseline guidance for fused INT4 dequant GEMV so agents compare custom kernels against materialized dequant, bitsandbytes, Composable Kernel/CK Tile, hipBLASLt, MIGraphX, vLLM on ROCm, Transformer Engine on ROCm, Triton, and framework-generated paths without changing the quantization contract silently.",
+  "seed_contract": {
+    "operation": "GEMV",
+    "formula": "y[row] = sum_k x[k] * ((q4(row,k) - zero_point(row,group(k))) * scale(row,group(k)))",
+    "weights": {
+      "dtype_storage": "uint8",
+      "logical_dtype": "uint4 unsigned",
+      "shape": "[rows, ceil(cols / 2)]",
+      "layout": "row-major packed by K",
+      "packing_order": "even k in low nibble, odd k in high nibble",
+      "odd_cols_policy": "unused high nibble in final byte is ignored"
+    },
+    "groups": {
+      "group_index": "k / group_size",
+      "groups_per_row": "ceil(cols / group_size)",
+      "tail_policy": "final group may contain fewer than group_size K values"
+    },
+    "scales": {
+      "dtype": "fp32",
+      "shape": "[rows, ceil(cols / group_size)]",
+      "layout": "row-major by output row then contiguous K group",
+      "index": "row * groups_per_row + k / group_size"
+    },
+    "zero_points": {
+      "dtype_storage": "uint8",
+      "logical_dtype": "uint4 unsigned",
+      "shape": "[rows, ceil(cols / group_size)]",
+      "layout": "one metadata byte per output row and K group",
+      "semantic_value": "zero_points[index] & 0x0f",
+      "index": "row * groups_per_row + k / group_size"
+    },
+    "activation": {
+      "dtype": "fp32",
+      "shape": "[cols]"
+    },
+    "accumulator_dtype": "fp32 in CUDA seed; fp64 in CPU oracle before final fp32 cast",
+    "output_dtype": "fp32",
+    "tolerance": {
+      "max_abs_error": 0.005,
+      "max_rel_error": 0.0005,
+      "reference": "CPU oracle with fp64 accumulation and final fp32 output"
+    }
+  },
+  "fairness_gate": {
+    "must_match": [
+      "rows",
+      "cols",
+      "group_size",
+      "packing_order",
+      "odd_cols_policy",
+      "scale_layout",
+      "zero_point_layout",
+      "dequant_formula",
+      "accumulator_dtype",
+      "output_dtype",
+      "epilogue",
+      "tolerance",
+      "timing_boundary"
+    ],
+    "if_not_matched": "Use a partial, not-applicable, library-win-different-contract, negative-example, or correctness-fail label instead of a fair win label.",
+    "required_timing_boundary_fields": [
+      "timer_type",
+      "warmup_iterations",
+      "measured_iterations",
+      "synchronization",
+      "allocation_included",
+      "conversion_included",
+      "framework_dispatch_included",
+      "engine_build_included",
+      "graph_capture_included"
+    ]
+  },
+  "result_labels": [
+    {
+      "label": "custom-win-fair",
+      "meaning": "Custom kernel beats the closest direct library path under the same quantization, math, output, epilogue, tolerance, and timing contract."
+    },
+    {
+      "label": "custom-specialized-win-fair",
+      "meaning": "Custom kernel beats a fair library path for a narrower fixed shape, layout, epilogue, architecture, or runtime boundary."
+    },
+    {
+      "label": "near-match-fair",
+      "meaning": "Custom and library results are within measurement noise under the same contract."
+    },
+    {
+      "label": "library-win-fair",
+      "meaning": "Library path wins under the same contract; record why and what narrower custom specialization remains plausible."
+    },
+    {
+      "label": "partial-win-materialized-dequant-only",
+      "meaning": "Custom fused kernel beats dequantize-to-FP16-or-FP32 plus GEMV/GEMM, but a direct low-bit library competitor has not been measured."
+    },
+    {
+      "label": "partial-win-format-conversion",
+      "meaning": "Custom kernel beats a baseline that required changing quantization format, packing, scale layout, zero-point layout, or output dtype."
+    },
+    {
+      "label": "partial-win-framework-overhead-only",
+      "meaning": "Custom path wins only when framework dispatch, allocation, conversion, or extra launches are included in the compared baseline."
+    },
+    {
+      "label": "library-win-different-contract",
+      "meaning": "Library is faster, but its format or numerical contract differs from the seed contract."
+    },
+    {
+      "label": "not-applicable",
+      "meaning": "Library path cannot express the seed contract without material conversion or custom code."
+    },
+    {
+      "label": "negative-example",
+      "meaning": "Attempted baseline or custom path is slower, unsupported, or unhelpful, and the reason is recorded."
+    },
+    {
+      "label": "correctness-fail",
+      "meaning": "Timing result is invalid because output did not satisfy the declared tolerance."
+    }
+  ],
+  "baseline_order": [
+    "host-reference",
+    "materialized-dequant",
+    "custom-seed",
+    "bitsandbytes",
+    "composable-kernel-ck_tile",
+    "hipblaslt",
+    "migraphx",
+    "vllm-rocm",
+    "transformer-engine",
+    "triton",
+    "framework-generated"
+  ],
+  "baseline_families": [
+    {
+      "id": "materialized-dequant",
+      "role": "educational baseline and correctness-adjacent performance floor",
+      "applicability_to_seed": "direct but not strongest low-bit library baseline",
+      "fair_contract_requirements": [
+        "dequant kernel uses seed byte addressing and nibble order",
+        "zero point is one uint8 storage element per row/group and masked with 0x0f",
+        "scale is fp32 per row/group",
+        "temporary dtype and layout are recorded",
+        "downstream GEMV/GEMM layout and transpose are recorded",
+        "total timing includes dequantization plus GEMV/GEMM when claiming fused advantage"
+      ],
+      "required_records": [
+        "temporary_dtype",
+        "temporary_layout",
+        "temporary_bytes",
+        "dequant_kernel_ms",
+        "gemv_or_gemm_ms",
+        "total_ms",
+        "gemv_or_gemm_backend",
+        "allocation_included",
+        "conversion_included",
+        "tolerance"
+      ],
+      "fair_win_labels": [
+        "partial-win-materialized-dequant-only"
+      ],
+      "partial_win_labels": [
+        "partial-win-materialized-dequant-only",
+        "partial-win-framework-overhead-only"
+      ],
+      "local_references": [
+        "corpus/tasks/fused-int4-dequant-gemv/source/baseline.hip",
+        "harnesses/int4_dequant_gemv_benchmark.hip",
+        "docs/HIPBLAS_ROCBLAS_GUIDE.md"
+      ],
+      "notes": [
+        "A win here does not prove a library win because the fused kernel avoids a materialized temporary.",
+        "Use seed FP32 tolerance for FP32 temporary; define a separate tolerance for FP16 or BF16 temporary."
+      ]
+    },
+    {
+      "id": "bitsandbytes",
+      "role": "low-bit framework library competitor and format reference",
+      "applicability_to_seed": "usually partial because common bitsandbytes 4-bit paths use fp4 or nf4 codebooks plus absmax metadata rather than affine uint4 zero-points",
+      "fair_contract_requirements": [
+        "quant_type and codebook match the declared task contract",
+        "blocksize and metadata granularity match group_size or the difference is labeled",
+        "activation dtype and output dtype are recorded",
+        "weight orientation and transposed fast path are recorded",
+        "fallback path for non-multiple blocksize is recorded",
+        "bias and framework dispatch timing are recorded"
+      ],
+      "required_records": [
+        "bitsandbytes_version_or_commit",
+        "api",
+        "quant_type",
+        "blocksize",
+        "absmax_shape",
+        "codebook",
+        "compress_statistics",
+        "activation_dtype",
+        "output_dtype",
+        "weight_orientation",
+        "fallback_path",
+        "dispatch_included",
+        "tolerance"
+      ],
+      "fair_win_labels": [
+        "custom-win-fair",
+        "custom-specialized-win-fair",
+        "near-match-fair",
+        "library-win-fair"
+      ],
+      "partial_win_labels": [
+        "partial-win-format-conversion",
+        "partial-win-framework-overhead-only",
+        "library-win-different-contract",
+        "not-applicable"
+      ],
+      "local_references": [
+        "third_party/bitsandbytes/agents/api_surface.md",
+        "third_party/bitsandbytes/bitsandbytes/backends/cuda/ops.py",
+        "third_party/bitsandbytes/bitsandbytes/autograd/_functions.py"
+      ],
+      "notes": [
+        "For the seed affine uint4 task, do not treat nf4 or fp4 as exact int4 without documenting the format change.",
+        "The bitsandbytes gemv_4bit CUDA path returns the activation dtype, so FP32 seed output requires FP32 activation or a separate output contract."
+      ]
+    },
+    {
+      "id": "composable-kernel-ck_tile",
+      "role": "competitor and custom-kernel extension surface for low-bit GEMV/GEMM",
+      "applicability_to_seed": "direct only if the selected or modified path implements affine uint4 row/group scales and zero-points; otherwise reference or partial for int4, fp8, fp4, or block-scaled formats",
+      "fair_contract_requirements": [
+        "operand element types and signedness match",
+        "packing order matches seed byte/nibble order or a conversion is labeled",
+        "scale factor dtype and layout match seed row/group layout",
+        "zero-point support and layout match seed contract",
+        "accumulator and output dtype match",
+        "epilogue semantics match",
+        "tile, scheduler, stages, alignment, and architecture target are recorded"
+      ],
+      "required_records": [
+        "composable-kernel_commit",
+        "example_ancestor",
+        "target_sm",
+        "element_a",
+        "element_b",
+        "element_accumulator",
+        "element_output",
+        "layout_a",
+        "layout_b",
+        "scale_layout",
+        "zero_point_layout",
+        "cta_tile",
+        "warp_tile",
+        "instruction_tile",
+        "stages",
+        "scheduler",
+        "epilogue",
+        "workspace_bytes"
+      ],
+      "fair_win_labels": [
+        "custom-win-fair",
+        "custom-specialized-win-fair",
+        "near-match-fair",
+        "library-win-fair"
+      ],
+      "partial_win_labels": [
+        "partial-win-format-conversion",
+        "library-win-different-contract",
+        "negative-example"
+      ],
+      "local_references": [
+        "third_party/composable-kernel/examples/91_fp4_gemv/91_fp4_gemv.hip",
+        "third_party/composable-kernel/examples/94_ada_fp8_blockwise/ada_fp8_blockwise.hip",
+        "third_party/composable-kernel/examples/87_blackwell_geforce_gemm_blockwise",
+        "third_party/composable-kernel/examples/79_blackwell_geforce_gemm/79a_blackwell_geforce_nvfp4_bf16_gemm.hip",
+        "docs/COMPOSABLE_KERNEL_EXTENSION_GUIDE.md"
+      ],
+      "notes": [
+        "Stock block-scaled FP4 or FP8 examples are not exact affine uint4 GEMV seed baselines.",
+        "A modified Composable Kernel kernel still counts as custom-kernel work when the agent changes layout, iterator, epilogue, or scheduling."
+      ]
+    },
+    {
+      "id": "hipblaslt",
+      "role": "vendor GEMM baseline where dtype and scale contracts are expressible",
+      "applicability_to_seed": "usually materialized-dequant or different-contract for packed affine uint4 GEMV",
+      "fair_contract_requirements": [
+        "hipBLASLt supports the declared dtype and scale layout directly, or the comparison is labeled materialized/converted",
+        "matrix layouts, leading dimensions, and transpose flags are recorded",
+        "compute type, scale type, output type, epilogue, and TF32 policy match",
+        "workspace cap, heuristic count, and selected algorithm are recorded"
+      ],
+      "required_records": [
+        "hipblaslt_version",
+        "matmul_desc",
+        "matrix_layouts",
+        "transpose_flags",
+        "compute_type",
+        "scale_type",
+        "output_type",
+        "math_mode",
+        "tf32_policy",
+        "workspace_bytes",
+        "heuristic_count",
+        "selected_algorithm",
+        "epilogue_attributes",
+        "conversion_included"
+      ],
+      "fair_win_labels": [
+        "custom-win-fair",
+        "custom-specialized-win-fair",
+        "near-match-fair",
+        "library-win-fair"
+      ],
+      "partial_win_labels": [
+        "partial-win-materialized-dequant-only",
+        "partial-win-format-conversion",
+        "library-win-different-contract",
+        "not-applicable"
+      ],
+      "local_references": [
+        "docs/HIPBLAS_ROCBLAS_GUIDE.md",
+        "third_party/rocblas-examples",
+        "data/sources/core_resources.json"
+      ],
+      "notes": [
+        "Do not claim a fair hipBLASLt INT4 comparison if packed uint4 weights and row/group zero-points are first converted to another format.",
+        "hipBLASLt is still the right baseline for materialized dequant and for future INT8, FP8, or block-scaled matmul tasks where supported."
+      ]
+    },
+    {
+      "id": "migraphx",
+      "role": "deployment engine and plugin baseline",
+      "applicability_to_seed": "fair only through an engine or plugin that preserves the seed contract; otherwise deployment or converted-contract baseline",
+      "fair_contract_requirements": [
+        "engine or plugin consumes the same packed weights, scales, zero-points, and activation dtype",
+        "output dtype and tolerance match or are separately declared",
+        "plugin enqueue, engine layer timing, engine runtime, and end-to-end serving boundaries are separated",
+        "engine build time is not mixed with runtime unless explicitly studying build overhead"
+      ],
+      "required_records": [
+        "migraphx_version",
+        "model_or_layer_source",
+        "plugin_name",
+        "precision_flags",
+        "dynamic_profiles",
+        "timing_cache",
+        "workspace_bytes",
+        "engine_build_command",
+        "runtime_batch",
+        "runtime_shapes",
+        "packing_order",
+        "scale_layout",
+        "zero_point_layout",
+        "accumulator_dtype",
+        "output_dtype",
+        "timing_boundary"
+      ],
+      "fair_win_labels": [
+        "custom-win-fair",
+        "custom-specialized-win-fair",
+        "near-match-fair",
+        "library-win-fair"
+      ],
+      "partial_win_labels": [
+        "partial-win-format-conversion",
+        "partial-win-framework-overhead-only",
+        "library-win-different-contract",
+        "not-applicable"
+      ],
+      "local_references": [
+        "docs/MIGRAPHX_INFERENCE_GUIDE.md",
+        "third_party/migraphx",
+        "data/sources/core_resources.json"
+      ],
+      "notes": [
+        "A MIGraphX plugin wrapping the custom kernel is an integration baseline, not proof that a standalone library path exists.",
+        "Separate isolated kernel timing from engine or serving timing."
+      ]
+    },
+    {
+      "id": "vllm-rocm",
+      "role": "LLM inference engine, plugin, kernel, and serving baseline",
+      "applicability_to_seed": "fair when W4A16/AWQ/weight-only/plugin path matches seed affine uint4 group metadata; otherwise deployment or format-family baseline",
+      "fair_contract_requirements": [
+        "quantization algorithm, group size, zero-point policy, and packing order match",
+        "scale layout and activation scale layout are recorded",
+        "engine/plugin output dtype and tolerance match",
+        "batching, sequence lengths, KV-cache policy, and scheduler are recorded for serving metrics",
+        "engine build, checkpoint conversion, and runtime measurement are separated"
+      ],
+      "required_records": [
+        "migraphx_llm_version_or_commit",
+        "quantization_config",
+        "checkpoint_conversion_command",
+        "engine_build_command",
+        "plugin_or_kernel_path",
+        "qformat",
+        "group_size",
+        "has_zero_point",
+        "pre_quant_scale",
+        "packing_order",
+        "scale_layout",
+        "zero_point_layout",
+        "activation_scale_layout",
+        "accumulator_dtype",
+        "output_dtype",
+        "batching_policy",
+        "sequence_lengths",
+        "kv_cache_dtype",
+        "serving_metric"
+      ],
+      "fair_win_labels": [
+        "custom-win-fair",
+        "custom-specialized-win-fair",
+        "near-match-fair",
+        "library-win-fair"
+      ],
+      "partial_win_labels": [
+        "partial-win-format-conversion",
+        "partial-win-framework-overhead-only",
+        "library-win-different-contract",
+        "negative-example"
+      ],
+      "local_references": [
+        "third_party/vllm-rocm/examples/quantization/README.md",
+        "third_party/vllm-rocm/cpp/micro_benchmarks",
+        "third_party/vllm-rocm/cpp/migraphx_llm/plugins",
+        "docs/MIGRAPHX_INFERENCE_GUIDE.md"
+      ],
+      "notes": [
+        "vLLM on ROCm quantization formats such as int4_awq, int4_wo, w4a8_awq, fp8, and nvfp4 must not be treated as equivalent to the seed without explicit format metadata.",
+        "End-to-end tokens/sec or latency can be a valid deployment result but is not the same as an isolated GEMV kernel result."
+      ]
+    },
+    {
+      "id": "transformer-engine",
+      "role": "FP8, MXFP8, NVFP4, amax, and block-scaled transformer reference",
+      "applicability_to_seed": "not direct for affine uint4 GEMV; reference or different-contract baseline for FP8 and block-scaled tasks",
+      "fair_contract_requirements": [
+        "task is explicitly FP8, MXFP8, NVFP4, or block-scaled",
+        "recipe, scale layout, amax history, and scale update policy are recorded",
+        "activation and weight quantizers are recorded",
+        "accumulator, bias, and output dtype are recorded",
+        "framework autocast and quantizer update timing boundary is recorded"
+      ],
+      "required_records": [
+        "transformer_engine_version_or_commit",
+        "framework_binding",
+        "recipe",
+        "fp8_format",
+        "scale_layout",
+        "amax_history",
+        "scale_update_policy",
+        "activation_quantizer",
+        "weight_quantizer",
+        "accumulator_dtype",
+        "output_dtype",
+        "availability_check",
+        "timing_boundary"
+      ],
+      "fair_win_labels": [
+        "custom-win-fair",
+        "custom-specialized-win-fair",
+        "near-match-fair",
+        "library-win-fair"
+      ],
+      "partial_win_labels": [
+        "partial-win-format-conversion",
+        "library-win-different-contract",
+        "not-applicable"
+      ],
+      "local_references": [
+        "third_party/transformer-engine/README.rst",
+        "third_party/transformer-engine/benchmarks/linear/benchmark_linear.py",
+        "third_party/transformer-engine/benchmarks/linear/benchmark_grouped_linear.py"
+      ],
+      "notes": [
+        "For fused-int4-dequant-gemv, Transformer Engine on ROCm should usually be labeled not-applicable unless the task is reframed as FP8 or block-scaled.",
+        "Scale and amax behavior are part of the numerical contract, not incidental metadata."
+      ]
+    },
+    {
+      "id": "triton",
+      "role": "compiler-authored GPU kernel competitor",
+      "applicability_to_seed": "direct if the Triton kernel implements the exact seed contract",
+      "fair_contract_requirements": [
+        "same packed byte/nibble unpack",
+        "same row/group scale and zero-point indexing",
+        "same accumulator and output dtype",
+        "same tolerance",
+        "meta-parameters and dispatch boundary are recorded",
+        "generated LLVM IR / AMD GCN ISA claims are backed by inspected artifacts"
+      ],
+      "required_records": [
+        "triton_version",
+        "kernel_source",
+        "block_m",
+        "block_k",
+        "num_warps",
+        "num_stages",
+        "vectorization",
+        "masks",
+        "accumulator_dtype",
+        "output_dtype",
+        "dispatch_included",
+        "compile_time_included",
+        "tolerance"
+      ],
+      "fair_win_labels": [
+        "custom-win-fair",
+        "custom-specialized-win-fair",
+        "near-match-fair",
+        "library-win-fair"
+      ],
+      "partial_win_labels": [
+        "partial-win-framework-overhead-only",
+        "partial-win-format-conversion",
+        "negative-example"
+      ],
+      "local_references": [
+        "third_party/triton/python/tutorials/03-matrix-multiplication.py",
+        "third_party/triton/python/tutorials/10-block-scaled-matmul.py",
+        "docs/TRITON_KERNEL_GUIDE.md"
+      ],
+      "notes": [
+        "Triton can be a fair custom-kernel baseline for the seed if it preserves the exact affine uint4 contract.",
+        "Block-scaled Triton tutorials are different-contract references unless the task is reframed."
+      ]
+    },
+    {
+      "id": "framework-generated",
+      "role": "PyTorch, torch.compile, Inductor, extension, or framework eager baseline",
+      "applicability_to_seed": "direct if the generated or eager graph preserves the exact seed expression; partial if it materializes or changes dtype/format",
+      "fair_contract_requirements": [
+        "graph expression matches seed contract",
+        "materialized intermediates are recorded",
+        "compiled versus eager path is recorded",
+        "allocation, conversion, and dispatch timing boundary is recorded",
+        "correctness tolerance matches output dtype contract"
+      ],
+      "required_records": [
+        "framework_name",
+        "framework_version",
+        "compiler_mode",
+        "graph_capture",
+        "generated_kernel_reference",
+        "materialized_intermediates",
+        "allocation_included",
+        "dispatch_included",
+        "conversion_included",
+        "accumulator_dtype",
+        "output_dtype",
+        "tolerance"
+      ],
+      "fair_win_labels": [
+        "custom-win-fair",
+        "custom-specialized-win-fair",
+        "near-match-fair",
+        "library-win-fair"
+      ],
+      "partial_win_labels": [
+        "partial-win-framework-overhead-only",
+        "partial-win-materialized-dequant-only",
+        "partial-win-format-conversion",
+        "negative-example"
+      ],
+      "local_references": [
+        "docs/FRAMEWORK_EXTENSION_GUIDE.md",
+        "docs/TRITON_KERNEL_GUIDE.md"
+      ],
+      "notes": [
+        "Framework overhead is a valid deployment concern, but it should be labeled separately from isolated kernel speed.",
+        "Do not claim compiler code-generation facts unless generated code was inspected."
+      ]
+    }
+  ],
+  "required_measured_record_fields": [
+    "task_id",
+    "baseline_id",
+    "result_label",
+    "evidence_label",
+    "gpu_name",
+    "gfx_target",
+    "driver_version",
+    "cuda_toolkit_version",
+    "library_versions",
+    "build_command",
+    "rows",
+    "cols",
+    "group_size",
+    "packing_order",
+    "scale_layout",
+    "zero_point_layout",
+    "activation_dtype",
+    "accumulator_dtype",
+    "output_dtype",
+    "epilogue",
+    "tolerance",
+    "warmup_iterations",
+    "measured_iterations",
+    "timer_type",
+    "profiler_status",
+    "timing_boundary",
+    "correctness_reference",
+    "win_loss_notes"
+  ],
+  "evidence_policy": {
+    "no_gpu_status": "guidance-only-no-gpu",
+    "cuda_event_without_counters": "timing-only",
+    "must_not_claim": [
+      "rocprofiler/rocprof counters unless profiler artifacts are attached",
+      "fair direct low-bit library comparison when packing, scale layout, zero-point layout, accumulator dtype, output dtype, epilogue, tolerance, or timing boundary differ",
+      "bitsandbytes nf4/fp4 equivalence to affine uint4 without documenting the format conversion",
+      "Composable Kernel block-scaled fp4/fp8 equivalence to affine uint4 without documenting the format conversion",
+      "MIGraphX or vLLM on ROCm serving win as an isolated kernel win",
+      "hipBLASLt direct int4 seed support when the path uses materialized dequant or a different dtype"
+    ]
+  }
+}

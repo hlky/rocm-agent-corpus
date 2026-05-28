@@ -1,0 +1,85 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.local/rocm-agent-corpus/task.schema.json",
+  "title": "HIP/ROCm Agent Corpus Task",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "id",
+    "title",
+    "domain",
+    "language",
+    "tags",
+    "source_refs",
+    "problem",
+    "artifacts",
+    "verification",
+    "benchmarking",
+    "license",
+    "curation"
+  ],
+  "properties": {
+    "schema_version": { "type": "string" },
+    "id": { "type": "string" },
+    "title": { "type": "string" },
+    "domain": { "type": "string" },
+    "language": { "type": "string" },
+    "tags": { "type": "array", "items": { "type": "string" } },
+    "source_refs": { "type": "array", "items": { "type": "string" } },
+    "problem": {
+      "type": "object",
+      "required": ["summary", "inputs", "outputs", "constraints"],
+      "properties": {
+        "summary": { "type": "string" },
+        "inputs": { "type": "array", "items": { "type": "string" } },
+        "outputs": { "type": "array", "items": { "type": "string" } },
+        "constraints": { "type": "array", "items": { "type": "string" } }
+      },
+      "additionalProperties": false
+    },
+    "artifacts": {
+      "type": "object",
+      "required": ["baseline", "optimized"],
+      "properties": {
+        "baseline": { "type": "string" },
+        "optimized": { "type": "string" },
+        "harness": { "type": "string" },
+        "profiles": { "type": "array", "items": { "type": "string" } },
+        "results": { "type": "array", "items": { "type": "string" } }
+      },
+      "additionalProperties": false
+    },
+    "verification": {
+      "type": "object",
+      "required": ["status", "method", "tolerances"],
+      "properties": {
+        "status": { "type": "string" },
+        "method": { "type": "string" },
+        "tolerances": { "type": "object" }
+      },
+      "additionalProperties": false
+    },
+    "benchmarking": {
+      "type": "object",
+      "required": ["status", "required_metrics", "recommended_shapes"],
+      "properties": {
+        "status": { "type": "string" },
+        "operation": { "type": "string" },
+        "required_metrics": { "type": "array", "items": { "type": "string" } },
+        "recommended_shapes": { "type": "array", "items": { "type": "string" } }
+      },
+      "additionalProperties": false
+    },
+    "license": { "type": "string" },
+    "curation": {
+      "type": "object",
+      "required": ["status", "notes"],
+      "properties": {
+        "status": { "type": "string" },
+        "notes": { "type": "string" }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

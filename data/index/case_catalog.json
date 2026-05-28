@@ -1,0 +1,1514 @@
+{
+  "schema_version": "0.2.0",
+  "guide": "docs/CASE_CATALOG.md",
+  "coverage_plan": "docs/CASE_COVERAGE_PLAN.md",
+  "mission": "Classify HIP/ROCm optimization problems into stable case families, then route agents to tasks, baselines, and extension surfaces for custom-kernel competition.",
+  "catalog_layers": [
+    {
+      "name": "v1",
+      "status": "coverage-contract",
+      "meaning": "Rows in the main catalog tables should be completed with tasks, measured records, library baselines, and custom-kernel hypotheses."
+    },
+    {
+      "name": "v2",
+      "status": "proposed-extension-backlog",
+      "meaning": "Extended rows are candidates for promotion into the coverage plan once task manifests and baseline recipes exist."
+    }
+  ],
+  "base_sections": [
+    {
+      "section": "Memory Movement",
+      "cases": [
+        "copy-map-saxpy",
+        "transpose",
+        "gather-scatter",
+        "stencil",
+        "aos-to-soa"
+      ]
+    },
+    {
+      "section": "Reductions and Prefix Work",
+      "cases": [
+        "sum-min-max",
+        "segmented-reduction",
+        "scan-prefix-sum",
+        "histogram",
+        "top-k"
+      ]
+    },
+    {
+      "section": "Dense Linear Algebra",
+      "cases": [
+        "gemm-standard",
+        "batched-gemm",
+        "gemm-bias-activation",
+        "gemm-custom",
+        "quantized-gemm"
+      ]
+    },
+    {
+      "section": "ML Kernels",
+      "cases": [
+        "softmax",
+        "layernorm-rmsnorm",
+        "attention",
+        "embedding-ops",
+        "optimizers"
+      ]
+    },
+    {
+      "section": "Sparse and Irregular",
+      "cases": [
+        "spmv-spmm",
+        "graph-traversal",
+        "sparse-attention"
+      ]
+    },
+    {
+      "section": "System-Level CUDA",
+      "cases": [
+        "launch-overhead",
+        "overlap-copy-compute",
+        "multi-gpu-collectives",
+        "runtime-compilation",
+        "persistent-services"
+      ]
+    },
+    {
+      "section": "Low-Level Extensions",
+      "cases": [
+        "warp-primitives",
+        "async-copy",
+        "tensor-core-mma",
+        "tma-wgmma",
+        "inline-ptx"
+      ]
+    },
+    {
+      "section": "Inference and Framework Integration",
+      "cases": [
+        "migraphx-engine-build",
+        "migraphx-plugin",
+        "llm-inference",
+        "framework-custom-op",
+        "triton-kernel"
+      ]
+    },
+    {
+      "section": "Architecture-Specific Paths",
+      "cases": [
+        "ampere-tuning",
+        "ada-inference",
+        "hopper-tuning",
+        "blackwell-tuning"
+      ]
+    }
+  ],
+  "anchors": [
+    {
+      "id": "gemm-standard",
+      "library_first": [
+        "hipBLAS/rocBLAS",
+        "hipBLASLt"
+      ],
+      "custom_when": [
+        "fusion",
+        "unusual layout",
+        "datatype experiment",
+        "small specialized shapes"
+      ],
+      "submodules": [
+        "third_party/rocm-examples",
+        "third_party/composable-kernel"
+      ],
+      "status": "guide-plus-measured-seeds"
+    },
+    {
+      "id": "gemm-custom-epilogue",
+      "library_first": [
+        "hipBLASLt",
+        "Composable Kernel"
+      ],
+      "custom_when": [
+        "unsupported epilogue",
+        "auxiliary output",
+        "quantization",
+        "research activation"
+      ],
+      "submodules": [
+        "third_party/composable-kernel"
+      ],
+      "status": "guide-example-and-scaffold"
+    },
+    {
+      "id": "reduction",
+      "library_first": [
+        "hipCUB"
+      ],
+      "custom_when": [
+        "fusion",
+        "small fixed shape",
+        "teaching",
+        "nonstandard operator"
+      ],
+      "tasks": [
+        "block-reduction-sum"
+      ],
+      "submodules": [
+        "third_party/rocm-libraries"
+      ],
+      "status": "timing-only-measured"
+    },
+    {
+      "id": "softmax-rowwise",
+      "library_first": [
+        "framework",
+        "MIOpen where applicable"
+      ],
+      "custom_when": [
+        "fusion",
+        "shape specialization",
+        "attention variant"
+      ],
+      "tasks": [
+        "rowwise-softmax"
+      ],
+      "submodules": [
+        "third_party/kernelbench",
+        "third_party/gpu-mode-reference-kernels"
+      ],
+      "status": "timing-only-measured"
+    },
+    {
+      "id": "inference-engine-plugin",
+      "library_first": [
+        "MIGraphX",
+        "vLLM on ROCm",
+        "MIOpen"
+      ],
+      "custom_when": [
+        "unsupported layer",
+        "custom fusion",
+        "deployment requires MIGraphX engine",
+        "LLM plugin path"
+      ],
+      "submodules": [
+        "third_party/migraphx",
+        "third_party/vllm-rocm",
+        "third_party/miopen-frontend"
+      ],
+      "status": "guide-example-and-scaffold"
+    },
+    {
+      "id": "framework-custom-op",
+      "library_first": [
+        "PyTorch extension",
+        "OneFlow operator",
+        "Triton"
+      ],
+      "custom_when": [
+        "framework integration",
+        "autograd support",
+        "runtime placement",
+        "compiler-generated baseline comparison"
+      ],
+      "submodules": [
+        "third_party/oneflow",
+        "third_party/triton"
+      ],
+      "status": "guide-example-and-scaffold"
+    },
+    {
+      "id": "architecture-specific-sm",
+      "library_first": [
+        "hipBLASLt",
+        "Composable Kernel",
+        "MIGraphX",
+        "Triton"
+      ],
+      "custom_when": [
+        "global-to-LDS staging",
+        "global-to-LDS staging",
+        "WGMFMA",
+        "architecture-specific Matrix Core path",
+        "CDNA4/RDNA4 feature path"
+      ],
+      "submodules": [
+        "third_party/composable-kernel",
+        "third_party/migraphx",
+        "third_party/triton"
+      ],
+      "status": "guide-and-index"
+    }
+  ],
+  "extension_status": "v2-proposed",
+  "promotion_rule": [
+    "Add or identify a task manifest under corpus/tasks.",
+    "Add a correctness oracle and benchmark harness.",
+    "Name the strongest vendor/library baselines.",
+    "Add at least one timing or profile artifact on named hardware.",
+    "Link the case from docs/CASE_COVERAGE_PLAN.md and docs/RETRIEVAL_MAP.md."
+  ],
+  "extension_priority_frontier": [
+    "paged-kv-cache-attention",
+    "varlen-packed-attention",
+    "gqa-mqa-decode-attention",
+    "fused-mlp-swiglu",
+    "ragged-grouped-gemm",
+    "fp8-cast-scale-amax",
+    "block-scaled-fp4-gemm",
+    "int8-dot-mfma-gemm",
+    "direct-convolution-2d",
+    "radix-sort-key-value",
+    "structured-sparsity-2to4",
+    "pytorch-inductor-generated-kernel",
+    "rocprof-counter-roofline"
+  ],
+  "promoted_extension_tasks": [
+    {
+      "wave": "v2-extension-promotion-wave-1",
+      "guide": "docs/V2_EXTENSION_PROMOTION_WAVE.md",
+      "index": "data/index/v2_extension_wave.json",
+      "status": "template-only",
+      "task_ids": [
+        "paged-kv-cache-attention",
+        "gqa-mqa-decode-attention",
+        "varlen-packed-attention",
+        "fused-mlp-swiglu",
+        "direct-convolution-2d",
+        "conv2d-fused-bias-activation",
+        "radix-sort-key-value",
+        "top-p-nucleus-sampling",
+        "fp8-cast-scale-amax",
+        "block-scaled-fp4-gemm",
+        "int8-dot-mfma-gemm",
+        "structured-sparsity-2to4",
+        "ragged-grouped-gemm",
+        "composable-kernel-custom-epilogue",
+        "pytorch-inductor-generated-kernel",
+        "rocprof-counter-roofline"
+      ]
+    },
+    {
+      "wave": "v2-extension-promotion-wave-2",
+      "guide": "docs/V2_EXTENSION_PROMOTION_WAVE.md",
+      "index": "data/index/v2_extension_wave.json",
+      "status": "template-only",
+      "task_ids": [
+        "select-filter-compact",
+        "groupby-reduce-by-key",
+        "unique-run-length-encode",
+        "sddmm-sparse-attention-score",
+        "spgemm-merge-hash",
+        "sparse-format-conversion",
+        "reduce-scatter-overlap",
+        "allgather-overlap",
+        "alltoall-moe-exchange",
+        "rocm-sanitizer-racecheck",
+        "amdisa-diff-regression",
+        "autotune-parameter-sweep",
+        "gfx90a-gfx942-cdna-split",
+        "gfx942-cdna3-mfma-lab"
+      ]
+    }
+  ],
+  "extension_families": [
+    {
+      "family": "Memory, Layout, and Data Plumbing",
+      "cases": [
+        {
+          "id": "strided-batched-layout-transform",
+          "library_baselines": [
+            "rocThrust",
+            "hipCUB",
+            "framework tensor copies"
+          ],
+          "custom_topics": [
+            "stride math",
+            "vectorization",
+            "alignment",
+            "non-contiguous tensors"
+          ],
+          "promotion_artifact": "layout-conversion task with stride sweep"
+        },
+        {
+          "id": "packed-layout-transcode",
+          "library_baselines": [
+            "Composable Kernel layouts",
+            "vLLM on ROCm",
+            "Transformer Engine on ROCm"
+          ],
+          "custom_topics": [
+            "interleaving",
+            "swizzles",
+            "scale metadata",
+            "vectorized stores"
+          ],
+          "promotion_artifact": "packed int4/fp8 format task"
+        },
+        {
+          "id": "async-p2p-copy-pack",
+          "library_baselines": [
+            "CUDA P2P",
+            "RCCL point-to-point"
+          ],
+          "custom_topics": [
+            "pack kernels",
+            "stream ordering",
+            "NVLink/PCIe boundaries"
+          ],
+          "promotion_artifact": "P2P staging task"
+        },
+        {
+          "id": "memory-pool-allocator",
+          "library_baselines": [
+            "CUDA memory pools",
+            "framework caching allocators"
+          ],
+          "custom_topics": [
+            "allocation overhead",
+            "reuse",
+            "fragmentation",
+            "graph capture"
+          ],
+          "promotion_artifact": "allocator microbenchmark task"
+        },
+        {
+          "id": "image-plane-format-convert",
+          "library_baselines": [
+            "NPP",
+            "nvJPEG",
+            "framework preprocessors"
+          ],
+          "custom_topics": [
+            "planar/interleaved formats",
+            "color conversion",
+            "fused normalization"
+          ],
+          "promotion_artifact": "image preprocessing task"
+        },
+        {
+          "id": "nvcomp-streaming-decode",
+          "library_baselines": [
+            "nvCOMP",
+            "CUDA samples"
+          ],
+          "custom_topics": [
+            "block framing",
+            "decode-plus-transform fusion",
+            "bandwidth limits"
+          ],
+          "promotion_artifact": "compression pipeline task"
+        }
+      ]
+    },
+    {
+      "family": "Convolution, Signal, and Classical Linear Algebra",
+      "cases": [
+        {
+          "id": "direct-convolution-2d",
+          "library_baselines": [
+            "MIOpen",
+            "Composable Kernel conv",
+            "framework conv"
+          ],
+          "custom_topics": [
+            "shared tiles",
+            "constant filters",
+            "small kernels"
+          ],
+          "promotion_artifact": "direct conv task"
+        },
+        {
+          "id": "conv2d-fused-bias-activation",
+          "library_baselines": [
+            "MIOpen",
+            "MIGraphX",
+            "Composable Kernel conv epilogues"
+          ],
+          "custom_topics": [
+            "conv epilogues",
+            "bias/activation fusion",
+            "layout constraints"
+          ],
+          "promotion_artifact": "fused conv task"
+        },
+        {
+          "id": "depthwise-separable-convolution",
+          "library_baselines": [
+            "MIOpen",
+            "MIGraphX",
+            "framework kernels"
+          ],
+          "custom_topics": [
+            "channel grouping",
+            "vectorized channel packs",
+            "fusion"
+          ],
+          "promotion_artifact": "depthwise conv task"
+        },
+        {
+          "id": "implicit-gemm-convolution",
+          "library_baselines": [
+            "MIOpen",
+            "Composable Kernel implicit GEMM"
+          ],
+          "custom_topics": [
+            "iterator math",
+            "layout transforms",
+            "Matrix Core eligibility"
+          ],
+          "promotion_artifact": "implicit-GEMM conv task"
+        },
+        {
+          "id": "winograd-convolution-tile",
+          "library_baselines": [
+            "MIOpen",
+            "MIGraphX"
+          ],
+          "custom_topics": [
+            "transform overhead",
+            "numerical error",
+            "fixed filters"
+          ],
+          "promotion_artifact": "Winograd task"
+        },
+        {
+          "id": "fft-convolution-fusion",
+          "library_baselines": [
+            "cuFFT",
+            "MIOpen where applicable"
+          ],
+          "custom_topics": [
+            "library-call fusion",
+            "pointwise multiply",
+            "batched plans"
+          ],
+          "promotion_artifact": "cuFFT-adjacent task"
+        },
+        {
+          "id": "small-gemv-token-batch",
+          "library_baselines": [
+            "hipBLAS/rocBLAS",
+            "hipBLASLt",
+            "bitsandbytes"
+          ],
+          "custom_topics": [
+            "persistent weights",
+            "dequant",
+            "warp-level dot products"
+          ],
+          "promotion_artifact": "GEMV decode task"
+        },
+        {
+          "id": "triangular-solve-small-batch",
+          "library_baselines": [
+            "hipBLAS/rocBLAS",
+            "cuSOLVER"
+          ],
+          "custom_topics": [
+            "dependency scheduling",
+            "register tiling",
+            "fixed-size batches"
+          ],
+          "promotion_artifact": "solver-adjacent task"
+        }
+      ]
+    },
+    {
+      "family": "Sorting, Grouping, and Selection",
+      "cases": [
+        {
+          "id": "radix-sort-key-value",
+          "library_baselines": [
+            "hipCUB DeviceRadixSort",
+            "rocThrust sort"
+          ],
+          "custom_topics": [
+            "fixed key width",
+            "local histograms",
+            "temporary storage"
+          ],
+          "promotion_artifact": "radix sort task"
+        },
+        {
+          "id": "select-filter-compact",
+          "library_baselines": [
+            "hipCUB DeviceSelect",
+            "rocThrust copy_if"
+          ],
+          "custom_topics": [
+            "mask generation",
+            "prefix counts",
+            "fused transforms"
+          ],
+          "promotion_artifact": "select/compact task"
+        },
+        {
+          "id": "unique-run-length-encode",
+          "library_baselines": [
+            "hipCUB DeviceRunLengthEncode",
+            "rocThrust unique"
+          ],
+          "custom_topics": [
+            "sorted inputs",
+            "segment boundaries",
+            "output sizing"
+          ],
+          "promotion_artifact": "RLE task"
+        },
+        {
+          "id": "groupby-reduce-by-key",
+          "library_baselines": [
+            "hipCUB reduce_by_key",
+            "rocThrust reduce_by_key"
+          ],
+          "custom_topics": [
+            "skewed groups",
+            "atomics versus scans",
+            "shared aggregation"
+          ],
+          "promotion_artifact": "group-by task"
+        },
+        {
+          "id": "top-p-nucleus-sampling",
+          "library_baselines": [
+            "vLLM on ROCm",
+            "vLLM",
+            "FlashInfer",
+            "hipCUB sort/select"
+          ],
+          "custom_topics": [
+            "partial sort",
+            "prefix probability",
+            "RNG",
+            "rejection paths"
+          ],
+          "promotion_artifact": "top-p sampling task"
+        },
+        {
+          "id": "deterministic-reduction",
+          "library_baselines": [
+            "hipCUB",
+            "framework deterministic modes"
+          ],
+          "custom_topics": [
+            "fixed trees",
+            "reproducibility",
+            "compensated sums"
+          ],
+          "promotion_artifact": "determinism task"
+        }
+      ]
+    },
+    {
+      "family": "Transformer and ML Fusion",
+      "cases": [
+        {
+          "id": "fused-residual-dropout-norm",
+          "library_baselines": [
+            "framework kernels",
+            "Transformer Engine on ROCm",
+            "vLLM on ROCm"
+          ],
+          "custom_topics": [
+            "RNG state",
+            "vectorized rows",
+            "mixed precision"
+          ],
+          "promotion_artifact": "fused norm task"
+        },
+        {
+          "id": "normalization-backward",
+          "library_baselines": [
+            "PyTorch",
+            "Transformer Engine on ROCm",
+            "Triton",
+            "Apex-like references"
+          ],
+          "custom_topics": [
+            "dgamma/dbeta reductions",
+            "saved statistics",
+            "mixed precision"
+          ],
+          "promotion_artifact": "norm backward task"
+        },
+        {
+          "id": "fused-mlp-swiglu",
+          "library_baselines": [
+            "hipBLASLt",
+            "Composable Kernel",
+            "vLLM on ROCm",
+            "Triton"
+          ],
+          "custom_topics": [
+            "epilogues",
+            "gating",
+            "activation math",
+            "intermediate avoidance"
+          ],
+          "promotion_artifact": "MLP fusion task"
+        },
+        {
+          "id": "cross-entropy-loss",
+          "library_baselines": [
+            "framework kernels",
+            "MIOpen where applicable"
+          ],
+          "custom_topics": [
+            "max/sum reductions",
+            "sparse targets",
+            "gradient fusion"
+          ],
+          "promotion_artifact": "loss task"
+        },
+        {
+          "id": "rotary-alibi-positioning",
+          "library_baselines": [
+            "vLLM on ROCm",
+            "vLLM",
+            "FlashInfer"
+          ],
+          "custom_topics": [
+            "sin/cos layout",
+            "vectorized complex multiply",
+            "cache writes"
+          ],
+          "promotion_artifact": "RoPE/ALiBi task"
+        },
+        {
+          "id": "paged-kv-cache-attention",
+          "library_baselines": [
+            "vLLM",
+            "FlashInfer",
+            "vLLM on ROCm"
+          ],
+          "custom_topics": [
+            "page tables",
+            "coalescing",
+            "fragmentation",
+            "batch scheduling"
+          ],
+          "promotion_artifact": "paged KV task"
+        },
+        {
+          "id": "varlen-packed-attention",
+          "library_baselines": [
+            "FlashAttention varlen",
+            "MIOpen SDPA",
+            "FlashInfer",
+            "Triton"
+          ],
+          "custom_topics": [
+            "prefix offsets",
+            "ragged batches",
+            "mask elimination",
+            "scheduler metadata"
+          ],
+          "promotion_artifact": "varlen attention task"
+        },
+        {
+          "id": "gqa-mqa-decode-attention",
+          "library_baselines": [
+            "vLLM on ROCm",
+            "FlashInfer",
+            "vLLM",
+            "FlashAttention where applicable"
+          ],
+          "custom_topics": [
+            "KV head sharing",
+            "grouped heads",
+            "cache reads",
+            "small-query batching"
+          ],
+          "promotion_artifact": "GQA/MQA decode task"
+        },
+        {
+          "id": "beam-search-step",
+          "library_baselines": [
+            "vLLM on ROCm",
+            "vLLM",
+            "framework generation"
+          ],
+          "custom_topics": [
+            "top-k/top-p composition",
+            "penalties",
+            "parent tracking"
+          ],
+          "promotion_artifact": "beam step task"
+        },
+        {
+          "id": "masked-logits-softmax-fusion",
+          "library_baselines": [
+            "PyTorch",
+            "Triton",
+            "vLLM on ROCm",
+            "MIOpen SDPA-adjacent paths"
+          ],
+          "custom_topics": [
+            "mask application",
+            "stable row reductions",
+            "log-softmax",
+            "logits processors"
+          ],
+          "promotion_artifact": "masked logits task"
+        },
+        {
+          "id": "activation-gated-fusion",
+          "library_baselines": [
+            "hipBLASLt epilogues",
+            "Composable Kernel epilogues",
+            "Triton"
+          ],
+          "custom_topics": [
+            "custom epilogues",
+            "approximations",
+            "auxiliary outputs"
+          ],
+          "promotion_artifact": "activation epilogue task"
+        },
+        {
+          "id": "ragged-sequence-pack-unpack",
+          "library_baselines": [
+            "framework nested tensors",
+            "hipCUB select/scan"
+          ],
+          "custom_topics": [
+            "offsets",
+            "padding removal",
+            "variable lengths"
+          ],
+          "promotion_artifact": "ragged tensor task"
+        },
+        {
+          "id": "multi-tensor-adamw",
+          "library_baselines": [
+            "PyTorch foreach/fused optimizers",
+            "Apex-style fused RDNA3m",
+            "bitsandbytes"
+          ],
+          "custom_topics": [
+            "tensor-list batching",
+            "mixed precision states",
+            "launch amortization"
+          ],
+          "promotion_artifact": "multi-tensor optimizer task"
+        }
+      ]
+    },
+    {
+      "family": "Quantization, Precision, and Numeric Format Work",
+      "cases": [
+        {
+          "id": "fp8-cast-scale-amax",
+          "library_baselines": [
+            "Transformer Engine on ROCm",
+            "hipBLASLt",
+            "Composable Kernel"
+          ],
+          "custom_topics": [
+            "amax reductions",
+            "delayed scaling",
+            "saturation"
+          ],
+          "promotion_artifact": "FP8 scale task"
+        },
+        {
+          "id": "block-scaled-fp4-gemm",
+          "library_baselines": [
+            "Transformer Engine on ROCm",
+            "Composable Kernel",
+            "MIGraphX"
+          ],
+          "custom_topics": [
+            "block scales",
+            "packing",
+            "Matrix Core eligibility"
+          ],
+          "promotion_artifact": "FP4 task"
+        },
+        {
+          "id": "int8-dot-mfma-gemm",
+          "library_baselines": [
+            "hipBLASLt INT8",
+            "Composable Kernel INT8",
+            "MIGraphX",
+            "bitsandbytes"
+          ],
+          "custom_topics": [
+            "packing",
+            "signedness",
+            "scale placement",
+            "Matrix Core versus DP4A fallback"
+          ],
+          "promotion_artifact": "INT8 GEMM task"
+        },
+        {
+          "id": "int4-groupwise-gemv",
+          "library_baselines": [
+            "bitsandbytes",
+            "vLLM on ROCm",
+            "Composable Kernel"
+          ],
+          "custom_topics": [
+            "packed nibbles",
+            "group scales",
+            "zero points"
+          ],
+          "promotion_artifact": "INT4 GEMV task"
+        },
+        {
+          "id": "quantize-dequantize-reorder",
+          "library_baselines": [
+            "framework quantization",
+            "MIGraphX"
+          ],
+          "custom_topics": [
+            "scale layout",
+            "transpose fusion",
+            "saturation"
+          ],
+          "promotion_artifact": "Q/DQ reorder task"
+        },
+        {
+          "id": "stochastic-rounding-kernel",
+          "library_baselines": [
+            "framework paths",
+            "Transformer Engine on ROCm paths"
+          ],
+          "custom_topics": [
+            "RNG quality",
+            "vectorized conversion",
+            "reproducibility"
+          ],
+          "promotion_artifact": "stochastic rounding task"
+        },
+        {
+          "id": "mixed-precision-accumulation",
+          "library_baselines": [
+            "hipBLASLt",
+            "Composable Kernel",
+            "framework kernels"
+          ],
+          "custom_topics": [
+            "error budgets",
+            "accumulator type",
+            "K-splitting"
+          ],
+          "promotion_artifact": "numeric contract task"
+        }
+      ]
+    },
+    {
+      "family": "Sparse, Structured Sparsity, and Graph Work",
+      "cases": [
+        {
+          "id": "sddmm-sparse-attention-score",
+          "library_baselines": [
+            "cuSPARSE",
+            "Composable Kernel sparse",
+            "graph libraries"
+          ],
+          "custom_topics": [
+            "metadata traversal",
+            "coalesced edge blocks",
+            "reuse"
+          ],
+          "promotion_artifact": "SDDMM task"
+        },
+        {
+          "id": "spgemm-merge-hash",
+          "library_baselines": [
+            "cuSPARSE SpGEMM"
+          ],
+          "custom_topics": [
+            "merge/hash strategies",
+            "row imbalance",
+            "memory planning"
+          ],
+          "promotion_artifact": "SpGEMM task"
+        },
+        {
+          "id": "sparse-format-conversion",
+          "library_baselines": [
+            "cuSPARSE",
+            "hipCUB sort/scan"
+          ],
+          "custom_topics": [
+            "prefix counts",
+            "sorting",
+            "block metadata"
+          ],
+          "promotion_artifact": "format conversion task"
+        },
+        {
+          "id": "bsr-block-sparse-matmul",
+          "library_baselines": [
+            "cuSPARSE BSR",
+            "Composable Kernel sparse",
+            "Triton"
+          ],
+          "custom_topics": [
+            "block masks",
+            "Matrix Core block size",
+            "scheduler"
+          ],
+          "promotion_artifact": "BSR matmul task"
+        },
+        {
+          "id": "structured-sparsity-2to4",
+          "library_baselines": [
+            "cuSPARSELt",
+            "Composable Kernel sparse",
+            "MIGraphX"
+          ],
+          "custom_topics": [
+            "metadata packing",
+            "pruning layout",
+            "sparse MFMA"
+          ],
+          "promotion_artifact": "2:4 sparse task"
+        },
+        {
+          "id": "gnn-neighbor-aggregation",
+          "library_baselines": [
+            "cuSPARSE",
+            "Gunrock-like references",
+            "framework ops"
+          ],
+          "custom_topics": [
+            "frontier grouping",
+            "atomics",
+            "load balance"
+          ],
+          "promotion_artifact": "GNN aggregation task"
+        }
+      ]
+    },
+    {
+      "family": "Matrix Core, Composable Kernel, and CK Tile Internals",
+      "cases": [
+        {
+          "id": "composable-kernel-custom-epilogue",
+          "library_baselines": [
+            "Composable Kernel",
+            "hipBLASLt epilogues"
+          ],
+          "custom_topics": [
+            "visitor trees",
+            "auxiliary tensors",
+            "activation/scale fusion"
+          ],
+          "promotion_artifact": "Composable Kernel epilogue task"
+        },
+        {
+          "id": "ck_tile-layout-algebra-task",
+          "library_baselines": [
+            "Composable Kernel",
+            "CK Tile examples"
+          ],
+          "custom_topics": [
+            "layout composition",
+            "tilers",
+            "tensor views",
+            "swizzles"
+          ],
+          "promotion_artifact": "CK Tile layout task"
+        },
+        {
+          "id": "persistent-gemm-scheduler",
+          "library_baselines": [
+            "Composable Kernel persistent kernels",
+            "hipBLASLt"
+          ],
+          "custom_topics": [
+            "work queues",
+            "CTA residency",
+            "split tiles"
+          ],
+          "promotion_artifact": "persistent GEMM task"
+        },
+        {
+          "id": "splitk-reduction-gemm",
+          "library_baselines": [
+            "hipBLASLt",
+            "Composable Kernel"
+          ],
+          "custom_topics": [
+            "partial accumulation",
+            "reduction epilogue",
+            "atomics"
+          ],
+          "promotion_artifact": "split-K task"
+        },
+        {
+          "id": "ragged-grouped-gemm",
+          "library_baselines": [
+            "hipBLASLt grouped matmul where available",
+            "Composable Kernel grouped GEMM",
+            "Triton grouped matmul"
+          ],
+          "custom_topics": [
+            "shape bucketing",
+            "pointer arrays",
+            "scheduling",
+            "padding avoidance"
+          ],
+          "promotion_artifact": "ragged/grouped GEMM task"
+        },
+        {
+          "id": "grouped-gemm-moe",
+          "library_baselines": [
+            "hipBLASLt grouped paths",
+            "Composable Kernel grouped GEMM",
+            "vLLM on ROCm"
+          ],
+          "custom_topics": [
+            "shape bucketing",
+            "scheduler",
+            "expert imbalance"
+          ],
+          "promotion_artifact": "grouped GEMM task"
+        },
+        {
+          "id": "warp-specialized-wgmma",
+          "library_baselines": [
+            "Composable Kernel CDNA3 kernels"
+          ],
+          "custom_topics": [
+            "producer/consumer warps",
+            "barriers",
+            "register pressure"
+          ],
+          "promotion_artifact": "WGMFMA pipeline task"
+        },
+        {
+          "id": "tma-multicast-gemm",
+          "library_baselines": [
+            "Composable Kernel",
+            "CK Tile CDNA3 examples"
+          ],
+          "custom_topics": [
+            "cluster launch",
+            "descriptors",
+            "distributed shared memory"
+          ],
+          "promotion_artifact": "global-to-LDS staging multicast task"
+        }
+      ]
+    },
+    {
+      "family": "Inference, Framework, and Compiler Integration",
+      "cases": [
+        {
+          "id": "miopen-frontend-fusion",
+          "library_baselines": [
+            "MIOpen"
+          ],
+          "custom_topics": [
+            "graph construction",
+            "plan selection",
+            "fused pointwise ops"
+          ],
+          "promotion_artifact": "MIOpen task"
+        },
+        {
+          "id": "graph-captured-inference-step",
+          "library_baselines": [
+            "HIP Graphs",
+            "MIGraphX runtime",
+            "PyTorch HIP graphs"
+          ],
+          "custom_topics": [
+            "fixed buffers",
+            "replay updates",
+            "launch amortization",
+            "graph-safe allocators"
+          ],
+          "promotion_artifact": "captured inference task"
+        },
+        {
+          "id": "migraphx-dynamic-plugin",
+          "library_baselines": [
+            "MIGraphX plugin API"
+          ],
+          "custom_topics": [
+            "shape expressions",
+            "format support",
+            "serialization"
+          ],
+          "promotion_artifact": "dynamic plugin task"
+        },
+        {
+          "id": "vllm-rocm-custom-plugin",
+          "library_baselines": [
+            "vLLM on ROCm plugins"
+          ],
+          "custom_topics": [
+            "decode metadata",
+            "KV cache",
+            "quantization",
+            "engine build"
+          ],
+          "promotion_artifact": "vLLM on ROCm plugin task"
+        },
+        {
+          "id": "pytorch-inductor-generated-kernel",
+          "library_baselines": [
+            "PyTorch Inductor",
+            "Triton",
+            "nvFuser"
+          ],
+          "custom_topics": [
+            "generated code inspection",
+            "HIP replacement",
+            "fusion limits"
+          ],
+          "promotion_artifact": "compiler baseline task"
+        },
+        {
+          "id": "oneflow-user-op",
+          "library_baselines": [
+            "OneFlow operator stack"
+          ],
+          "custom_topics": [
+            "stream semantics",
+            "SBP/distribution",
+            "tensor layout"
+          ],
+          "promotion_artifact": "OneFlow op task"
+        },
+        {
+          "id": "cuda-python-driver-launch",
+          "library_baselines": [
+            "cuda-python",
+            "Numba where relevant"
+          ],
+          "custom_topics": [
+            "launch overhead",
+            "module loading",
+            "interop harnesses"
+          ],
+          "promotion_artifact": "Python driver task"
+        },
+        {
+          "id": "onnx-custom-op-bridge",
+          "library_baselines": [
+            "MIGraphX parser",
+            "ONNX Runtime CUDA EP"
+          ],
+          "custom_topics": [
+            "shape/type contracts",
+            "plugin registration",
+            "deployment"
+          ],
+          "promotion_artifact": "ONNX bridge task"
+        }
+      ]
+    },
+    {
+      "family": "Multi-GPU, Partitioning, and Runtime Systems",
+      "cases": [
+        {
+          "id": "reduce-scatter-overlap",
+          "library_baselines": [
+            "RCCL",
+            "framework distributed"
+          ],
+          "custom_topics": [
+            "chunking",
+            "fusion",
+            "stream priorities",
+            "dependency graphs"
+          ],
+          "promotion_artifact": "reduce-scatter task"
+        },
+        {
+          "id": "allgather-overlap",
+          "library_baselines": [
+            "RCCL",
+            "framework distributed"
+          ],
+          "custom_topics": [
+            "staging",
+            "prefetch",
+            "tensor parallel layouts"
+          ],
+          "promotion_artifact": "all-gather task"
+        },
+        {
+          "id": "alltoall-moe-exchange",
+          "library_baselines": [
+            "RCCL",
+            "rocSHMEM",
+            "Megatron-like references"
+          ],
+          "custom_topics": [
+            "token permutation",
+            "routing metadata",
+            "overlap"
+          ],
+          "promotion_artifact": "all-to-all task"
+        },
+        {
+          "id": "nvlink-p2p-staging",
+          "library_baselines": [
+            "CUDA P2P",
+            "RCCL"
+          ],
+          "custom_topics": [
+            "peer access",
+            "topology",
+            "copy engines",
+            "staging buffers"
+          ],
+          "promotion_artifact": "P2P topology task"
+        },
+        {
+          "id": "gpudirect-rdma-boundary",
+          "library_baselines": [
+            "RCCL",
+            "UCX-like stacks"
+          ],
+          "custom_topics": [
+            "registration",
+            "pinned buffers",
+            "network overlap"
+          ],
+          "promotion_artifact": "RDMA boundary guide/task"
+        },
+        {
+          "id": "cuda-ipc-multiprocess",
+          "library_baselines": [
+            "CUDA IPC samples",
+            "framework serving"
+          ],
+          "custom_topics": [
+            "handle lifetime",
+            "synchronization",
+            "memory ownership"
+          ],
+          "promotion_artifact": "CUDA IPC task"
+        },
+        {
+          "id": "mig-mps-contention",
+          "library_baselines": [
+            "CUDA MPS",
+            "MIG deployment docs"
+          ],
+          "custom_topics": [
+            "occupancy caps",
+            "scheduling",
+            "benchmark hygiene"
+          ],
+          "promotion_artifact": "isolation benchmark task"
+        }
+      ]
+    },
+    {
+      "family": "Tooling, Verification, and Agent Evaluation",
+      "cases": [
+        {
+          "id": "rocprof-counter-roofline",
+          "library_baselines": [
+            "rocprofiler/rocprof",
+            "Nsight Systems"
+          ],
+          "custom_topics": [
+            "occupancy",
+            "memory throughput",
+            "tensor utilization",
+            "stall reasons"
+          ],
+          "promotion_artifact": "profile artifact task"
+        },
+        {
+          "id": "rocm-sanitizer-racecheck",
+          "library_baselines": [
+            "rocm-sanitizer"
+          ],
+          "custom_topics": [
+            "racecheck",
+            "initcheck",
+            "synccheck",
+            "CI gating"
+          ],
+          "promotion_artifact": "sanitizer task"
+        },
+        {
+          "id": "amdisa-diff-regression",
+          "library_baselines": [
+            "cuobjdump",
+            "nvdisasm",
+            "amdclang++ logs"
+          ],
+          "custom_topics": [
+            "instruction mix",
+            "register drift",
+            "spills",
+            "codegen changes"
+          ],
+          "promotion_artifact": "AMD GCN ISA diff task"
+        },
+        {
+          "id": "autotune-parameter-sweep",
+          "library_baselines": [
+            "nvbench",
+            "Composable Kernel profiler",
+            "Triton autotune"
+          ],
+          "custom_topics": [
+            "tile search",
+            "warmup discipline",
+            "overfit prevention"
+          ],
+          "promotion_artifact": "autotune task"
+        },
+        {
+          "id": "ulp-stability-harness",
+          "library_baselines": [
+            "library oracle",
+            "CPU high precision"
+          ],
+          "custom_topics": [
+            "tolerance envelopes",
+            "adversarial inputs",
+            "reductions"
+          ],
+          "promotion_artifact": "numeric QA task"
+        },
+        {
+          "id": "thermal-clock-benchmark",
+          "library_baselines": [
+            "rocm-smi",
+            "DCGM where available"
+          ],
+          "custom_topics": [
+            "persistence mode",
+            "clocks",
+            "throttling labels"
+          ],
+          "promotion_artifact": "benchmark hygiene task"
+        },
+        {
+          "id": "occupancy-register-pressure",
+          "library_baselines": [
+            "CUDA occupancy API",
+            "rocprofiler/rocprof"
+          ],
+          "custom_topics": [
+            "launch bounds",
+            "spills",
+            "shared memory tradeoffs"
+          ],
+          "promotion_artifact": "occupancy task"
+        }
+      ]
+    },
+    {
+      "family": "Architecture-Specific Extension Paths",
+      "cases": [
+        {
+          "id": "sm75-turing-fallback",
+          "library_baselines": [
+            "CUDA samples",
+            "MIGraphX",
+            "hipBLASLt"
+          ],
+          "custom_topics": [
+            "no global-to-LDS staging",
+            "older Matrix Core path",
+            "inference fallback"
+          ],
+          "promotion_artifact": "sm_75 lab"
+        },
+        {
+          "id": "gfx90a-gfx942-cdna-split",
+          "library_baselines": [
+            "hipBLASLt",
+            "Composable Kernel",
+            "MIGraphX"
+          ],
+          "custom_topics": [
+            "gfx90a versus gfx1030",
+            "TF32",
+            "cache behavior",
+            "global-to-LDS staging"
+          ],
+          "promotion_artifact": "CDNA2 split lab"
+        },
+        {
+          "id": "sm89-ada-inference",
+          "library_baselines": [
+            "MIGraphX",
+            "hipBLASLt",
+            "FlashInfer"
+          ],
+          "custom_topics": [
+            "tactic choices",
+            "L2 behavior",
+            "decode kernels"
+          ],
+          "promotion_artifact": "gfx1100 lab"
+        },
+        {
+          "id": "gfx942-cdna3-mfma-lab",
+          "library_baselines": [
+            "Composable Kernel",
+            "CK Tile",
+            "hipBLASLt",
+            "MIGraphX"
+          ],
+          "custom_topics": [
+            "gfx942 versus gfx950",
+            "global-to-LDS staging",
+            "WGMFMA",
+            "clusters"
+          ],
+          "promotion_artifact": "CDNA3 lab"
+        },
+        {
+          "id": "sm100-sm120-blackwell-path",
+          "library_baselines": [
+            "current CUDA",
+            "Composable Kernel",
+            "hipBLASLt",
+            "MIGraphX"
+          ],
+          "custom_topics": [
+            "exact arch flags",
+            "low-precision paths",
+            "compatibility checks"
+          ],
+          "promotion_artifact": "CDNA4/RDNA4 lab"
+        },
+        {
+          "id": "dpx-dynamic-programming",
+          "library_baselines": [
+            "CUDA samples",
+            "domain libraries where applicable"
+          ],
+          "custom_topics": [
+            "recurrence tiling",
+            "warp cooperation",
+            "architecture fallback"
+          ],
+          "promotion_artifact": "DPX task"
+        },
+        {
+          "id": "cluster-dsm-workqueue",
+          "library_baselines": [
+            "CUDA cooperative groups",
+            "Composable Kernel CDNA3 examples"
+          ],
+          "custom_topics": [
+            "cluster scheduling",
+            "DGFX layout",
+            "barriers"
+          ],
+          "promotion_artifact": "cluster workqueue task"
+        }
+      ]
+    }
+  ]
+}

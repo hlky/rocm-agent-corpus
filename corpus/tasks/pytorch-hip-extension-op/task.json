@@ -1,0 +1,76 @@
+{
+  "schema_version": "0.1.0",
+  "id": "pytorch-hip-extension-op",
+  "title": "PyTorch and OneFlow Extension Op Boundary",
+  "domain": "framework-kernel",
+  "language": "python+hip-cpp",
+  "tags": [
+    "pytorch",
+    "oneflow",
+    "extension",
+    "rowwise",
+    "strides",
+    "streams",
+    "template-only",
+    "todo"
+  ],
+  "source_refs": [
+    "pytorch",
+    "oneflow",
+    "oneflow-docs",
+    "triton",
+    "amd-rocm-programming-guide"
+  ],
+  "problem": {
+    "summary": "Define a framework extension boundary for a rowwise HIP op, with tensor checks, stride assumptions, stream semantics, and PyTorch/OneFlow integration notes.",
+    "inputs": [
+      "Framework tensor X shaped [rows, cols]",
+      "optional non-contiguous tensor metadata",
+      "current framework CUDA stream"
+    ],
+    "outputs": [
+      "Framework tensor Y shaped [rows] with one row sum per row"
+    ],
+    "constraints": [
+      "Template-only scaffold; no framework dispatch timing is claimed",
+      "Reject or explicitly handle non-CUDA, non-float32, and non-contiguous inputs",
+      "Record whether timing includes Python dispatch, extension launch, synchronization, compiler warmup, or graph capture"
+    ]
+  },
+  "artifacts": {
+    "baseline": "source/framework_baseline.py",
+    "optimized": "source/rowwise_extension_kernel.hip",
+    "harness": "source/pytorch_binding.cpp"
+  },
+  "verification": {
+    "status": "template-only",
+    "method": "Compare extension output with torch.sum(x, dim=1) or equivalent OneFlow eager output across contiguous and rejected-stride cases.",
+    "tolerances": {
+      "max_abs_error": 0.0001,
+      "max_rel_error": 0.0001
+    }
+  },
+  "benchmarking": {
+    "status": "template-only",
+    "operation": "framework-rowwise-sum-extension",
+    "required_metrics": [
+      "median extension latency",
+      "dispatch boundary",
+      "framework version",
+      "CUDA stream source",
+      "tensor strides",
+      "dtype",
+      "hardware_metadata"
+    ],
+    "recommended_shapes": [
+      "rows=4096,cols=1024",
+      "rows=65536,cols=128",
+      "rows=1024,cols=4096"
+    ]
+  },
+  "license": "Project seed example",
+  "curation": {
+    "status": "template-only",
+    "notes": "Framework extension scaffold for rowwise CUDA work; useful for comparing eager, compiler-generated, Triton, and custom HIP paths."
+  }
+}

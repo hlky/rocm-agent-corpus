@@ -1,0 +1,68 @@
+{
+  "schema_version": "0.1.0",
+  "id": "aos-soa-layout-conversion",
+  "title": "AoS to SoA Layout Conversion",
+  "domain": "memory",
+  "language": "hip-cpp",
+  "tags": [
+    "layout-conversion",
+    "aos",
+    "soa",
+    "vectorized-load",
+    "coalescing"
+  ],
+  "source_refs": [
+    "amd-rocm-programming-guide",
+    "amd-hip-memory-performance",
+    "rocm-examples"
+  ],
+  "problem": {
+    "summary": "Convert a contiguous array-of-structures represented as x/y/z/w float tuples into four structure-of-arrays outputs. The baseline loads scalar fields; the optimized version uses one vectorized float4 load per tuple.",
+    "inputs": [
+      "float* aos",
+      "float* x",
+      "float* y",
+      "float* z",
+      "float* w",
+      "int n"
+    ],
+    "outputs": [
+      "x[i], y[i], z[i], and w[i] contain the four fields from tuple i"
+    ],
+    "constraints": [
+      "aos is 16-byte aligned for the optimized float4 path",
+      "outputs do not alias aos or each other",
+      "n may be any positive element count"
+    ]
+  },
+  "artifacts": {
+    "baseline": "source/baseline.hip",
+    "optimized": "source/optimized.hip",
+    "harness": "../../../harnesses/aos_soa_benchmark.hip"
+  },
+  "verification": {
+    "status": "template-only",
+    "method": "Harness compares all four SoA outputs against CPU deinterleaving of the AoS input.",
+    "tolerances": {}
+  },
+  "benchmarking": {
+    "status": "todo",
+    "operation": "aos-to-soa",
+    "required_metrics": [
+      "median kernel duration",
+      "effective memory bandwidth",
+      "global load/store sectors per request",
+      "alignment contract"
+    ],
+    "recommended_shapes": [
+      "n=1048576",
+      "n=16777216",
+      "n=16777219"
+    ]
+  },
+  "license": "Project template example",
+  "curation": {
+    "status": "template-only",
+    "notes": "No GPU timing has been collected. Keep vectorized-load wins or losses labeled timing-only unless profiler counters are collected."
+  }
+}

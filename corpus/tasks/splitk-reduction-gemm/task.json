@@ -1,0 +1,87 @@
+{
+  "schema_version": "0.1.0",
+  "id": "splitk-reduction-gemm",
+  "title": "Split K GEMM Reduction",
+  "domain": "gemm",
+  "language": "hip-cpp",
+  "tags": [
+    "cublaslt",
+    "cutlass",
+    "gemm",
+    "reduction",
+    "rocm-parity",
+    "split-k",
+    "template-only",
+    "triton"
+  ],
+  "source_refs": [
+    "amd-hipblaslt-rocblas-docs",
+    "rocm-composable-kernel",
+    "triton",
+    "amd-rocm-programming-guide",
+    "rocm-rocprim"
+  ],
+  "problem": {
+    "summary": "Evaluate Split-K GEMM partial accumulation and reduction strategies against hipBLASLt, Composable Kernel, and Triton, focusing on large-K or low-occupancy shapes where K partitioning may help.",
+    "inputs": [
+      "half* A",
+      "half* B",
+      "float* C",
+      "float* partials",
+      "int M",
+      "int N",
+      "int K",
+      "int split_k"
+    ],
+    "outputs": [
+      "C = A * B with FP32 accumulation"
+    ],
+    "constraints": [
+      "Template-only; no timing or profiler evidence is claimed",
+      "Document reduction method: atomics, workspace reduction, or epilogue reduction",
+      "Record math mode, layouts, leading dimensions, and workspace size",
+      "Compare against non-split GEMM for the same shape"
+    ]
+  },
+  "artifacts": {
+    "baseline": "source/baseline.hip",
+    "optimized": "source/optimized.hip",
+    "harness": "source/harness_plan.md",
+    "profiles": [],
+    "results": []
+  },
+  "verification": {
+    "status": "template-only",
+    "method": "Compare against hipBLAS/rocBLAS/hipBLASLt or CPU FP32 accumulation and check split_k=1 matches the non-split contract.",
+    "tolerances": {
+      "max_abs_error": 0.05,
+      "max_rel_error": 0.02
+    }
+  },
+  "benchmarking": {
+    "status": "template-only",
+    "operation": "splitk-reduction-gemm",
+    "required_metrics": [
+      "median latency",
+      "effective TFLOP/s",
+      "M/N/K",
+      "split_k",
+      "reduction policy",
+      "workspace bytes",
+      "library baseline",
+      "hardware and build metadata",
+      "evidence label"
+    ],
+    "recommended_shapes": [
+      "M=128 N=4096 K=16384 split_k=2,4,8",
+      "M=256 N=256 K=65536 split_k=4,8,16",
+      "M=4096 N=4096 K=4096 split_k=1,2,4",
+      "M=64 N=8192 K=8192 split_k=2,4"
+    ]
+  },
+  "license": "Project seed example",
+  "curation": {
+    "status": "template-only",
+    "notes": "ROCm parity port from CUDA task `splitk-reduction-gemm`. This is a template/harness scaffold only; CUDA-origin result artifacts were intentionally not copied, and no ROCm timing, correctness, or profiler-counter evidence is claimed yet. Run on AMD hardware, attach ROCm version, hipcc flags, gfx target, and label HIP-event-only results as timing-only."
+  }
+}

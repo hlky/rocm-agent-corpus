@@ -1,0 +1,52 @@
+{
+  "schema_version": "0.1.0",
+  "track_id": "integration-epilogue",
+  "guide": "docs/INTEGRATION_EPILOGUE_TASK_GUIDE.md",
+  "mission": "Promote guide and skeleton rows into first-class template-only tasks for GEMM epilogues, MIGraphX plugins, and framework extension operators.",
+  "evidence_policy": {
+    "current_status": "template-only",
+    "must_say": ["template-only for unrun scaffolds", "timing-only for HIP-event timings without profiler counters", "negative example when an attempted optimization loses"],
+    "must_not_claim": ["custom epilogue win without hipBLASLt or Composable Kernel epilogue baseline", "MIGraphX plugin win without matching engine/runtime timing boundary", "framework extension win without dispatch and synchronization boundary metadata"]
+  },
+  "tasks": [
+    {
+      "id": "gemm-bias-activation-epilogue",
+      "task_path": "corpus/tasks/gemm-bias-activation-epilogue/task.json",
+      "status": "template-only",
+      "topic": "custom GEMM epilogue fusion versus hipBLASLt and Composable Kernel baselines",
+      "source_refs": ["amd-hipblaslt-rocblas-docs", "rocm-composable-kernel", "triton", "amd-rocm-programming-guide"]
+    },
+    {
+      "id": "migraphx-custom-op-fused-op",
+      "task_path": "corpus/tasks/migraphx-custom-op-fused-op/task.json",
+      "status": "template-only",
+      "topic": "minimal MIGraphX plugin fused op lifecycle and CUDA enqueue kernel",
+      "source_refs": ["amd-migraphx-docs", "amd-migraphx", "amd-rocm-programming-guide"]
+    },
+    {
+      "id": "pytorch-hip-extension-op",
+      "task_path": "corpus/tasks/pytorch-hip-extension-op/task.json",
+      "status": "template-only",
+      "topic": "framework extension boundaries, tensor checks, strides, streams, and rowwise HIP op",
+      "source_refs": ["pytorch", "oneflow", "oneflow-docs", "triton", "amd-rocm-programming-guide"]
+    }
+  ],
+  "metadata_requirements": [
+    "task_id",
+    "evidence_label",
+    "gpu_name",
+    "gfx_target",
+    "driver_version",
+    "cuda_toolkit_version",
+    "compiler_or_library_version",
+    "build_or_compile_options",
+    "timer_type",
+    "warmup_iterations",
+    "measured_iterations",
+    "correctness_reference",
+    "tolerance",
+    "dispatch_or_engine_boundary",
+    "library_baseline_metadata",
+    "win_loss_notes"
+  ]
+}

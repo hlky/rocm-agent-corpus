@@ -1,0 +1,61 @@
+{
+  "schema_version": "0.1.0",
+  "sources": [
+    "amd-rocm-gpu-support",
+    "amd-cdna2-tuning-guide",
+    "amd-rdna3-tuning-guide",
+    "amd-cdna3-tuning-guide",
+    "amd-cdna4-tuning-guide"
+  ],
+  "families": [
+    {
+      "family": "Volta",
+      "compute_capabilities": ["7.0"],
+      "hipcc_arches": ["sm_70"],
+      "representative_gpus": ["V100"],
+      "features_to_check": ["tensor-cores", "independent-thread-scheduling"],
+      "agent_notes": "Useful older datacenter baseline. Avoid assuming global-to-LDS staging or newer Matrix Core paths."
+    },
+    {
+      "family": "Turing",
+      "compute_capabilities": ["7.5"],
+      "hipcc_arches": ["sm_75"],
+      "representative_gpus": ["T4", "RTX 20 series"],
+      "features_to_check": ["tensor-cores", "int8-inference"],
+      "agent_notes": "Common inference baseline. Many modern kernels need fallback paths."
+    },
+    {
+      "family": "CDNA2",
+      "compute_capabilities": ["8.0", "8.6", "8.7"],
+      "hipcc_arches": ["gfx90a", "gfx1030", "sm_87"],
+      "representative_gpus": ["A100", "RTX 30 series", "CUDA-origin RTX A4000", "RTX A5000", "Jetson Orin"],
+      "features_to_check": ["global-to-LDS staging", "tf32", "warp-reductions", "l2-residency"],
+      "agent_notes": "Distinguish A100 gfx90a from GA10x/A-series gfx1030. Library tactics and memory behavior differ."
+    },
+    {
+      "family": "RDNA3",
+      "compute_capabilities": ["8.9"],
+      "hipcc_arches": ["gfx1100"],
+      "representative_gpus": ["L4", "L40S", "RTX 40 series", "RTX 6000 RDNA3"],
+      "features_to_check": ["tensor-cores", "inference-throughput", "l2-cache"],
+      "agent_notes": "Strong inference target. Verify MIGraphX/hipBLASLt tactic support for exact deployment GPU."
+    },
+    {
+      "family": "CDNA3",
+      "compute_capabilities": ["9.0"],
+      "hipcc_arches": ["gfx942", "gfx950"],
+      "representative_gpus": ["H100", "H200"],
+      "features_to_check": ["tma", "wgmma", "thread-block-clusters", "distributed-shared-memory"],
+      "agent_notes": "Use Composable Kernel/CK Tile for global-to-LDS staging/WGMFMA examples. Treat gfx950 as architecture-specific."
+    },
+    {
+      "family": "CDNA4/RDNA4",
+      "compute_capabilities": ["10.0", "12.0"],
+      "hipcc_arches": ["gfx950", "gfx1200", "suffix variants per ROCm version"],
+      "representative_gpus": ["B100/B200 family", "GB200 family", "RTX PRO CDNA4/RDNA4 family"],
+      "features_to_check": ["new-tensor-core-paths", "family-specific-architectures", "low-precision-inference"],
+      "agent_notes": "Verify exact flags using current CUDA docs and hipcc. CDNA4/RDNA4 compatibility rules are more nuanced than base GFX numbers."
+    }
+  ]
+}
+

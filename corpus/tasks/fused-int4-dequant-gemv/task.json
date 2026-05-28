@@ -1,0 +1,98 @@
+{
+  "schema_version": "0.1.0",
+  "id": "fused-int4-dequant-gemv",
+  "title": "Fused INT4 Dequantization GEMV",
+  "domain": "quantization",
+  "language": "hip-cpp",
+  "tags": [
+    "quantization",
+    "int4",
+    "packed-weights",
+    "fused-dequant",
+    "gemv",
+    "weight-only",
+    "group-scales",
+    "zero-points",
+    "custom-kernel-competition",
+    "llm-inference"
+  ],
+  "source_refs": [
+    "amd-rocm-programming-guide",
+    "rocm-composable-kernel",
+    "amd-hipblaslt-rocblas-docs",
+    "amd-migraphx-docs",
+    "vllm",
+    "transformer-engine",
+    "bitsandbytes",
+    "triton",
+    "flashinfer"
+  ],
+  "problem": {
+    "summary": "Compute y[row] = sum_k x[k] * ((q4_weight[row,k] - zero_point[row,group(k)]) * scale[row,group(k)]) for row-major packed uint4 weights. The task teaches fused unpack plus dequantization inside a GEMV kernel instead of materializing FP16 or FP32 weights before multiplication.",
+    "inputs": [
+      "uint8_t* packed_weights: row-major weights shaped [rows, ceil(cols / 2)] with even columns in the low nibble and odd columns in the high nibble",
+      "float* x: FP32 activation vector shaped [cols]",
+      "float* scales: FP32 scale metadata shaped [rows, ceil(cols / group_size)]",
+      "uint8_t* zero_points: uint4 zero-point metadata stored in bytes shaped [rows, ceil(cols / group_size)]",
+      "float* y: FP32 output vector shaped [rows]",
+      "int rows",
+      "int cols",
+      "int group_size"
+    ],
+    "outputs": [
+      "For each row, y[row] equals the FP32 dot product of x and the dequantized int4 weight row using per-row/per-group scale and zero-point metadata"
+    ],
+    "constraints": [
+      "Weight packing uses unsigned 4-bit values with two columns per byte",
+      "Even K columns use the low nibble; odd K columns use the high nibble",
+      "Dequantization contract is (q4 - zero_point) * scale",
+      "Scale and zero-point metadata are per output row and per contiguous K group",
+      "Group tails are valid when cols is not divisible by group_size",
+      "FP32 accumulation and FP32 output are used in this seed task",
+      "The optimized seed uses one CTA per output row and fuses unpack, dequantization, multiply, and reduction"
+    ]
+  },
+  "artifacts": {
+    "baseline": "source/baseline.hip",
+    "optimized": "source/optimized.hip",
+    "harness": "../../../harnesses/int4_dequant_gemv_benchmark.hip"
+  },
+  "verification": {
+    "status": "port-pending-rocm-run",
+    "method": "The harness constructs deterministic packed int4 weights, scales, zero points, and activation values, then computes a CPU FP64-accumulated reference before comparing GPU output with max_abs_error, max_rel_error, bad_count, and passed. Ported from the CUDA corpus; rerun on ROCm hardware before marking passed.",
+    "tolerances": {
+      "max_abs_error": 0.005,
+      "max_rel_error": 0.0005
+    }
+  },
+  "benchmarking": {
+    "status": "rocm-measurement-pending",
+    "operation": "fused-int4-dequant-gemv",
+    "required_metrics": [
+      "median kernel duration",
+      "p10 kernel duration",
+      "p90 kernel duration",
+      "weighted_values_per_s",
+      "minimum_logical_gib_per_s",
+      "max_abs_error",
+      "max_rel_error",
+      "bad_count",
+      "evidence_label"
+    ],
+    "recommended_shapes": [
+      "rows=4096,cols=4096,group_size=128",
+      "rows=4096,cols=4096,group_size=64",
+      "rows=4096,cols=11008,group_size=128",
+      "rows=11008,cols=4096,group_size=128",
+      "rows=32000,cols=4096,group_size=128",
+      "rows=4096,cols=4097,group_size=128",
+      "rows=1024,cols=1024,group_size=32",
+      "rows=128,cols=4096,group_size=128"
+    ]
+  },
+  "license": "Project seed example",
+  "curation": {
+    "status": "ported-seed",
+    "notes": "Ported from the CUDA corpus on 2026-05-20. CUDA-origin timing artifacts were removed; rerun on ROCm hardware before making performance claims."
+  }
+}

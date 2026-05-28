@@ -1,0 +1,69 @@
+{
+  "schema_version": "0.1.0",
+  "id": "inline-mfma-skeleton",
+  "title": "Inline mfma Skeleton",
+  "domain": "tensor-core",
+  "language": "hip-cpp",
+  "tags": [
+    "mfma",
+    "inline-ptx",
+    "matrix-core",
+    "ptx",
+    "template-only",
+    "todo"
+  ],
+  "source_refs": [
+    "amd-hip-programming-guide",
+    "amd-gcn-isa",
+    "rocm-composable-kernel"
+  ],
+  "problem": {
+    "summary": "Provide a minimal task boundary for replacing rocWMMA with inline mfma after register-fragment layout and ldmatrix staging are documented.",
+    "inputs": [
+      "half* A",
+      "half* B",
+      "float* C",
+      "int tiles"
+    ],
+    "outputs": [
+      "one 16x8x16-style tile result per warp-sized group"
+    ],
+    "constraints": [
+      "Inline LLVM IR / AMD GCN ISA instruction and fragment layout are TODO",
+      "Must record target GFX and instruction shape",
+      "Use Composable Kernel as a reference for production-quality layouts"
+    ]
+  },
+  "artifacts": {
+    "baseline": "source/baseline.hip",
+    "optimized": "source/optimized.hip"
+  },
+  "verification": {
+    "status": "template-only",
+    "method": "Compare a single tile against a CPU FP32 reference before benchmarking.",
+    "tolerances": {
+      "default_max_abs_error": 0.05,
+      "default_max_rel_error": 0.02
+    }
+  },
+  "benchmarking": {
+    "status": "template-only",
+    "operation": "inline-mma-tile",
+    "required_metrics": [
+      "median kernel duration",
+      "instruction shape",
+      "target sm",
+      "fragment layout notes",
+      "hardware_metadata"
+    ],
+    "recommended_shapes": [
+      "tiles=4096",
+      "tiles=65536"
+    ]
+  },
+  "license": "Project seed example",
+  "curation": {
+    "status": "template-only",
+    "notes": "This is deliberately a skeleton. Future optimized.hip edits should document register ownership before using inline LLVM IR / AMD GCN ISA."
+  }
+}

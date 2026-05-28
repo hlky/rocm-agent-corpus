@@ -1,0 +1,79 @@
+{
+  "schema_version": "0.1.0",
+  "id": "groupby-reduce-by-key",
+  "title": "Group By Reduce By Key Scaffold",
+  "domain": "parallel-primitives",
+  "language": "hip-cpp",
+  "tags": [
+    "groupby",
+    "reduce-by-key",
+    "cub",
+    "rocthrust",
+    "segmented-reduction",
+    "template-only"
+  ],
+  "source_refs": [
+    "rocm-rocprim",
+    "rocm-rocprim-docs",
+    "amd-rocm-programming-guide"
+  ],
+  "problem": {
+    "summary": "Group sorted or unsorted key/value pairs and reduce values per key while exposing skew, preprocessing, and temporary-storage costs.",
+    "inputs": [
+      "keys",
+      "values",
+      "num_items",
+      "sorted flag",
+      "reduction operator",
+      "key range metadata"
+    ],
+    "outputs": [
+      "unique keys",
+      "reduced values",
+      "num_groups"
+    ],
+    "constraints": [
+      "Template-only; separate sorted-input reduce_by_key from sort-plus-reduce pipelines",
+      "Record skew, group-size histogram, and stable output policy",
+      "Custom atomics must document conflict and determinism behavior"
+    ]
+  },
+  "artifacts": {
+    "baseline": "source/baseline.hip",
+    "optimized": "source/optimized.hip",
+    "harness": "source/harness_plan.md"
+  },
+  "verification": {
+    "status": "template-only",
+    "method": "Implement the baseline, optimized candidate, and CPU or strongest-library oracle where applicable; compare outputs before timing claims.",
+    "tolerances": {
+      "max_abs_error": 0.0001,
+      "max_rel_error": 0.0001
+    }
+  },
+  "benchmarking": {
+    "status": "template-only",
+    "operation": "groupby-reduce-by-key",
+    "required_metrics": [
+      "median latency",
+      "num_items",
+      "num_groups",
+      "sorted_input",
+      "group-size histogram",
+      "temp storage bytes",
+      "preprocessing included",
+      "correctness max error"
+    ],
+    "recommended_shapes": [
+      "n=1048576 groups=1024 uniform",
+      "n=1048576 groups=1024 Zipf",
+      "n=16777216 groups=65536 sorted",
+      "n=1048576 small fixed key range"
+    ]
+  },
+  "license": "Project seed example",
+  "curation": {
+    "status": "template-only",
+    "notes": "Promoted from the v2 extension backlog as wave 2. No performance, correctness, or profiler evidence is claimed yet."
+  }
+}

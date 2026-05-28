@@ -1,0 +1,77 @@
+{
+  "schema_version": "0.1.0",
+  "id": "reduce-scatter-overlap",
+  "title": "Reduce Scatter Overlap Scaffold",
+  "domain": "multi-gpu",
+  "language": "hip-cpp+rccl",
+  "tags": [
+    "rccl",
+    "reduce-scatter",
+    "overlap",
+    "multi-gpu",
+    "template-only"
+  ],
+  "source_refs": [
+    "amd-rccl",
+    "amd-rccl-docs",
+    "megatron-lm",
+    "amd-rocm-programming-guide"
+  ],
+  "problem": {
+    "summary": "Overlap chunked local compute with RCCL reduce-scatter to model tensor/sequence-parallel training communication boundaries.",
+    "inputs": [
+      "per-rank gradient or activation shard",
+      "rank count",
+      "chunk size",
+      "compute kernel",
+      "RCCL communicator"
+    ],
+    "outputs": [
+      "reduced scatter shard per rank",
+      "timing/timeline metadata"
+    ],
+    "constraints": [
+      "Template-only; no overlap claim without multi-GPU timing or Nsight Systems timeline",
+      "Record rank count, topology, transport, chunking, stream priorities, and dependency edges",
+      "Compare phase-separated and overlapped variants"
+    ]
+  },
+  "artifacts": {
+    "baseline": "source/baseline.hip",
+    "optimized": "source/optimized.hip",
+    "harness": "source/harness_plan.md"
+  },
+  "verification": {
+    "status": "template-only",
+    "method": "Implement the baseline, optimized candidate, and CPU or strongest-library oracle where applicable; compare outputs before timing claims.",
+    "tolerances": {
+      "max_abs_error": 0.0001,
+      "max_rel_error": 0.0001
+    }
+  },
+  "benchmarking": {
+    "status": "template-only",
+    "operation": "reduce-scatter-overlap",
+    "required_metrics": [
+      "end-to-end latency",
+      "rank count",
+      "bytes per rank",
+      "chunk size",
+      "topology",
+      "transport",
+      "overlap percentage",
+      "timeline evidence",
+      "correctness max error"
+    ],
+    "recommended_shapes": [
+      "ranks=2 bytes=256MiB chunks=8",
+      "ranks=4 bytes=1GiB chunks=16",
+      "ranks=8 bytes=4GiB chunks=32"
+    ]
+  },
+  "license": "Project seed example",
+  "curation": {
+    "status": "template-only",
+    "notes": "Promoted from the v2 extension backlog as wave 2. No performance, correctness, or profiler evidence is claimed yet."
+  }
+}

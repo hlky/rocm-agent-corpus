@@ -1,0 +1,412 @@
+{
+  "schema_version": "0.1.0",
+  "task_id": "online-attention-forward",
+  "guide": "docs/ATTENTION_LIBRARY_BASELINES.md",
+  "status": "guidance-only",
+  "measurement_note": "No GPU measurements were added with this index. Existing online-attention-forward seed data is timing-only and lacks FlashAttention, MIOpen, Triton/framework, vLLM on ROCm, vLLM, FlashInfer, and materialized GEMM baselines.",
+  "library_stance": [
+    "Libraries are competitors to beat or match.",
+    "Libraries are correctness oracles for matching contracts.",
+    "Libraries are profiling targets and implementation references.",
+    "Libraries are extension surfaces for plugins, graph integration, generated kernels, or serving-stack replacement.",
+    "Libraries are not final answers; when a library wins, record why and define the next narrower custom-kernel hypothesis."
+  ],
+  "seed_contract": {
+    "operation": "scaled-dot-product-attention-forward",
+    "formula": "O = softmax(scale * Q * K^T + mask) * V",
+    "layout_q": "contiguous [batch, heads, query_length, head_dim]",
+    "layout_k": "contiguous [batch, heads, key_length, head_dim]",
+    "layout_v": "contiguous [batch, heads, key_length, head_dim]",
+    "layout_output": "contiguous [batch, heads, query_length, head_dim]",
+    "dtype_q": "fp32",
+    "dtype_k": "fp32",
+    "dtype_v": "fp32",
+    "dtype_accumulator": "fp32",
+    "dtype_output": "fp32",
+    "scale": "1 / sqrt(head_dim)",
+    "dropout": "disabled",
+    "padding_or_ragged_sequences": "not present",
+    "paged_kv_cache": "not present in seed",
+    "query_position_convention": "suffix-aligned causal positions: absolute_query = query_index + max(0, key_length - query_length); key is visible when key_index <= absolute_query",
+    "decode_interpretation": "query_length=1,key_length=N,causal=1 models latest-token decode and can see the whole KV cache"
+  },
+  "required_match_contract": [
+    "operation",
+    "prefill_or_decode",
+    "batch_size",
+    "num_query_heads",
+    "num_kv_heads",
+    "query_length",
+    "key_length",
+    "head_dim",
+    "value_dim",
+    "dtype_q",
+    "dtype_k",
+    "dtype_v",
+    "dtype_accumulator",
+    "dtype_output",
+    "kv_cache_dtype",
+    "layout_q",
+    "layout_k",
+    "layout_v",
+    "layout_output",
+    "kv_cache_layout",
+    "scale",
+    "mask_type",
+    "causal_semantics",
+    "query_position_convention",
+    "dropout",
+    "timing_boundary",
+    "evidence_label"
+  ],
+  "overall_ladder": [
+    {
+      "order": 1,
+      "baseline_id": "cpu-stable-reference",
+      "role": "correctness-oracle",
+      "notes": "Use double-precision stable softmax with the exact mask and suffix-aligned query convention."
+    },
+    {
+      "order": 2,
+      "baseline_id": "custom-naive-cuda",
+      "role": "educational-baseline",
+      "artifact": "corpus/tasks/online-attention-forward/source/baseline.hip"
+    },
+    {
+      "order": 3,
+      "baseline_id": "custom-online-tiled-cuda",
+      "role": "custom-seed",
+      "artifact": "corpus/tasks/online-attention-forward/source/optimized.hip"
+    },
+    {
+      "order": 4,
+      "baseline_id": "gemm-softmax-gemm",
+      "role": "materialized-attention-baseline",
+      "notes": "Useful oracle and memory-traffic floor; usually weak for long-sequence fused prefill."
+    },
+    {
+      "order": 5,
+      "baseline_id": "triton-framework-sdpa",
+      "role": "compiler-and-framework-competitor"
+    },
+    {
+      "order": 6,
+      "baseline_id": "flash-attention-miopen-sdpa",
+      "role": "fused-prefill-competitor"
+    },
+    {
+      "order": 7,
+      "baseline_id": "decode-paged-kv-serving",
+      "role": "decode-and-serving-competitor"
+    },
+    {
+      "order": 8,
+      "baseline_id": "narrow-custom-kernel-or-plugin",
+      "role": "custom-competition-target",
+      "notes": "Exploit fixed shape, layout, mask, page size, fusion, lower launch overhead, or deployment boundary."
+    }
+  ],
+  "baseline_ladders": [
+    {
+      "id": "flash-attention",
+      "name": "FlashAttention dense and KV-cache paths",
+      "primary_source_paths": [
+        "third_party/flash-attention",
+        "docs/ATTENTION_KERNEL_GUIDE.md",
+        "docs/MIOPEN_ATTENTION_GUIDE.md"
+      ],
+      "applies_to": [
+        "dense prefill",
+        "fused attention",
+        "decode or extend through flash_attn_with_kvcache"
+      ],
+      "ladder": [
+        "Use flash_attn_func for separate Q, K, V tensors.",
+        "Use flash_attn_qkvpacked_func only if QKV is already packed or packing is timed.",
+        "Use flash_attn_varlen_func when padding or ragged sequence lengths are part of the contract.",
+        "Use flash_attn_with_kvcache for decode or extend with KV-cache update and attention in the same path.",
+        "Use architecture-specific FlashAttention variants only when the GPU, dtype, and head dimension are supported."
+      ],
+      "must_match": [
+        "dropout_p=0.0 for seed comparisons",
+        "softmax_scale equals the seed scale",
+        "causal bottom-right or suffix-aligned mask when query_length != key_length",
+        "layout conversion from [B,H,S,D] to [B,S,H,D] is included unless upstream tensors already use the library layout",
+        "dtype and accumulator contract are recorded; FP16/BF16/FP8 baselines are not equivalent to the FP32 seed unless declared as a changed numeric contract",
+        "ALiBi, local window, rotary, soft cap, and attention sinks are disabled unless the custom kernel implements them"
+      ],
+      "timing_boundary": [
+        "device-resident inputs",
+        "steady-state attention call",
+        "optional QKV pack, transpose, or cache update included only when required by the workload and stated"
+      ],
+      "custom_followups": [
+        "fixed-shape no-ragged/no-dropout kernel",
+        "fused scale, mask, rotary, bias, or output work",
+        "decode-only latency with fixed KV layout",
+        "plugin or extension path that avoids layout conversion"
+      ]
+    },
+    {
+      "id": "miopen-frontend-sdpa",
+      "name": "MIOpen scaled dot-product attention",
+      "primary_source_paths": [
+        "third_party/miopen-frontend",
+        "docs/MIOPEN_ATTENTION_GUIDE.md",
+        "docs/LIBRARY_GUIDE.md"
+      ],
+      "applies_to": [
+        "SDPA fprop expressible as a MIOpen graph",
+        "framework-integrated MIOpen SDPA",
+        "CDNA3 or CDNA4/RDNA4-oriented fused attention paths when supported"
+      ],
+      "ladder": [
+        "Build a MIOpen graph with matching Q, K, V, scale, mask, and output descriptors.",
+        "Generate operation plans and filter by dtype, compute type, workspace, determinism, dropout, mask behavior, and target GPU support.",
+        "Benchmark viable engine configs and record the selected engine, workspace bytes, and plan filters.",
+        "Compare steady-state graph execution against the custom seed with the same device-resident tensors.",
+        "If no equivalent plan exists, record baseline-unavailable instead of silently substituting a weaker baseline."
+      ],
+      "must_match": [
+        "tensor dimensions and strides",
+        "dtype and accumulation policy",
+        "causal semantics and query-position convention",
+        "dropout disabled",
+        "workspace and determinism settings recorded"
+      ],
+      "timing_boundary": [
+        "plan creation and autotune measured separately",
+        "steady-state graph execution compared to kernel timings",
+        "layout conversion included when not a descriptor-only view"
+      ],
+      "custom_followups": [
+        "fixed-shape direct HIP where MIOpen has no equivalent engine",
+        "unsupported mask, bias, KV-cache, or output fusion",
+        "workspace-free or descriptor-specialized narrow kernel"
+      ]
+    },
+    {
+      "id": "triton-framework-sdpa",
+      "name": "Triton and framework attention",
+      "primary_source_paths": [
+        "third_party/triton/python/tutorials/06-fused-attention.py",
+        "docs/TRITON_KERNEL_GUIDE.md",
+        "docs/FRAMEWORK_EXTENSION_GUIDE.md"
+      ],
+      "applies_to": [
+        "compiler-generated attention",
+        "PyTorch or framework SDPA",
+        "shape-specialized Triton fused attention"
+      ],
+      "ladder": [
+        "Run framework eager SDPA and record the selected backend.",
+        "Run framework compiled SDPA and separate compile time from steady-state runtime.",
+        "Run a Triton fused-attention kernel with block sizes, warps, stages, and persistence options recorded.",
+        "Optionally compare a CUDA graph captured framework or Triton path for repeated fixed shapes.",
+        "Move to HIP C++ after dispatch, JIT, and backend boundaries are clear."
+      ],
+      "must_match": [
+        "layout and strides",
+        "is_causal or explicit mask semantics",
+        "scale and dropout",
+        "training versus evaluation mode",
+        "dtype and TF32 allowance for FP32 framework paths",
+        "query-position convention for decode and extend"
+      ],
+      "timing_boundary": [
+        "first-call JIT and compile time reported separately",
+        "steady-state runtime reported with synchronization",
+        "framework dispatch included for application-latency claims and excluded only for kernel-only claims"
+      ],
+      "custom_followups": [
+        "lower dispatch overhead for small fixed shapes",
+        "architecture-specific CUDA scheduling",
+        "fusion across framework op boundaries",
+        "MIGraphX plugin or C++ extension integration"
+      ]
+    },
+    {
+      "id": "decode-paged-kv-serving",
+      "name": "vLLM on ROCm, vLLM, and FlashInfer decode or paged KV",
+      "primary_source_paths": [
+        "third_party/vllm-rocm",
+        "third_party/vllm",
+        "third_party/flashinfer",
+        "docs/MIGRAPHX_INFERENCE_GUIDE.md"
+      ],
+      "applies_to": [
+        "query_length=1 decode",
+        "paged KV cache",
+        "batched decode",
+        "mixed prefill/decode serving"
+      ],
+      "ladder": [
+        "Start with isolated contiguous decode matching query_length=1,key_length=N,causal=1 and latest-token query semantics.",
+        "Move to paged-KV decode with page or block size, block table, last-page length, KV layout, and cache dtype recorded.",
+        "Benchmark batched decode with realistic context-length distribution and scheduler assumptions.",
+        "Benchmark mixed prefill/decode or extend when the production path interleaves prompt processing and generation.",
+        "Use end-to-end serving metrics for serving claims: time-to-first-token, inter-token latency, tokens/sec, memory footprint, and correctness tolerance."
+      ],
+      "must_match": [
+        "latest-token suffix-aligned decode convention",
+        "num query heads and num KV heads",
+        "grouped-query or multi-query mapping",
+        "KV layout and page or block size",
+        "KV-cache dtype and quantization",
+        "rotary, ALiBI, sinks, sliding window, or other attention modifiers",
+        "scheduler and batch composition for serving metrics"
+      ],
+      "timing_boundary": [
+        "vLLM on ROCm engine build separated from runtime",
+        "FlashInfer plan separated from wrapper run unless replanning is runtime behavior",
+        "vLLM isolated attention benchmarks separated from serving benchmarks",
+        "KV-cache construction or layout conversion included when converting from seed tensors"
+      ],
+      "per_library_checklists": {
+        "migraphx_llm": [
+          "version",
+          "engine build flags",
+          "attention backend or plugin",
+          "paged KV settings",
+          "max tokens in paged KV cache",
+          "batch and beam settings",
+          "precision and quantization",
+          "timing cache"
+        ],
+        "vllm": [
+          "attention backend",
+          "block size",
+          "KV-cache dtype",
+          "scheduler and batch composition",
+          "prefix-cache settings",
+          "prefill/decode/extend/mixed classification"
+        ],
+        "flashinfer": [
+          "wrapper type",
+          "kv_layout",
+          "page_block_size",
+          "workspace bytes",
+          "plan inputs",
+          "use_tensor_cores",
+          "q dtype",
+          "kv dtype",
+          "query heads",
+          "KV heads",
+          "context lengths"
+        ]
+      },
+      "custom_followups": [
+        "fixed page size and head dimension",
+        "single-request or narrow-batch latency",
+        "custom cache layout",
+        "rotary or bias fusion",
+        "serving-stack kernel replacement with the same batching boundary"
+      ]
+    },
+    {
+      "id": "gemm-softmax-gemm",
+      "name": "Materialized GEMM plus softmax plus GEMM",
+      "primary_source_paths": [
+        "docs/GEMM_COMPETITION_TRACK.md",
+        "docs/HIPBLAS_ROCBLAS_GUIDE.md",
+        "docs/ROCPRIM_HIPCUB_ROCTHRUST_GUIDE.md"
+      ],
+      "applies_to": [
+        "correctness oracle",
+        "debug baseline",
+        "explicit memory-traffic floor",
+        "small shapes where launch and materialization cost can be studied"
+      ],
+      "ladder": [
+        "Run batched or strided QK GEMM to materialize scores.",
+        "Apply scale, mask, and rowwise softmax with the seed suffix-aligned causal rule.",
+        "Run batched or strided PV GEMM to produce output.",
+        "Optionally capture the sequence in a CUDA graph for repeated fixed shapes.",
+        "Optionally run hipBLASLt algorithm search for QK and PV separately and record selected algorithms."
+      ],
+      "must_match": [
+        "scale placement in GEMM alpha or softmax kernel",
+        "mask semantics",
+        "dtype of scores, probabilities, accumulators, and output",
+        "layout and leading dimensions",
+        "allocation and memory traffic for materialized scores and probabilities",
+        "launch count and graph replay boundary"
+      ],
+      "timing_boundary": [
+        "QK GEMM",
+        "mask plus softmax",
+        "PV GEMM",
+        "score/probability allocation if production would allocate it",
+        "layout conversion if required"
+      ],
+      "custom_followups": [
+        "online softmax to avoid materializing scores and probabilities",
+        "fused mask, softmax, and PV",
+        "fixed-shape row statistics in registers or shared memory",
+        "Matrix Core QK and PV tiles without materialized P"
+      ]
+    }
+  ],
+  "evidence_policy": {
+    "timing_only_label": "Use timing-only when results are HIP-event or framework timings without Nsight counters.",
+    "negative_example_label": "Use negative example when an attempted optimization or custom path does not improve speed.",
+    "must_not_claim": [
+      "rocprofiler/rocprof counter evidence unless profiler artifacts were collected",
+      "FlashAttention/MIOpen/Triton equivalence unless mask, dtype, scale, layout, dropout, and sequence contract match",
+      "Decode wins unless KV-cache layout, batching, and query-position semantics are recorded",
+      "Serving wins from isolated attention-kernel timing alone",
+      "FP32 custom wins against lower-precision library baselines unless the changed numeric contract is explicit"
+    ]
+  },
+  "record_template_fields": [
+    "baseline_id",
+    "baseline_version_or_commit",
+    "entrypoint_or_backend",
+    "hardware_id",
+    "gpu_name",
+    "gfx_target",
+    "driver_version",
+    "cuda_toolkit_version",
+    "library_versions",
+    "compiler_version",
+    "arch_flags",
+    "batch_size",
+    "num_query_heads",
+    "num_kv_heads",
+    "query_length",
+    "key_length",
+    "head_dim",
+    "value_dim",
+    "dtype_q",
+    "dtype_k",
+    "dtype_v",
+    "dtype_accumulator",
+    "dtype_output",
+    "kv_cache_dtype",
+    "layout_q",
+    "layout_k",
+    "layout_v",
+    "layout_output",
+    "kv_cache_layout",
+    "scale",
+    "mask_type",
+    "causal_semantics",
+    "query_position_convention",
+    "dropout",
+    "prefill_or_decode",
+    "warmup_iterations",
+    "measured_iterations",
+    "timer_type",
+    "synchronization_points",
+    "timing_boundary",
+    "setup_costs_measured_separately",
+    "correctness_reference",
+    "tolerance",
+    "seed",
+    "max_abs_error",
+    "max_rel_error",
+    "evidence_label",
+    "win_loss_notes",
+    "next_custom_hypothesis"
+  ]
+}

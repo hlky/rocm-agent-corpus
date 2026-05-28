@@ -1,0 +1,76 @@
+{
+  "schema_version": "0.1.0",
+  "id": "embedding-gather-dedup",
+  "title": "Embedding Gather Dedup",
+  "domain": "embedding",
+  "language": "hip-cpp",
+  "tags": [
+    "embedding",
+    "gather",
+    "dedupe",
+    "irregular",
+    "memory-bandwidth"
+  ],
+  "source_refs": [
+    "amd-rocm-programming-guide",
+    "rocm-rocprim",
+    "vllm"
+  ],
+  "problem": {
+    "summary": "Gather embedding rows for token ids. The baseline directly copies each requested row. The optimized scaffold assumes ids have been sorted and uniqued by an upstream rocPRIM/hipCUB/rocThrust-style path, gathers unique rows once, and scatters back through an inverse map.",
+    "inputs": [
+      "float* table",
+      "int* ids",
+      "int* unique_ids",
+      "int* inverse",
+      "float* unique_rows",
+      "float* output",
+      "int requests",
+      "int unique_count",
+      "int dim"
+    ],
+    "outputs": [
+      "output[request, dim] contains table[ids[request], dim]"
+    ],
+    "constraints": [
+      "baseline uses ids directly",
+      "optimized seed expects unique_ids and inverse to be precomputed",
+      "dim is runtime dynamic but contiguous",
+      "dedupe only helps when repeated ids amortize sorting and scatter overhead"
+    ]
+  },
+  "artifacts": {
+    "baseline": "source/baseline.hip",
+    "optimized": "source/optimized.hip"
+  },
+  "verification": {
+    "status": "template-only",
+    "method": "TODO: compare direct gather and dedupe path outputs bytewise for deterministic fp32 table values.",
+    "tolerances": {
+      "max_abs_error": 0.0
+    }
+  },
+  "benchmarking": {
+    "status": "template-only",
+    "operation": "embedding-gather-with-optional-dedup",
+    "required_metrics": [
+      "median kernel duration",
+      "requests",
+      "unique_count",
+      "embedding_dim",
+      "sort/dedupe time included or excluded",
+      "effective bandwidth"
+    ],
+    "recommended_shapes": [
+      "requests=8192 unique=8192 dim=128",
+      "requests=8192 unique=1024 dim=128",
+      "requests=32768 unique=2048 dim=256",
+      "requests=4096 zipf dim=64"
+    ]
+  },
+  "license": "Project seed example",
+  "curation": {
+    "status": "template-only",
+    "notes": "Template-only embedding gather/dedup scaffold. The optimized path documents the sorted/unique customization surface; it must include sort and inverse-map cost before claiming an end-to-end win."
+  }
+}

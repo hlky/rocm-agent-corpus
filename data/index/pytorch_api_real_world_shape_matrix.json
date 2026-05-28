@@ -1,0 +1,590 @@
+{
+  "schema_version": "0.1.0",
+  "observed_at": "2026-05-21",
+  "doc": "docs/PYTORCH_API_REAL_WORLD_SHAPE_MATRIX.md",
+  "evidence_label": "extracted-problem-size",
+  "purpose": "Admission matrix requiring real-world problem sizes for PyTorch public API contracts used in HIP/ROCm challenge tasks.",
+  "admission_rule": {
+    "required_for": [
+      "docs/PYTORCH_BASELINE_CHALLENGE.md challenge tracks",
+      "eval/tasks/pytorch_baseline_challenge_manifest.json candidate tasks",
+      "new PyTorch-public-API challenge tasks"
+    ],
+    "task_field": "real_shape_matrix_refs",
+    "rule": "Every challenge-admitted PyTorch public API contract must cite at least one shape_matrix row with admission_status=challenge-admitted."
+  },
+  "coverage_summary": {
+    "all_current_challenge_public_api_contracts_have_shape_rows": true,
+    "catalog_is_not_automatic_admission": true,
+    "blocked_until_sourced_families": [
+      "torch.linalg.* except narrowed torch.linalg.cholesky candidate",
+      "torch.optim.*",
+      "torch._foreach_*",
+      "torch.special.* except narrowed torch.special.logit candidate",
+      "torch.nested.*"
+    ]
+  },
+  "shape_matrix": [
+    {
+      "id": "pt_layout_latent_pack_concat",
+      "admission_status": "challenge-admitted",
+      "public_api_contracts": [
+        "torch.empty",
+        "torch.zeros",
+        "torch.full",
+        "torch.arange",
+        "torch.randn",
+        "torch.randn_like",
+        "torch.cat",
+        "torch.stack",
+        "torch.split",
+        "torch.chunk",
+        "torch.reshape",
+        "torch.view",
+        "torch.permute",
+        "torch.transpose",
+        "Tensor.contiguous",
+        "torch.squeeze",
+        "torch.unsqueeze",
+        "torch.repeat_interleave",
+        "Tensor.expand"
+      ],
+      "tracks": ["all-reference-helpers", "torch_pointwise_fusion", "torch_conv_codec", "torch_attention"],
+      "real_problem_sizes": [
+        {
+          "shape_id": "sdxl_unet_cfg_1024",
+          "source": "H:/dinoml_v2_agents/agents/plans/diffusers/stable_diffusion_xl/report.md:117",
+          "tensors": ["latent_model_input [2B,4,128,128]", "prompt_embeds [2B,77,2048]"]
+        },
+        {
+          "shape_id": "flux_transformer_1024",
+          "source": "H:/dinoml_v2_agents/agents/plans/diffusers/flux/report.md:155",
+          "tensors": ["latents [B,16,128,128] packed to [B,4096,64]", "t5_prompt [B,512,4096]"]
+        },
+        {
+          "shape_id": "wan_i2v_condition_81f",
+          "source": "H:/dinoml_v2_agents/agents/plans/diffusers/wan/report.md:216",
+          "tensors": ["concat condition [B,36,T_lat,H/8,W/8]", "mask [B,4,T_lat,H/8,W/8]"]
+        },
+        {
+          "shape_id": "ace_step_audio_dit_pack",
+          "source": "H:/dinoml_v2_agents/agents/plans/diffusers/ace_step/report.md:148",
+          "tensors": ["context_latents [B,T,128]", "noisy_latents [B,T,64]", "concat [B,T,192]"]
+        }
+      ],
+      "notes": "Layout operations are admitted only as part of a concrete model-real subgraph, not as arbitrary tensor-shape benchmarks."
+    },
+    {
+      "id": "pt_pointwise_cfg_scheduler",
+      "admission_status": "challenge-admitted",
+      "public_api_contracts": [
+        "torch.add",
+        "torch.sub",
+        "torch.mul",
+        "torch.div",
+        "torch.where",
+        "torch.clamp",
+        "torch.exp",
+        "torch.rsqrt",
+        "torch.nn.functional.silu",
+        "torch.nn.functional.gelu",
+        "torch.nn.functional.relu",
+        "torch.sigmoid"
+      ],
+      "tracks": ["torch_pointwise_fusion", "torch_reduction_norm", "torch_conv_codec"],
+      "real_problem_sizes": [
+        {
+          "shape_id": "sdxl_unet_cfg_1024",
+          "source": "H:/dinoml_v2_agents/agents/plans/diffusers/stable_diffusion_xl/report.md:117",
+          "tensors": ["CFG/scheduler arithmetic over [2B,4,128,128]"]
+        },
+        {
+          "shape_id": "flux_vae_decode_1024",
+          "source": "H:/dinoml_v2_agents/agents/plans/diffusers/flux/report.md:164",
+          "tensors": ["latent shift/scale over [B,16,128,128]"]
+        },
+        {
+          "shape_id": "autoencoder_kl_posterior",
+          "source": "H:/dinoml_v2_agents/agents/plans/diffusers/autoencoder_kl/report.md",
+          "tensors": ["posterior moments [B,8,64,64]", "mean/logvar [B,4,64,64]"]
+        },
+        {
+          "shape_id": "mixtral_swiglu",
+          "source": "H:/dinoml_v2_agents/agents/plans/transformers/mixtral/report.md:184",
+          "tensors": ["expert gate/up projection [tokens,28672]", "SwiGLU intermediate [tokens,14336]"]
+        }
+      ],
+      "notes": "Useful custom targets include scheduler fusion, VAE scale/shift fusion, RMSNorm math, and activation epilogues."
+    },
+    {
+      "id": "pt_reduction_norm_rows",
+      "admission_status": "challenge-admitted",
+      "public_api_contracts": [
+        "torch.sum",
+        "torch.mean",
+        "torch.amax",
+        "torch.amin",
+        "torch.max",
+        "torch.argmax",
+        "torch.logsumexp",
+        "torch.norm",
+        "torch.count_nonzero",
+        "torch.nn.functional.rms_norm",
+        "torch.nn.functional.layer_norm"
+      ],
+      "tracks": ["torch_reduction_norm", "torch_selection_sampling", "torch_gather_scatter_moe"],
+      "real_problem_sizes": [
+        {
+          "shape_id": "llm_dense_decode",
+          "source": "docs/REAL_MODEL_PROBLEM_SIZES.md",
+          "tensors": ["hidden widths 2048, 2560, 4096, 5120, 6144", "head dims 64, 80, 128"]
+        },
+        {
+          "shape_id": "aimv2_rmsnorm_l2",
+          "source": "H:/dinoml_v2_agents/agents/plans/transformers/aimv2/report.md:187",
+          "tensors": ["vision/text projected features [B,projection_dim]", "RMSNorm hidden widths 768 and 1024"]
+        },
+        {
+          "shape_id": "rag_logsumexp_docs",
+          "source": "H:/dinoml_v2_agents/agents/plans/transformers/rag/report.md:142",
+          "tensors": ["seq_logprobs [B,n_docs,T,V]", "doc_scores [B,n_docs]"]
+        },
+        {
+          "shape_id": "superglue_sinkhorn",
+          "source": "H:/dinoml_v2_agents/agents/plans/transformers/superglue/report.md:203",
+          "tensors": ["log transport matrix [B,K+1,K+1]", "default sinkhorn_iterations 100"]
+        }
+      ],
+      "notes": "Arg reductions and Top-K rows must state tie policy separately."
+    },
+    {
+      "id": "pt_softmax_attention_rows",
+      "admission_status": "challenge-admitted",
+      "public_api_contracts": [
+        "torch.nn.functional.softmax",
+        "torch.nn.functional.log_softmax",
+        "torch.nn.functional.scaled_dot_product_attention",
+        "torch.nn.MultiheadAttention"
+      ],
+      "tracks": ["torch_attention", "torch_reduction_norm"],
+      "real_problem_sizes": [
+        {
+          "shape_id": "flux_transformer_1024",
+          "source": "H:/dinoml_v2_agents/agents/plans/diffusers/flux/report.md:155",
+          "tensors": ["image tokens 4096", "text tokens up to 512", "heads 24", "head_dim 128"]
+        },
+        {
+          "shape_id": "qwen3_8b_dense",
+          "source": "H:/dinoml_v2_agents/agents/plans/transformers/qwen3/report.md:115",
+          "tensors": ["Q heads 32", "KV heads 8", "head_dim 128", "context up to 40960"]
+        },
+        {
+          "shape_id": "qwen3_moe_235b_a22b",
+          "source": "H:/dinoml_v2_agents/agents/plans/transformers/qwen3_moe/report.md:115",
+          "tensors": ["Q heads 64", "KV heads 4", "head_dim 128", "router logits [M,128]"]
+        },
+        {
+          "shape_id": "superglue_attention",
+          "source": "H:/dinoml_v2_agents/agents/plans/transformers/superglue/report.md:100",
+          "tensors": ["padded keypoints [B,2,K,256]", "MHA heads 4", "head_dim 64"]
+        }
+      ],
+      "notes": "Record fp32 softmax accumulation expectations and mask semantics."
+    },
+    {
+      "id": "pt_position_scan_rope_rows",
+      "admission_status": "challenge-admitted",
+      "public_api_contracts": [
+        "torch.cumsum",
+        "torch.arange",
+        "torch.linspace",
+        "torch.meshgrid",
+        "torch.cartesian_prod",
+        "torch.outer",
+        "torch.sin",
+        "torch.cos",
+        "torch.clamp",
+        "torch.repeat_interleave",
+        "torch.roll",
+        "torch.flip"
+      ],
+      "tracks": ["torch_position_scan_rope", "rope-kv-cache-update", "block-prefix-scan"],
+      "real_problem_sizes": [
+        {
+          "shape_id": "bloom_alibi_position_cumsum",
+          "source": "H:/dinoml_v2_agents/agents/plans/transformers/bloom/report.md:89",
+          "tensors": ["attention_mask [B,S]", "position ids from cumsum", "heads 16..112", "vocab 250880"]
+        },
+        {
+          "shape_id": "mm_grounding_dino_special_logit",
+          "source": "H:/dinoml_v2_agents/agents/plans/transformers/mm_grounding_dino/report.md:153",
+          "tensors": ["pixel mask cumsum over feature H/W", "DETR-like 800/1333 images", "detector queries 900"]
+        },
+        {
+          "shape_id": "qwen3_vl_cu_seqlens_mrope",
+          "source": "H:/dinoml_v2_agents/agents/plans/transformers/qwen3_vl/report.md:187",
+          "tensors": ["grid_thw rows [num_items,3]", "cu_seqlens from repeat_interleave+cumsum", "position_ids can be [4,B,S]"]
+        },
+        {
+          "shape_id": "allegro_3d_rope_grid",
+          "source": "H:/dinoml_v2_agents/agents/plans/diffusers/allegro/report.md:306",
+          "tensors": ["token grid 22x45x80 = 79200", "heads 24", "head_dim 96", "axis chunks 32/32/32"]
+        }
+      ],
+      "notes": "Admit bounded position/scan/RoPE construction and application paths; searchsorted and dynamic placeholder recovery stay candidate-only."
+    },
+    {
+      "id": "pt_selection_sampling_rows",
+      "admission_status": "challenge-admitted",
+      "public_api_contracts": [
+        "torch.topk",
+        "torch.sort",
+        "torch.argsort",
+        "torch.multinomial",
+        "torch.argmax"
+      ],
+      "tracks": ["torch_selection_sampling", "road_to_sota_topk"],
+      "real_problem_sizes": [
+        {
+          "shape_id": "qwen_vocab_topk20",
+          "source": "H:/dinoml_v2_agents/agents/plans/transformers/qwen3/report.md:115",
+          "tensors": ["logits [rows,151936]", "k 20", "dtype bfloat16"]
+        },
+        {
+          "shape_id": "qwen3_moe_router_topk8",
+          "source": "H:/dinoml_v2_agents/agents/plans/transformers/qwen3_moe/report.md:115",
+          "tensors": ["router_logits [M,128]", "k 8", "hidden 2048 or 4096"]
+        },
+        {
+          "shape_id": "mixtral_router_top2",
+          "source": "H:/dinoml_v2_agents/agents/plans/transformers/mixtral/report.md:179",
+          "tensors": ["router_logits [M,8]", "k 2", "hidden 4096"]
+        },
+        {
+          "shape_id": "bark_fine_codebook_sampling",
+          "source": "H:/dinoml_v2_agents/agents/plans/transformers/bark/report.md:242",
+          "tensors": ["fine codebook logits over 1024 tokens", "argmax or softmax plus multinomial"]
+        },
+        {
+          "shape_id": "vit_mae_mask_argsort",
+          "source": "H:/dinoml_v2_agents/agents/plans/transformers/vit_mae/report.md:163",
+          "tensors": ["noise [B,196]", "ids_shuffle argsort", "ids_restore argsort"]
+        }
+      ],
+      "notes": "Top-K tasks should also compare against hipCUB, FlashInfer, vLLM, and vLLM on ROCm where contracts match."
+    },
+    {
+      "id": "pt_gather_scatter_compaction",
+      "admission_status": "challenge-admitted",
+      "public_api_contracts": [
+        "torch.gather",
+        "torch.take_along_dim",
+        "torch.index_select",
+        "torch.index_add",
+        "Tensor.index_add_",
+        "torch.scatter",
+        "torch.scatter_add",
+        "torch.scatter_reduce",
+        "Tensor.masked_fill",
+        "Tensor.masked_scatter",
+        "torch.nonzero",
+        "torch.where"
+      ],
+      "tracks": ["torch_gather_scatter_moe", "torch_selection_sampling", "memory_movement_track"],
+      "real_problem_sizes": [
+        {
+          "shape_id": "qwen3_moe_routing",
+          "source": "H:/dinoml_v2_agents/agents/plans/transformers/qwen3_moe/report.md:157",
+          "tensors": ["tokens [M,2048] or [M,4096]", "experts 128", "top-k 8"]
+        },
+        {
+          "shape_id": "mixtral_expert_scatter",
+          "source": "H:/dinoml_v2_agents/agents/plans/transformers/mixtral/report.md:179",
+          "tensors": ["tokens [M,4096]", "experts 8", "top-k 2"]
+        },
+        {
+          "shape_id": "audioflamingo3_audio_token_stitch",
+          "source": "H:/dinoml_v2_agents/agents/plans/transformers/audioflamingo3/report.md:222",
+          "tensors": ["audio rows [sum(post_lengths),3584]", "full 30s window 750 audio tokens"]
+        },
+        {
+          "shape_id": "superpoint_keypoint_compaction",
+          "source": "H:/dinoml_v2_agents/agents/plans/transformers/superpoint/report.md:159",
+          "tensors": ["score map [B,H,W]", "threshold/nonzero/gather/topk to K keypoints"]
+        },
+        {
+          "shape_id": "blt_patch_scatter_reduce",
+          "source": "H:/dinoml_v2_agents/agents/plans/transformers/blt/report.md:118",
+          "tensors": ["byte states [B,S,H_local]", "patch states [B,P,H_local]", "reduce amax"]
+        }
+      ],
+      "notes": "MoE eager one-hot/nonzero paths are correctness references, not production targets."
+    },
+    {
+      "id": "pt_dense_linear_gemm_rows",
+      "admission_status": "challenge-admitted",
+      "public_api_contracts": [
+        "torch.mm",
+        "torch.matmul",
+        "torch.bmm",
+        "torch.addmm",
+        "torch.nn.functional.linear",
+        "torch.einsum"
+      ],
+      "tracks": ["torch_dense_linear", "torch_attention", "torch_gather_scatter_moe"],
+      "real_problem_sizes": [
+        {
+          "shape_id": "qwen3_dense_linears",
+          "source": "H:/dinoml_v2_agents/agents/plans/transformers/qwen3/report.md:152",
+          "tensors": ["hidden [B,S,4096]", "LM head [B,S_or_1,151936]"]
+        },
+        {
+          "shape_id": "flux_linear_stack",
+          "source": "H:/dinoml_v2_agents/agents/plans/diffusers/flux/report.md:209",
+          "tensors": ["x_embedder Linear(64->3072)", "context Linear(4096->3072)", "proj_out Linear(3072->64)"]
+        },
+        {
+          "shape_id": "mixtral_expert_linears",
+          "source": "H:/dinoml_v2_agents/agents/plans/transformers/mixtral/report.md:184",
+          "tensors": ["router Linear(4096->8)", "expert gate/up Linear(4096->28672)", "down Linear(14336->4096)"]
+        },
+        {
+          "shape_id": "rag_doc_scores_bmm",
+          "source": "H:/dinoml_v2_agents/agents/plans/transformers/rag/report.md:93",
+          "tensors": ["bmm [B,1,768] x [B,768,n_docs] -> [B,n_docs]"]
+        },
+        {
+          "shape_id": "colpali_maxsim_einsum",
+          "source": "H:/dinoml_v2_agents/agents/plans/transformers/colpali/report.md:259",
+          "tensors": ["einsum bnd,csd->bcns", "max over passage tokens", "sum over query tokens"]
+        }
+      ],
+      "notes": "Use hipBLAS/rocBLAS/hipBLASLt/Composable Kernel as baselines or oracles for GEMM-shaped rows."
+    },
+    {
+      "id": "pt_conv_resample_codec_rows",
+      "admission_status": "challenge-admitted",
+      "public_api_contracts": [
+        "torch.nn.Conv1d",
+        "torch.nn.Conv2d",
+        "torch.nn.Conv3d",
+        "torch.nn.functional.conv1d",
+        "torch.nn.functional.conv2d",
+        "torch.nn.functional.conv3d",
+        "torch.nn.functional.group_norm",
+        "torch.nn.functional.batch_norm",
+        "torch.nn.functional.interpolate",
+        "torch.nn.functional.max_pool2d",
+        "torch.nn.functional.avg_pool1d",
+        "torch.nn.functional.grid_sample",
+        "Tensor.unfold",
+        "padding ops"
+      ],
+      "tracks": ["torch_conv_codec", "torch_attention", "audio_generation", "vision_classic_transformers"],
+      "real_problem_sizes": [
+        {
+          "shape_id": "sdxl_vae_decode_1024",
+          "source": "H:/dinoml_v2_agents/agents/plans/diffusers/stable_diffusion_xl/report.md:170",
+          "tensors": ["latent [B,4,128,128]", "image [B,3,1024,1024]"]
+        },
+        {
+          "shape_id": "wan_i2v_81f_480x832",
+          "source": "H:/dinoml_v2_agents/agents/plans/diffusers/wan/report.md:202",
+          "tensors": ["latents [B,16,21,60,104]", "decode [B,3,81,480,832]"]
+        },
+        {
+          "shape_id": "ace_step_conv1d_patchify",
+          "source": "H:/dinoml_v2_agents/agents/plans/diffusers/ace_step/report.md:148",
+          "tensors": ["Conv1d [B,T,192] -> [B,2048,T/2]", "ConvTranspose1d [B,S,2048] -> [B,T,64]"]
+        },
+        {
+          "shape_id": "audioflamingo3_avgpool1d",
+          "source": "H:/dinoml_v2_agents/agents/plans/transformers/audioflamingo3/report.md:211",
+          "tensors": ["audio encoder [W,1500,1280] -> [W,750,1280]", "kernel 2 stride 2"]
+        },
+        {
+          "shape_id": "superpoint_480x640_detector",
+          "source": "H:/dinoml_v2_agents/agents/plans/transformers/superglue/report.md:139",
+          "tensors": ["input [B*2,1,480,640]", "Conv2d/ReLU/MaxPool", "descriptor grid_sample to [K,256]"]
+        },
+        {
+          "shape_id": "patchtsmixer_temporal_unfold",
+          "source": "H:/dinoml_v2_agents/agents/plans/transformers/patchtsmixer/report.md:101",
+          "tensors": ["unfold [B,T,C] -> [B,C,P,patch_length]", "axis -2", "step patch_stride"]
+        }
+      ],
+      "notes": "Generic resampling APIs should be promoted through bounded model subgraphs such as VAE, SuperPoint, PatchTGFXixer, or audio codec paths."
+    }
+  ],
+  "candidate_only_shape_evidence": [
+    {
+      "id": "pt_fft_stft_audio_frontend",
+      "admission_status": "candidate-with-shape",
+      "public_api_contracts": ["torch.stft", "torch.fft.rfft", "torch.fft.fft", "torch.fft.irfft"],
+      "sources": [
+        "H:/dinoml_v2_agents/agents/plans/transformers/audioflamingo3/report.md:133",
+        "H:/dinoml_v2_agents/agents/plans/transformers/clap/report.md:262",
+        "H:/dinoml_v2_agents/agents/plans/transformers/autoformer/report.md:71"
+      ],
+      "summary": "Real STFT/log-mel and AutoCorrelation FFT rows exist, but CPU/data-pipeline versus CUDA-runtime ownership must be decided before admission."
+    },
+    {
+      "id": "pt_loss_training_heads",
+      "admission_status": "candidate-with-shape",
+      "public_api_contracts": [
+        "torch.nn.functional.mse_loss",
+        "torch.nn.functional.cross_entropy",
+        "torch.nn.functional.binary_cross_entropy",
+        "torch.nn.functional.kl_div",
+        "torch.nn.functional.nll_loss",
+        "torch.distributions.*"
+      ],
+      "sources": [
+        "H:/dinoml_v2_agents/agents/plans/transformers/vit_mae/report.md:214",
+        "H:/dinoml_v2_agents/agents/plans/transformers/videomae/report.md:67",
+        "H:/dinoml_v2_agents/agents/plans/transformers/videomt/report.md:142",
+        "H:/dinoml_v2_agents/agents/plans/transformers/patchtsmixer/report.md:103"
+      ],
+      "summary": "Real training/eval-head shapes exist, but they should be separated from inference-kernel leaderboards."
+    },
+    {
+      "id": "pt_sparse_block_extension",
+      "admission_status": "candidate-with-shape",
+      "public_api_contracts": ["torch.sparse.mm", "torch.sparse.softmax", "sampled dense block matmul"],
+      "sources": [
+        "H:/dinoml_v2_agents/agents/plans/transformers/mra/report.md:82",
+        "H:/dinoml_v2_agents/agents/plans/transformers/mra/report.md:118",
+        "H:/dinoml_v2_agents/agents/plans/transformers/mra/report.md:232"
+      ],
+      "summary": "MRA gives fixed 32x32 sparse block evidence, but exact layout and oracle must be captured."
+    },
+    {
+      "id": "pt_bucketize_searchsorted_unique_rows",
+      "admission_status": "candidate-with-shape",
+      "public_api_contracts": [
+        "torch.bucketize",
+        "torch.searchsorted",
+        "torch.unique",
+        "torch.unique_consecutive",
+        "torch.sort",
+        "torch.gather"
+      ],
+      "sources": [
+        "H:/dinoml_v2_agents/agents/plans/transformers/aria/report.md:118",
+        "H:/dinoml_v2_agents/agents/plans/transformers/aria/report.md:285",
+        "H:/dinoml_v2_agents/agents/plans/transformers/idefics2/report.md:169",
+        "H:/dinoml_v2_agents/agents/plans/transformers/idefics3/report.md:205",
+        "H:/dinoml_v2_agents/agents/plans/diffusers/shap_e/report.md:498",
+        "H:/dinoml_v2_agents/agents/plans/diffusers/shap_e/report.md:502",
+        "H:/dinoml_v2_agents/agents/plans/transformers/qwen3_vl/report.md:240"
+      ],
+      "summary": "Bucketized vision positions, Shap-E CDF/searchsorted sampling and unique mesh compaction, and Qwen3-VL video placeholder recovery are real but dynamic-irregular."
+    },
+    {
+      "id": "pt_special_masked_reduction_rows",
+      "admission_status": "candidate-with-shape",
+      "public_api_contracts": [
+        "torch.special.logit",
+        "torch.masked.mean",
+        "torch.masked.var",
+        "torch.cumsum",
+        "torch.isin",
+        "torch.cummax",
+        "torch.cummin"
+      ],
+      "sources": [
+        "H:/dinoml_v2_agents/agents/plans/transformers/mm_grounding_dino/report.md:80",
+        "H:/dinoml_v2_agents/agents/plans/transformers/mm_grounding_dino/report.md:143",
+        "H:/dinoml_v2_agents/agents/plans/transformers/mm_grounding_dino/report.md:153",
+        "H:/dinoml_v2_agents/agents/plans/transformers/pe_audio/report.md:91"
+      ],
+      "summary": "MM-Grounding-DINO anchors special.logit and token/mask cumulative helpers; PE-Audio anchors masked mean/var for masked GroupNorm."
+    },
+    {
+      "id": "pt_small_linalg_cholesky_rows",
+      "admission_status": "candidate-with-shape",
+      "public_api_contracts": ["torch.linalg.cholesky", "torch.matmul", "triangular-factor application"],
+      "sources": [
+        "H:/dinoml_v2_agents/agents/plans/diffusers/helios/report.md:299",
+        "H:/dinoml_v2_agents/agents/plans/diffusers/helios/report.md:519",
+        "H:/dinoml_v2_agents/agents/plans/diffusers/helios/report.md:529"
+      ],
+      "summary": "Helios block-correlated noise gives a narrowed fixed-patch Cholesky/matmul candidate; other linalg solvers remain blocked."
+    },
+    {
+      "id": "pt_mamba_scan_provider_rows",
+      "admission_status": "candidate-with-shape",
+      "public_api_contracts": ["chunked selective scan adjacency", "torch.split", "torch.nn.Conv1d", "torch.cumsum-like chunk state math"],
+      "sources": [
+        "H:/dinoml_v2_agents/agents/plans/transformers/bamba/report.md:77",
+        "H:/dinoml_v2_agents/agents/plans/transformers/bamba/report.md:132",
+        "H:/dinoml_v2_agents/agents/plans/transformers/bamba/report.md:160",
+        "H:/dinoml_v2_agents/agents/plans/transformers/bamba/report.md:256",
+        "H:/dinoml_v2_agents/agents/plans/transformers/bamba/report.md:341",
+        "H:/dinoml_v2_agents/agents/plans/transformers/bamba/report.md:347"
+      ],
+      "summary": "Bamba-9B Mamba2 gives concrete chunk size 256, Conv1d 8448 channels, and recurrent-state shapes, but first admission should choose provider or custom scan oracle."
+    },
+    {
+      "id": "pt_quant_cast_provider",
+      "admission_status": "candidate-with-shape",
+      "public_api_contracts": ["Tensor.to", "autocast/AMP", "quantize/dequantize adjacency", "FP8/int8 provider paths"],
+      "sources": [
+        "H:/dinoml_v2_agents/agents/plans/transformers/nemotron_h/report.md:64",
+        "H:/dinoml_v2_agents/agents/plans/transformers/nemotron_h/report.md:120",
+        "H:/dinoml_v2_agents/agents/plans/transformers/bamba/report.md:92",
+        "H:/dinoml_v2_agents/agents/plans/transformers/bamba/report.md:167",
+        "H:/dinoml_v2_agents/agents/plans/transformers/qwen3_moe/report.md:120",
+        "H:/dinoml_v2_agents/agents/plans/transformers/qwen3_moe/report.md:146",
+        "H:/dinoml_v2_agents/agents/plans/transformers/aria/report.md:42",
+        "H:/dinoml_v2_agents/agents/plans/transformers/aria/report.md:168"
+      ],
+      "summary": "FP8/int8 evidence exists for Nemotron-H, Bamba, Qwen3-MoE, and Aria, but these are loading/provider paths until a scale layout and dequant/GEMM boundary are selected."
+    },
+    {
+      "id": "pt_distributed_tp_surface",
+      "admission_status": "candidate-with-shape",
+      "public_api_contracts": ["torch.distributed", "tensor-parallel plans", "MoE all-to-all adjacency"],
+      "sources": [
+        "H:/dinoml_v2_agents/agents/plans/transformers/afmoe/report.md:100",
+        "H:/dinoml_v2_agents/agents/plans/transformers/afmoe/report.md:179",
+        "H:/dinoml_v2_agents/agents/plans/transformers/starcoder2/report.md:144"
+      ],
+      "summary": "AFMoE and StarCoder2 expose TP plans, but no concrete all_reduce/all_gather/reduce_scatter/all_to_all runtime shape was found."
+    },
+    {
+      "id": "pt_multimodal_masked_scatter",
+      "admission_status": "candidate-with-shape",
+      "public_api_contracts": ["Tensor.masked_scatter", "torch.nonzero", "Tensor.unfold"],
+      "sources": [
+        "H:/dinoml_v2_agents/agents/plans/transformers/aria/report.md:118",
+        "H:/dinoml_v2_agents/agents/plans/transformers/aria/report.md:321",
+        "H:/dinoml_v2_agents/agents/plans/transformers/aya_vision/report.md:124",
+        "H:/dinoml_v2_agents/agents/plans/transformers/aya_vision/report.md:399"
+      ],
+      "summary": "Good bounded multimodal-stitch candidates with fixed token budgets and tile shapes."
+    }
+  ],
+  "catalog_only_or_blocked": [
+    {
+      "family": "torch.linalg.solve/inv/qr/svd/eig/eigh/lu_factor/lstsq/matrix_exp",
+      "status": "blocked-until-sourced",
+      "reason": "No concrete solver/decomposition tensor sizes were found in the requested local reports; torch.linalg.cholesky has only a narrowed Helios candidate."
+    },
+    {
+      "family": "torch.optim.* and torch._foreach_*",
+      "status": "blocked-until-sourced",
+      "reason": "No concrete optimizer state tensor-list sizes were found in the requested local reports."
+    },
+    {
+      "family": "torch.special.* except torch.special.logit, and torch.nested.*",
+      "status": "catalog-only",
+      "reason": "Only special.logit has a model-real candidate row so far; no direct nested-tensor public API contract is anchored yet."
+    },
+    {
+      "family": "kthvalue, msort, randperm, bernoulli, poisson, generic unique_consecutive",
+      "status": "catalog-only",
+      "reason": "Some training-only or optional rows exist, but these exact APIs are not yet sourced as inference challenge contracts; dynamic bucketize/searchsorted/unique have candidate rows."
+    }
+  ]
+}

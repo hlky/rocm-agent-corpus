@@ -1,0 +1,76 @@
+{
+  "schema_version": "0.1.0",
+  "id": "autotune-parameter-sweep",
+  "title": "Autotune Parameter Sweep Scaffold",
+  "domain": "tooling",
+  "language": "tooling-workflow",
+  "tags": [
+    "autotune",
+    "parameter-sweep",
+    "nvbench",
+    "composable-kernel-profiler",
+    "triton",
+    "template-only"
+  ],
+  "source_refs": [
+    "rocm-rocprofiler-sdk",
+    "rocm-composable-kernel",
+    "triton",
+    "amd-rocm-programming-guide"
+  ],
+  "problem": {
+    "summary": "Define reproducible autotuning sweeps for tile shapes, block sizes, stages, vector widths, and launch bounds without overfitting to a single noisy run.",
+    "inputs": [
+      "candidate parameter grid",
+      "benchmark harness",
+      "shape suite",
+      "hardware metadata",
+      "correctness oracle"
+    ],
+    "outputs": [
+      "sweep results",
+      "chosen configuration",
+      "negative configurations",
+      "overfit notes"
+    ],
+    "constraints": [
+      "Template-only; every candidate must pass correctness before timing ranking",
+      "Record warmup, repetitions, clocks, and pruning criteria",
+      "Keep tuning set and holdout shapes separate"
+    ]
+  },
+  "artifacts": {
+    "baseline": "source/baseline_plan.md",
+    "optimized": "source/optimized_plan.md",
+    "harness": "source/evidence_checklist.md"
+  },
+  "verification": {
+    "status": "template-only",
+    "method": "Attach this workflow to a task-specific correctness harness or compile/profile artifact before claiming evidence.",
+    "tolerances": {}
+  },
+  "benchmarking": {
+    "status": "template-only",
+    "operation": "autotune-parameter-sweep",
+    "required_metrics": [
+      "parameter grid",
+      "candidate count",
+      "median latency",
+      "variance",
+      "correctness pass count",
+      "chosen config",
+      "holdout performance",
+      "hardware metadata"
+    ],
+    "recommended_shapes": [
+      "GEMM tile sweep",
+      "attention tile sweep",
+      "block size/vector width sweep"
+    ]
+  },
+  "license": "Project seed example",
+  "curation": {
+    "status": "template-only",
+    "notes": "Promoted from the v2 extension backlog as wave 2. No performance, correctness, or profiler evidence is claimed yet."
+  }
+}

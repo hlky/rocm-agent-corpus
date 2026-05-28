@@ -1,0 +1,179 @@
+{
+  "schema_version": "0.1.0",
+  "track_id": "selection-sampling-custom-kernels",
+  "status": "timing-only-measured",
+  "mission": "Teach agents to build, benchmark, and honestly compare custom HIP kernels for argmax, top-k, beam-search helpers, logits processors, and token sampling against hipCUB, vLLM on ROCm, vLLM, FlashInfer, Triton, and framework-generated baselines.",
+  "guide": "docs/SELECTION_SAMPLING_KERNEL_GUIDE.md",
+  "evidence_policy": {
+    "default_status": "template-only",
+    "timing_without_profiler_label": "timing-only",
+    "negative_label": "negative example",
+    "must_not_claim": [
+      "rocprofiler/rocprof counters unless collected",
+      "top-p equivalence from a top-k-only kernel",
+      "fair serving comparison unless logits processors, RNG, workspace, and launch boundaries are recorded",
+      "sorted top-k equivalence when the custom kernel returns unsorted candidates"
+    ]
+  },
+  "upstream_references": [
+    {
+      "name": "hipCUB selection, sort, and collectives",
+      "paths": [
+        "third_party/rocm-libraries/cub/cub/device/device_topk.hpp",
+        "third_party/rocm-libraries/cub/cub/device/device_select.hpp",
+        "third_party/rocm-libraries/cub/cub/device/device_radix_sort.hpp",
+        "third_party/rocm-libraries/cub/cub/block/block_reduce.hpp",
+        "third_party/rocm-libraries/cub/cub/warp/warp_reduce.hpp",
+        "third_party/rocm-libraries/cub/test/catch2_test_device_topk_api.hip"
+      ]
+    },
+    {
+      "name": "vLLM on ROCm sampling and beam helpers",
+      "paths": [
+        "third_party/vllm-rocm/cpp/migraphx_llm/kernels/samplingTopKKernels.hip",
+        "third_party/vllm-rocm/cpp/migraphx_llm/kernels/samplingTopPKernels.hip",
+        "third_party/vllm-rocm/cpp/migraphx_llm/kernels/samplingAirTopPKernels.hip",
+        "third_party/vllm-rocm/cpp/migraphx_llm/kernels/beamSearchKernels.hip",
+        "third_party/vllm-rocm/cpp/migraphx_llm/kernels/topkLastDim.hip",
+        "third_party/vllm-rocm/cpp/migraphx_llm/thop/fusedTopkSoftmax.cpp",
+        "third_party/vllm-rocm/cpp/migraphx_llm/thop/IndexerTopKOp.cpp",
+        "third_party/vllm-rocm/docs/source/features/sampling.md"
+      ]
+    },
+    {
+      "name": "vLLM sampler, top-k/top-p, beam search, and logits processors",
+      "paths": [
+        "third_party/vllm/csrc/topk.hip",
+        "third_party/vllm/csrc/persistent_topk.hpp",
+        "third_party/vllm/csrc/sampler.hip",
+        "third_party/vllm/vllm/v1/sample/ops/topk_topp_sampler.py",
+        "third_party/vllm/vllm/v1/sample/ops/topk_topp_triton.py",
+        "third_party/vllm/vllm/v1/sample/logits_processor/builtin.py",
+        "third_party/vllm/vllm/entrypoints/generate/beam_search/utils.py",
+        "third_party/vllm/benchmarks/benchmark_topk_topp.py"
+      ]
+    },
+    {
+      "name": "FlashInfer top-k, top-p, and sampling references",
+      "paths": [
+        "third_party/flashinfer/include/flashinfer/topk.hpp",
+        "third_party/flashinfer/include/flashinfer/sampling.hpp",
+        "third_party/flashinfer/include/flashinfer/air_top_p.hpp",
+        "third_party/flashinfer/csrc/topk.hip",
+        "third_party/flashinfer/csrc/sampling.hip",
+        "third_party/flashinfer/benchmarks/bench_topk.py",
+        "third_party/flashinfer/benchmarks/bench_sampling.py"
+      ]
+    }
+  ],
+  "benchmark_scaffolds": [
+    {
+      "task_id": "block-topk-sampling",
+      "status": "timing-only-measured",
+      "task_json": "corpus/tasks/block-topk-sampling/task.json",
+      "baseline": "corpus/tasks/block-topk-sampling/source/baseline.hip",
+      "optimized": "corpus/tasks/block-topk-sampling/source/optimized.hip",
+      "harness": "harnesses/topk_sampling_benchmark.hip",
+      "contract": "Top-k candidates sorted by descending logit with lower token id winning ties, followed by temperature softmax over top-k and sampling with precomputed per-row uniforms.",
+      "candidate_shapes": [
+        "rows=1024 vocab_size=32768 k=4 temperature=0.8",
+        "rows=256 vocab_size=128256 k=8 temperature=0.7",
+        "rows=4096 vocab_size=32000 k=1 temperature=1.0",
+        "rows=128 vocab_size=1009 k=4 temperature=0.8"
+      ],
+      "baselines_to_add": [
+        "hipCUB DeviceTopK plus separate sampling kernel",
+        "vLLM on ROCm top-k sampling path",
+        "vLLM top-k/top-p sampler path",
+        "FlashInfer top-k sampling path",
+        "framework torch.topk plus torch.multinomial or equivalent"
+      ],
+      "custom_next_steps": [
+        "Replace shared-memory list merge with warp-specialized merge for small vocabularies",
+        "Add a hipCUB BlockReduce candidate-list variant inside the custom kernel",
+        "Fuse simple logits processors before candidate insertion",
+        "Add top-p filtering as a separate contract rather than overloading top-k results",
+        "Measure sorted versus unsorted top-k when the sampler does not need sorted output"
+      ]
+    }
+  ],
+  "planned_tasks": [
+    {
+      "id": "row-argmax-logits-processor",
+      "priority": "p0",
+      "status": "planned",
+      "objective": "Fuse mask, bias, repetition penalty, and argmax for greedy decode.",
+      "custom_strategy": "Use value-index pair reductions with deterministic tie and mask policy.",
+      "negative_examples": [
+        "Argmax tie policy differs from framework baseline",
+        "A separate processor pass plus hipCUB ArgMax remains faster for large batches"
+      ]
+    },
+    {
+      "id": "beam-step-topk-parent-select",
+      "priority": "p1",
+      "status": "planned",
+      "objective": "Select beam expansions and parent ids from beam-width by vocab scores.",
+      "custom_strategy": "Fuse beam score update, length penalty, EOS handling, and top-k parent materialization.",
+      "negative_examples": [
+        "Full sort of all beam-token candidates loses to library or serving helper",
+        "Finished-beam edge cases make the custom result invalid"
+      ]
+    },
+    {
+      "id": "top-p-renormalize-sampling",
+      "priority": "p1",
+      "status": "planned",
+      "objective": "Study exact or approximate top-p cutoff, probability renormalization, and sampling.",
+      "custom_strategy": "Compare sorted-prefix, histogram/AIR-style, and fixed-vocab specialized paths.",
+      "negative_examples": [
+        "Top-p cutoff includes a different boundary token than the oracle",
+        "Histogram approximation is faster but violates the required sampling contract"
+      ]
+    },
+    {
+      "id": "fused-moe-router-topk",
+      "priority": "p1",
+      "status": "planned",
+      "objective": "Select top-k experts with routing bias, grouping, score normalization, and metadata writes.",
+      "custom_strategy": "Fuse expert score transform and top-k with compact routing output.",
+      "negative_examples": [
+        "Register pressure from k=8 sorted outputs erases fusion gains",
+        "Routing replay or grouped-policy output differs from serving-stack expectations"
+      ]
+    }
+  ],
+  "metadata_requirements": [
+    "task_id",
+    "variant",
+    "result_class",
+    "gpu_name",
+    "gfx_target",
+    "driver_version",
+    "cuda_toolkit_version",
+    "compiler_version",
+    "build_command",
+    "arch_flags",
+    "rows",
+    "vocab_size",
+    "k",
+    "temperature",
+    "top_p",
+    "top_k_filter_order",
+    "rng_included",
+    "logits_processors_included",
+    "sorted_output_contract",
+    "tie_policy",
+    "nan_policy",
+    "mask_policy",
+    "workspace_bytes",
+    "warmup_iterations",
+    "measured_iterations",
+    "timer_type",
+    "profiler_status",
+    "correctness_reference",
+    "tolerance",
+    "baseline_versions",
+    "win_loss_notes"
+  ]
+}

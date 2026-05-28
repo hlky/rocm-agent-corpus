@@ -1,0 +1,358 @@
+{
+  "schema_version": "0.1.0",
+  "observed_at": "2026-05-21",
+  "guide": "docs/TOPK_BASELINE_HARNESS_BLUEPRINT.md",
+  "status": "template-only",
+  "purpose": "Define executable benchmark planning metadata for Top-K selection, sampling, routing, ragged, and epilogue-fusion baselines.",
+  "related_guides": [
+    "docs/ROAD_TO_SOTA_TOPK.md",
+    "docs/TOPK_IMPLEMENTATION_SURVEY.md",
+    "docs/SELECTION_SAMPLING_LIBRARY_BASELINES.md",
+    "docs/BENCHMARKING_GUIDE.md"
+  ],
+  "tasks": [
+    "corpus/tasks/block-topk-sampling",
+    "corpus/tasks/wide-k-topk-selection",
+    "corpus/tasks/top-p-nucleus-sampling",
+    "corpus/tasks/moe-token-routing",
+    "corpus/tasks/composable-kernel-custom-epilogue"
+  ],
+  "timing_boundaries": [
+    {
+      "id": "kernel_only",
+      "description": "HIP events around one custom or library kernel."
+    },
+    {
+      "id": "steady_state_api",
+      "description": "API call with reusable preallocated output and workspace."
+    },
+    {
+      "id": "api_with_allocation",
+      "description": "API call including output and workspace allocation."
+    },
+    {
+      "id": "graph_replay",
+      "description": "HIP Graph replay only."
+    },
+    {
+      "id": "framework_call",
+      "description": "Framework or Python dispatch included."
+    },
+    {
+      "id": "serving_step",
+      "description": "Serving-visible decode or sampler step including processors and runtime boundary."
+    }
+  ],
+  "correctness_modes": [
+    "exact_sorted",
+    "exact_unsorted_membership",
+    "threshold_equivalent",
+    "exact_uniform_replay",
+    "exact_seed_replay",
+    "distributional",
+    "contract_mismatch"
+  ],
+  "shape_matrix": [
+    {
+      "shape_id": "k1_llm",
+      "rows": 4096,
+      "n": 32000,
+      "k": 1,
+      "sorted": false,
+      "purpose": "argmax/greedy"
+    },
+    {
+      "shape_id": "k4_seed",
+      "rows": 1024,
+      "n": 32768,
+      "k": 4,
+      "sorted": true,
+      "purpose": "current seed parity"
+    },
+    {
+      "shape_id": "k8_llm",
+      "rows": 1024,
+      "n": 32768,
+      "k": 8,
+      "sorted": true,
+      "purpose": "tiny fixed-k"
+    },
+    {
+      "shape_id": "k16_small",
+      "rows": 512,
+      "n": 32768,
+      "k": 16,
+      "sorted": true,
+      "purpose": "network/list boundary"
+    },
+    {
+      "shape_id": "k32_small",
+      "rows": 256,
+      "n": 32768,
+      "k": 32,
+      "sorted": true,
+      "purpose": "small-k merge boundary"
+    },
+    {
+      "shape_id": "k64_medium",
+      "rows": 256,
+      "n": 65536,
+      "k": 64,
+      "sorted": true,
+      "purpose": "heap/list/radix boundary"
+    },
+    {
+      "shape_id": "k128_medium",
+      "rows": 128,
+      "n": 65536,
+      "k": 128,
+      "sorted": true,
+      "purpose": "medium-k"
+    },
+    {
+      "shape_id": "k256_large",
+      "rows": 64,
+      "n": 131072,
+      "k": 256,
+      "sorted": true,
+      "purpose": "large-k candidate buffers"
+    },
+    {
+      "shape_id": "k512_large",
+      "rows": 32,
+      "n": 131072,
+      "k": 512,
+      "sorted": true,
+      "purpose": "radix/full-sort boundary"
+    },
+    {
+      "shape_id": "k1024_large",
+      "rows": 16,
+      "n": 131072,
+      "k": 1024,
+      "sorted": true,
+      "purpose": "large-k"
+    },
+    {
+      "shape_id": "k8192_near_full",
+      "rows": 16,
+      "n": 32768,
+      "k": 8192,
+      "sorted": true,
+      "purpose": "full-sort crossover"
+    },
+    {
+      "shape_id": "awkward_vocab",
+      "rows": 128,
+      "n": 1009,
+      "k": 32,
+      "sorted": true,
+      "purpose": "non-power-of-two"
+    },
+    {
+      "shape_id": "tiny_rows",
+      "rows": 65536,
+      "n": 512,
+      "k": 4,
+      "sorted": true,
+      "purpose": "many short rows"
+    },
+    {
+      "shape_id": "few_long_rows",
+      "rows": 8,
+      "n": 262144,
+      "k": 32,
+      "sorted": true,
+      "purpose": "multi-CTA pressure"
+    },
+    {
+      "shape_id": "ragged_zipf",
+      "rows": 4096,
+      "n": "1..65536",
+      "k": "1..128",
+      "sorted": "mixed",
+      "purpose": "segmented scheduler"
+    }
+  ],
+  "backend_recipes": [
+    {
+      "id": "cpu-oracle",
+      "contract_family": "oracle",
+      "result_role": "correctness-only",
+      "must_record": [
+        "tie_policy",
+        "nan_policy",
+        "membership_hash",
+        "sampling_uniform_policy"
+      ]
+    },
+    {
+      "id": "pytorch-topk",
+      "contract_family": "framework-selection",
+      "entrypoints": [
+        "torch.topk",
+        "torch.softmax",
+        "torch.multinomial",
+        "torch.gather",
+        "torch.cumsum"
+      ],
+      "measured_record": "data/records/runpod_rtx4000ada_topk_pytorch_20260525.jsonl",
+      "must_record": [
+        "torch_version",
+        "cuda_version",
+        "sorted_flag",
+        "out_buffers_used",
+        "contiguous_copy_timed",
+        "framework_dispatch_timed",
+        "allocator_warmed",
+        "tie_instability_note"
+      ]
+    },
+    {
+      "id": "cub-device-topk",
+      "contract_family": "selection-unsorted",
+      "entrypoints": [
+        "hipcub::DeviceTopK::MaxPairs",
+        "hipcub::DeviceTopK::MaxKeys"
+      ],
+      "must_record": [
+        "temp_storage_bytes",
+        "workspace_query_timed",
+        "workspace_allocation_timed",
+        "execution_determinism",
+        "output_ordering",
+        "membership_validation"
+      ]
+    },
+    {
+      "id": "cub-device-radix-sort",
+      "contract_family": "full-sort",
+      "entrypoints": [
+        "hipcub::DeviceRadixSort::SortPairsDescending"
+      ],
+      "must_record": [
+        "temp_storage_bytes",
+        "double_buffer_api",
+        "tie_key_encoding",
+        "full_sort_output_timed"
+      ]
+    },
+    {
+      "id": "flashinfer-topk",
+      "contract_family": "selection-or-sampling",
+      "entrypoints": [
+        "flashinfer.top_k",
+        "flashinfer.sampling.top_k_sampling_from_probs",
+        "flashinfer.sampling.top_k_top_p_sampling_from_logits"
+      ],
+      "must_record": [
+        "flashinfer_version",
+        "sorted",
+        "deterministic",
+        "tie_break",
+        "graph_safe",
+        "row_state_cache",
+        "dynamic_shared_memory",
+        "seed_offset",
+        "torch_sort_fallback"
+      ]
+    },
+    {
+      "id": "vllm-sampler",
+      "contract_family": "serving-dispatch",
+      "entrypoints": [
+        "TopKTopPSampler",
+        "apply_top_k_top_p_triton",
+        "FlashInfer sampler path",
+        "PyTorch fallback"
+      ],
+      "must_record": [
+        "vllm_version",
+        "selected_backend",
+        "environment_flags",
+        "generators_present",
+        "logprobs_mode",
+        "logits_contiguous_copy_timed",
+        "logits_processors_included",
+        "cached_buffer_allocation"
+      ]
+    },
+    {
+      "id": "tensorrt-llm-sampling",
+      "contract_family": "serving-sampling",
+      "entrypoints": [
+        "Torch Sampler",
+        "TRTLLM Sampler",
+        "invokeBatchTopKSampling"
+      ],
+      "must_record": [
+        "tensorrt_llm_version",
+        "sampler_backend",
+        "max_top_k",
+        "workspace_bytes",
+        "curand_state",
+        "finished_state_flags",
+        "runtime_args",
+        "return_logprobs",
+        "return_all_selected_tokens"
+      ]
+    },
+    {
+      "id": "oneflow-topk",
+      "contract_family": "framework-selection",
+      "entrypoints": [
+        "HeapTopKKernel",
+        "SortPairsDescending"
+      ],
+      "must_record": [
+        "heap_path_or_sort_path",
+        "shared_memory_bytes",
+        "cub_temp_storage_bytes",
+        "value_gather_timed"
+      ]
+    },
+    {
+      "id": "transformer-engine-router",
+      "contract_family": "moe-routing",
+      "entrypoints": [
+        "fused_topk_with_score_function"
+      ],
+      "must_record": [
+        "expert_count",
+        "topk",
+        "score_function",
+        "grouped_topk",
+        "expert_bias",
+        "routing_map_layout",
+        "topk_function_mode",
+        "backward_included"
+      ]
+    },
+    {
+      "id": "cutlass-topk-softmax-epilogue",
+      "contract_family": "epilogue-fusion",
+      "entrypoints": [
+        "LinCombTopKSoftmaxCol"
+      ],
+      "must_record": [
+        "sm_target",
+        "gemm_m",
+        "gemm_n",
+        "gemm_k",
+        "epilogue_tile",
+        "static_topk",
+        "duplicate_value_policy",
+        "scores_materialized"
+      ]
+    }
+  ],
+  "graduation_criteria": [
+    "CPU adversarial correctness pack",
+    "same-hardware PyTorch result",
+    "strongest applicable hipCUB or full-sort result",
+    "FlashInfer/vLLM/vLLM on ROCm result for sampling-facing contracts",
+    "custom result or explicit library-win/negative example",
+    "complete timing-boundary and workspace metadata",
+    "timing-only or counter-backed evidence label"
+  ]
+}

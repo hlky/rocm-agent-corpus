@@ -1,0 +1,84 @@
+{
+  "schema_version": "0.1.0",
+  "id": "rope-kv-cache-update",
+  "title": "RoPE and KV Cache Update",
+  "domain": "llm-inference",
+  "language": "hip-cpp",
+  "tags": [
+    "rope",
+    "rotary-position-embedding",
+    "kv-cache",
+    "decode",
+    "fusion",
+    "template-only"
+  ],
+  "source_refs": [
+    "amd-rocm-programming-guide",
+    "vllm",
+    "flashinfer"
+  ],
+  "problem": {
+    "summary": "Rotate query/key vectors with RoPE and write the current key/value token into a contiguous KV cache. The baseline uses a rotate kernel followed by separate K and V cache stores. The optimized scaffold fuses RoPE with the cache write to avoid a materialized rotated-key buffer.",
+    "inputs": [
+      "float* q",
+      "float* k",
+      "float* v",
+      "float* cos",
+      "float* sin",
+      "int* token_positions",
+      "int batch_tokens",
+      "int num_heads",
+      "int head_dim",
+      "int max_seq_len"
+    ],
+    "outputs": [
+      "float* q_out shaped [batch_tokens, num_heads, head_dim]",
+      "float* k_cache shaped [max_seq_len, num_heads, head_dim]",
+      "float* v_cache shaped [max_seq_len, num_heads, head_dim]"
+    ],
+    "constraints": [
+      "fp32 educational scaffold only",
+      "head_dim must be even",
+      "cos and sin are indexed by token position and half dimension",
+      "contiguous non-paged cache layout",
+      "one token position per batch token"
+    ]
+  },
+  "artifacts": {
+    "baseline": "source/baseline.hip",
+    "optimized": "source/optimized.hip"
+  },
+  "verification": {
+    "status": "template-only",
+    "method": "TODO: compare q_out, k_cache, and v_cache against a CPU RoPE plus cache-store reference for multiple positions and head dimensions.",
+    "tolerances": {
+      "max_abs_error": 1e-05,
+      "max_rel_error": 1e-05
+    }
+  },
+  "benchmarking": {
+    "status": "template-only",
+    "operation": "rope-kv-cache-update",
+    "required_metrics": [
+      "median kernel duration",
+      "batch_tokens",
+      "num_heads",
+      "head_dim",
+      "max_seq_len",
+      "cache layout",
+      "correctness max_abs_error",
+      "hardware and build metadata",
+      "evidence label"
+    ],
+    "recommended_shapes": [
+      "batch_tokens=1 heads=32 head_dim=128 max_seq_len=8192",
+      "batch_tokens=16 heads=32 head_dim=128 max_seq_len=4096",
+      "batch_tokens=64 heads=40 head_dim=128 max_seq_len=8192"
+    ]
+  },
+  "license": "Project seed example",
+  "curation": {
+    "status": "template-only",
+    "notes": "Template-only LLM decode scaffold. vLLM on ROCm, vLLM, and FlashInfer are reference and competitor paths for RoPE, paged KV, and serving integration; this seed isolates the non-paged fused-write boundary."
+  }
+}

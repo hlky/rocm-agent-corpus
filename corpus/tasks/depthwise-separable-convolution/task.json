@@ -1,0 +1,81 @@
+{
+  "schema_version": "0.1.0",
+  "id": "depthwise-separable-convolution",
+  "title": "Depthwise Separable Convolution",
+  "domain": "convolution",
+  "language": "hip-cpp",
+  "tags": [
+    "convolution",
+    "cudnn",
+    "depthwise",
+    "fusion",
+    "rocm-parity",
+    "separable",
+    "template-only",
+    "tensorrt"
+  ],
+  "source_refs": [
+    "amd-miopen-docs",
+    "amd-miopen",
+    "amd-migraphx-docs",
+    "rocm-composable-kernel",
+    "pytorch"
+  ],
+  "problem": {
+    "summary": "Evaluate depthwise and depthwise-separable convolution against MIOpen, MIGraphX, framework kernels, and custom fused paths. The baseline runs depthwise and pointwise stages separately; the optimized path specializes channel groups, vectorized channel packs, and optional fusion with bias, activation, or pointwise convolution.",
+    "inputs": [
+      "activation tensor NCHW or NHWC",
+      "depthwise filter tensor",
+      "optional pointwise filter tensor",
+      "padding, stride, dilation, and group descriptors",
+      "optional bias and activation parameters"
+    ],
+    "outputs": [
+      "depthwise or depthwise-separable convolution output"
+    ],
+    "constraints": [
+      "Template-only; no correctness, timing, or profiler evidence is claimed",
+      "Record layout, channel multiplier, groups, dtype, accumulator type, workspace, and whether pointwise convolution is included in the timing boundary",
+      "Library baselines should include MIOpen grouped/depthwise convolution, MIGraphX tactics, framework kernels, and custom fused kernels when available",
+      "A custom kernel can compete by specializing small spatial filters, fixed channel counts, NHWC channel packs, fusion, or lower launch/materialization overhead"
+    ]
+  },
+  "artifacts": {
+    "baseline": "source/baseline.hip",
+    "optimized": "source/optimized.hip",
+    "harness": "source/harness_plan.md",
+    "profiles": [],
+    "results": []
+  },
+  "verification": {
+    "status": "template-only",
+    "method": "Compare against MIOpen, MIGraphX, framework, or CPU reference output for depthwise-only and depthwise-plus-pointwise cases before timing.",
+    "tolerances": {
+      "max_abs_error": 0.001,
+      "max_rel_error": 0.001
+    }
+  },
+  "benchmarking": {
+    "status": "template-only",
+    "operation": "depthwise-separable-convolution",
+    "required_metrics": [
+      "median end-to-end latency",
+      "layout",
+      "channel multiplier",
+      "fusion boundary",
+      "workspace bytes",
+      "library tactic or algorithm",
+      "correctness max error"
+    ],
+    "recommended_shapes": [
+      "N=1 H=W=112 C=32 R=S=3 stride=1 NHWC fp16 depthwise-only",
+      "N=32 H=W=56 C=64 R=S=3 stride=1 NHWC fp16 depthwise-plus-pointwise K=128",
+      "N=8 H=W=28 C=256 R=S=5 stride=1 NCHW fp32 depthwise-only"
+    ]
+  },
+  "license": "Project seed example",
+  "curation": {
+    "status": "template-only",
+    "notes": "ROCm parity port from CUDA task `depthwise-separable-convolution`. This is a template/harness scaffold only; CUDA-origin result artifacts were intentionally not copied, and no ROCm timing, correctness, or profiler-counter evidence is claimed yet. Run on AMD hardware, attach ROCm version, hipcc flags, gfx target, and label HIP-event-only results as timing-only."
+  }
+}

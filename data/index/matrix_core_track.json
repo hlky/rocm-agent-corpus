@@ -1,0 +1,373 @@
+{
+  "schema_version": "0.1.0",
+  "track_id": "tensor-core-rocwmma",
+  "guide": "docs/MATRIX_CORE_ROCWMMA_GUIDE.md",
+  "mission": "Teach agents to write custom Matrix Core kernels with rocWMMA, inline mfma, Composable Kernel/CK Tile, and architecture-specific MFMA paths while treating hipBLASLt, Composable Kernel, Triton, MIGraphX, vLLM on ROCm, vLLM, and FlashInfer as baselines, correctness oracles, references, and extension surfaces.",
+  "evidence_policy": {
+    "current_status": "timing-only-measured",
+    "default_profiler_status": "timing-only-after-first-run",
+    "must_not_claim": [
+      "rocprofiler/rocprof counter evidence unless profiler artifacts are attached",
+      "fair FP32 comparison when TF32 Matrix Core math is enabled in the library baseline",
+      "fair FP8 comparison without scale, amax, accumulator, and output metadata",
+      "portable fragment layout across architectures",
+      "epilogue win unless hipBLASLt and Composable Kernel epilogue surfaces were considered"
+    ],
+    "result_classes": [
+      "custom-win",
+      "custom-specialized-win",
+      "near-match",
+      "library-win",
+      "negative-example",
+      "correctness-fail",
+      "compile-fail",
+      "template-only"
+    ]
+  },
+  "examples": [
+    {
+      "path": "examples/matrix_cores/README.md",
+      "role": "local Matrix Core example entrypoint"
+    },
+    {
+      "path": "examples/matrix_cores/rocwmma_fragment_notes.hip",
+      "role": "safe rocWMMA fragment operation sketch"
+    },
+    {
+      "path": "examples/matrix_cores/inline_mma_sync_skeleton.hip",
+      "role": "inline mfma documentation scaffold"
+    },
+    {
+      "path": "examples/matrix_cores/composable-kernel_ck_tile_reference_notes.md",
+      "role": "Composable Kernel/CK Tile specialization checklist"
+    }
+  ],
+  "metadata_requirements": [
+    "task_id",
+    "result_class",
+    "gpu_name",
+    "gfx_target",
+    "driver_version",
+    "cuda_toolkit_version",
+    "compiler_version",
+    "build_command",
+    "arch_flags",
+    "m",
+    "n",
+    "k",
+    "batch_count",
+    "layout_a",
+    "layout_b",
+    "layout_c",
+    "layout_d",
+    "lda",
+    "ldb",
+    "ldc",
+    "ldd",
+    "dtype_a",
+    "dtype_b",
+    "dtype_accumulator",
+    "dtype_output",
+    "math_mode",
+    "rocwmma_or_mma_instruction_shape",
+    "fragment_layout_policy",
+    "shared_memory_layout",
+    "shared_memory_swizzle",
+    "pipeline_stages",
+    "epilogue",
+    "alignment_bytes",
+    "workspace_bytes",
+    "warmup_iterations",
+    "measured_iterations",
+    "timer_type",
+    "profiler_status",
+    "correctness_reference",
+    "tolerance",
+    "seed",
+    "baseline_versions",
+    "win_loss_notes"
+  ],
+  "baseline_definitions": [
+    {
+      "id": "host-reference",
+      "kind": "correctness-oracle",
+      "records": [
+        "input rounding",
+        "accumulator semantics",
+        "output cast policy",
+        "epilogue semantics"
+      ]
+    },
+    {
+      "id": "custom-scalar",
+      "kind": "educational-custom-baseline",
+      "records": [
+        "indexing",
+        "layout mapping",
+        "dtype conversion",
+        "boundary handling"
+      ]
+    },
+    {
+      "id": "custom-rocwmma",
+      "kind": "custom-tensor-core-baseline",
+      "records": [
+        "rocwmma fragment shapes",
+        "layout_a",
+        "layout_b",
+        "accumulator_type",
+        "tile_aligned_scope"
+      ]
+    },
+    {
+      "id": "custom-mma-sync",
+      "kind": "custom-architecture-specific",
+      "records": [
+        "ptx_instruction",
+        "register_fragment_layout",
+        "ldmatrix_or_load_path",
+        "target_sm"
+      ]
+    },
+    {
+      "id": "composable-kernel-ck_tile",
+      "kind": "competitor-and-extension-surface",
+      "records": [
+        "composable-kernel_commit",
+        "example_ancestor",
+        "cta_tile",
+        "warp_tile",
+        "instruction_tile",
+        "stages",
+        "copy_atom",
+        "scheduler",
+        "epilogue_operator"
+      ]
+    },
+    {
+      "id": "hipblaslt",
+      "kind": "vendor-competitor-and-epilogue-reference",
+      "records": [
+        "matmul_desc",
+        "matrix_layouts",
+        "compute_type",
+        "scale_type",
+        "workspace_cap",
+        "heuristic_count",
+        "selected_algorithm",
+        "epilogue_attributes"
+      ]
+    },
+    {
+      "id": "triton",
+      "kind": "compiler-competitor",
+      "records": [
+        "meta_parameters",
+        "compile_boundary",
+        "generated_kernel_notes",
+        "dispatch_included"
+      ]
+    }
+  ],
+  "tasks": [
+    {
+      "id": "rocwmma-hgemm-seed",
+      "status": "timing-only-measured-with-hipblaslt-baseline",
+      "task_path": "corpus/tasks/rocwmma-mfma-gemm/task.json",
+      "objective": "Provide a CPU reference harness, scalar CUDA baseline, and simple rocWMMA 16x16x16 FP16-input FP32-accumulate custom kernel.",
+      "shape_families": [
+        "medium-square",
+        "rectangular",
+        "tile-aligned"
+      ],
+      "candidate_shapes": [
+        {
+          "m": 16,
+          "n": 16,
+          "k": 16
+        },
+        {
+          "m": 256,
+          "n": 256,
+          "k": 256
+        },
+        {
+          "m": 512,
+          "n": 128,
+          "k": 256
+        },
+        {
+          "m": 256,
+          "n": 256,
+          "k": 240
+        }
+      ],
+      "dtypes": [
+        "fp16-input-fp32-accumulate-fp32-output"
+      ],
+      "layouts": [
+        "A row-major",
+        "B column-major",
+        "C row-major"
+      ],
+      "baselines": [
+        "host-reference",
+        "custom-scalar",
+        "custom-rocwmma",
+        "hipblaslt",
+        "composable-kernel-ck_tile",
+        "triton"
+      ],
+      "measured_library_baselines": [],
+      "win_hypotheses": [
+        "The simple rocWMMA path should beat the scalar HIP baseline for tile-aligned shapes.",
+        "hipBLASLt and Composable Kernel should usually beat the seed rocWMMA path until shared-memory staging, more output tiles per CTA, and stronger scheduling are added."
+      ],
+      "negative_examples_to_keep": [
+        "One-warp-per-tile rocWMMA loses to Composable Kernel due to weak memory pipeline and low occupancy.",
+        "Ragged fallback is correct but slow because edge handling has not been tiled."
+      ]
+    },
+    {
+      "id": "mma-sync-inline-hgemm",
+      "status": "planned",
+      "objective": "Replace rocWMMA with inline mfma for a fixed GFX target and document register fragment layouts and ldmatrix shared-memory layout.",
+      "dtypes": [
+        "fp16-input-fp32-accumulate",
+        "fp16-input-fp16-accumulate"
+      ],
+      "baselines": [
+        "custom-rocwmma",
+        "custom-mma-sync",
+        "composable-kernel-ck_tile",
+        "hipblaslt"
+      ],
+      "win_hypotheses": [
+        "Inline MFMA can remove rocWMMA abstraction limits for fixed instruction shapes.",
+        "A bad register or shared-memory layout can lose despite using Matrix Cores."
+      ]
+    },
+    {
+      "id": "tf32-policy-study",
+      "status": "planned",
+      "objective": "Separate strict FP32 and TF32 Matrix Core contracts so agents do not claim unfair wins or losses.",
+      "dtypes": [
+        "fp32-input-fp32-accumulate",
+        "tf32-input-fp32-accumulate"
+      ],
+      "baselines": [
+        "custom-scalar",
+        "custom-rocwmma",
+        "hipblaslt",
+        "composable-kernel-ck_tile"
+      ],
+      "win_hypotheses": [
+        "TF32 library baselines can dominate strict FP32 custom kernels when the math contract allows TF32.",
+        "Disabling TF32 changes both performance and correctness tolerance."
+      ]
+    },
+    {
+      "id": "bf16-rocwmma-or-composable-kernel",
+      "status": "planned",
+      "objective": "Add a BF16 Matrix Core path with explicit conversion and tolerance metadata.",
+      "dtypes": [
+        "bf16-input-fp32-accumulate-fp32-output"
+      ],
+      "baselines": [
+        "host-reference",
+        "custom-rocwmma",
+        "composable-kernel-ck_tile",
+        "hipblaslt"
+      ],
+      "win_hypotheses": [
+        "BF16 needs its own task because conversion and tolerance differ from FP16.",
+        "Composable Kernel/CK Tile may be the cleanest custom route when direct rocWMMA support is awkward for the target."
+      ]
+    },
+    {
+      "id": "fp8-composable-kernel-ck_tile-boundary",
+      "status": "planned",
+      "objective": "Study FP8 GEMM through hipBLASLt and Composable Kernel/CK Tile before writing raw CUDA, with scale and amax metadata as first-class fields.",
+      "dtypes": [
+        "fp8-input-fp32-accumulate",
+        "fp8-input-f16-accumulate",
+        "block-scaled-low-precision"
+      ],
+      "baselines": [
+        "host-reference",
+        "hipblaslt",
+        "composable-kernel-ck_tile",
+        "migraphx-plugin",
+        "framework-generated"
+      ],
+      "win_hypotheses": [
+        "Custom wins may come from fixed scale layout, fused dequantization, fused quantization, or unsupported epilogues.",
+        "Plain FP8 GEMM throughput is likely hard to beat without reusing Composable Kernel/CK Tile architecture paths."
+      ]
+    },
+    {
+      "id": "tensor-core-fused-epilogue",
+      "status": "planned",
+      "objective": "Fuse bias, activation, residual, scale, or quantization after the Matrix Core mainloop and compare against hipBLASLt and Composable Kernel epilogues.",
+      "dtypes": [
+        "fp16",
+        "bf16",
+        "fp8",
+        "int8"
+      ],
+      "baselines": [
+        "custom-rocwmma",
+        "composable-kernel-ck_tile",
+        "hipblaslt",
+        "triton",
+        "migraphx-plugin"
+      ],
+      "win_hypotheses": [
+        "Unsupported or narrow fused epilogues can beat library paths that need extra launches or materialized intermediates.",
+        "hipBLASLt remains the strongest baseline when its epilogue exactly matches the task."
+      ]
+    },
+    {
+      "id": "hopper-wgmma-tma",
+      "status": "planned",
+      "objective": "Use Composable Kernel/CK Tile to study CDNA3 WGMFMA, global-to-LDS staging, clusters, and gfx950 portability before attempting raw CUDA.",
+      "dtypes": [
+        "fp16",
+        "bf16",
+        "fp8"
+      ],
+      "baselines": [
+        "composable-kernel-ck_tile",
+        "hipblaslt",
+        "triton",
+        "migraphx-plugin"
+      ],
+      "win_hypotheses": [
+        "CDNA3-specific kernels can win for fixed shapes or fused epilogues but require precise architecture metadata.",
+        "A portable gfx942 path and an gfx950 path should be recorded separately."
+      ]
+    },
+    {
+      "id": "blackwell-low-precision",
+      "status": "planned",
+      "objective": "Track CDNA4/RDNA4 Matrix Core and low-precision instruction paths with exact ROCm toolkit, GFX flag, and library-version metadata.",
+      "dtypes": [
+        "fp8",
+        "fp6",
+        "fp4",
+        "block-scaled-low-precision"
+      ],
+      "baselines": [
+        "composable-kernel-ck_tile",
+        "hipblaslt",
+        "vllm-rocm",
+        "vllm",
+        "flashinfer"
+      ],
+      "win_hypotheses": [
+        "New low-precision paths should start from library baselines and Composable Kernel/CK Tile examples.",
+        "Custom wins are most plausible with fixed scale formats, fused epilogues, or deployment-specific layout constraints."
+      ]
+    }
+  ]
+}

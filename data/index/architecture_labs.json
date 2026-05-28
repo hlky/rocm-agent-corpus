@@ -1,0 +1,389 @@
+{
+  "schema_version": 1,
+  "purpose": "Architecture-specific lab index for CUDA custom-kernel competition.",
+  "labs": [
+    {
+      "id": "gfx90a_ampere",
+      "sm": "gfx90a",
+      "gfx_target": "8.0",
+      "generation": "CDNA2",
+      "path": "architecture/gfx90a_ampere/README.md",
+      "example_gpus": [
+        "A100-class data-center CDNA2"
+      ],
+      "compile_targets": [
+        "gfx90a",
+        "compute_80"
+      ],
+      "feature_tags": [
+        "tensor_cores",
+        "tf32",
+        "fp16",
+        "bf16",
+        "int8",
+        "sparse_tensor_cores",
+        "cp_async",
+        "ldmatrix",
+        "mma_sync",
+        "large_shared_memory"
+      ],
+      "custom_kernel_focus": [
+        "fixed_shape_gemm",
+        "fused_epilogue",
+        "flash_attention_style",
+        "reductions",
+        "scans",
+        "layout_conversion"
+      ],
+      "vendor_baselines": [
+        "hipblas",
+        "hipblaslt",
+        "composable-kernel",
+        "cub",
+        "cccl",
+        "migraphx",
+        "triton"
+      ],
+      "measurement_tags": [
+        "native_cubin_required",
+        "timing_only_allowed",
+        "record_amdclang++_output"
+      ]
+    },
+    {
+      "id": "gfx1030_ampere_pro",
+      "sm": "gfx1030",
+      "gfx_target": "8.6",
+      "generation": "CDNA2",
+      "path": "architecture/gfx1030_ampere_pro/README.md",
+      "example_gpus": [
+        "CUDA-origin RTX A4000",
+        "RTX A5000",
+        "RTX A6000",
+        "A10-class CDNA2"
+      ],
+      "compile_targets": [
+        "gfx1030",
+        "compute_86"
+      ],
+      "feature_tags": [
+        "tensor_cores",
+        "tf32",
+        "fp16",
+        "int8",
+        "int4",
+        "cp_async",
+        "ldmatrix",
+        "mma_sync",
+        "workstation_clock_variance"
+      ],
+      "custom_kernel_focus": [
+        "launch_overhead_limited",
+        "fixed_shape_inference",
+        "fused_elementwise",
+        "layout_conversion",
+        "small_batched_gemm",
+        "specialized_reductions"
+      ],
+      "vendor_baselines": [
+        "hipblas",
+        "hipblaslt",
+        "composable-kernel",
+        "cub",
+        "cccl",
+        "migraphx",
+        "triton"
+      ],
+      "measurement_tags": [
+        "native_cubin_required",
+        "timing_only_allowed",
+        "record_clocks",
+        "record_amdclang++_output"
+      ]
+    },
+    {
+      "id": "gfx1100_ada",
+      "sm": "gfx1100",
+      "gfx_target": "8.9",
+      "generation": "RDNA3",
+      "path": "architecture/gfx1100_ada/README.md",
+      "example_gpus": [
+        "RTX 40-series",
+        "L4",
+        "L40",
+        "L40S"
+      ],
+      "compile_targets": [
+        "gfx1100",
+        "compute_89"
+      ],
+      "feature_tags": [
+        "tensor_cores",
+        "tf32",
+        "fp16",
+        "int8",
+        "cp_async",
+        "ldmatrix",
+        "mma_sync",
+        "inference_oriented",
+        "sku_feature_probe_required"
+      ],
+      "custom_kernel_focus": [
+        "migraphx_plugins",
+        "rmsnorm",
+        "rope",
+        "kv_cache",
+        "quant_dequant",
+        "topk_sampling",
+        "short_row_softmax"
+      ],
+      "vendor_baselines": [
+        "migraphx",
+        "migraphx_llm",
+        "hipblaslt",
+        "composable-kernel",
+        "cub",
+        "cccl",
+        "triton"
+      ],
+      "measurement_tags": [
+        "native_cubin_required",
+        "timing_only_allowed",
+        "record_clocks",
+        "record_math_contract"
+      ]
+    },
+    {
+      "id": "gfx942_hopper",
+      "sm": "gfx942",
+      "gfx_target": "9.0",
+      "generation": "CDNA3",
+      "path": "architecture/gfx942_hopper/README.md",
+      "example_gpus": [
+        "Portable CDNA3 gfx target 9.0 targets"
+      ],
+      "compile_targets": [
+        "gfx942",
+        "compute_90"
+      ],
+      "feature_tags": [
+        "portable_hopper",
+        "tensor_cores",
+        "hopper_memory_hierarchy",
+        "larger_shared_memory",
+        "cluster_probe_required",
+        "no_sm90a_assumption"
+      ],
+      "custom_kernel_focus": [
+        "portable_hopper_baseline",
+        "memory_bound_transformer_primitives",
+        "rmsnorm",
+        "softmax",
+        "kv_cache",
+        "custom_reductions",
+        "migraphx_plugins"
+      ],
+      "vendor_baselines": [
+        "hipblas",
+        "hipblaslt",
+        "composable-kernel",
+        "cub",
+        "cccl",
+        "migraphx",
+        "migraphx_llm",
+        "transformer_engine",
+        "triton"
+      ],
+      "measurement_tags": [
+        "native_cubin_required",
+        "timing_only_allowed",
+        "separate_from_sm90a",
+        "record_target_list"
+      ]
+    },
+    {
+      "id": "gfx950_hopper_specific",
+      "sm": "gfx950",
+      "gfx_target": "9.0a",
+      "generation": "CDNA3",
+      "path": "architecture/gfx950_hopper_specific/README.md",
+      "example_gpus": [
+        "H100/H200-class CDNA3-specific targets"
+      ],
+      "compile_targets": [
+        "gfx950",
+        "compute_90a"
+      ],
+      "feature_tags": [
+        "architecture_conditional",
+        "not_forward_compatible",
+        "wgmma",
+        "tma",
+        "mbarrier",
+        "thread_block_clusters",
+        "distributed_shared_memory",
+        "setmaxnreg",
+        "fp8"
+      ],
+      "custom_kernel_focus": [
+        "wgmma_gemm",
+        "tma_attention",
+        "warp_specialization",
+        "fused_gemm_epilogue",
+        "moe_grouped_gemm",
+        "persistent_kernels",
+        "migraphx_llm_plugins"
+      ],
+      "vendor_baselines": [
+        "hipblaslt",
+        "composable-kernel",
+        "ck_tile",
+        "transformer_engine",
+        "migraphx",
+        "migraphx_llm",
+        "flash_attention",
+        "flashinfer",
+        "cub",
+        "cccl"
+      ],
+      "measurement_tags": [
+        "native_cubin_required",
+        "timing_only_allowed",
+        "specialized_contract",
+        "verify_sass",
+        "record_cluster_shape"
+      ]
+    },
+    {
+      "id": "gfx950_blackwell",
+      "sm": "gfx950",
+      "gfx_target": "10.0",
+      "generation": "CDNA4/RDNA4",
+      "path": "architecture/gfx950_blackwell/README.md",
+      "example_gpus": [
+        "B200-class data-center CDNA4/RDNA4",
+        "GB200-class data-center CDNA4/RDNA4"
+      ],
+      "compile_targets": [
+        "gfx950",
+        "compute_100",
+        "gfx950a",
+        "compute_100a"
+      ],
+      "feature_tags": [
+        "blackwell",
+        "tensor_cores",
+        "low_precision",
+        "architecture_conditional_optional",
+        "large_shared_memory",
+        "nvlink",
+        "multi_gpu_overlap",
+        "library_maturity_drift"
+      ],
+      "custom_kernel_focus": [
+        "fixed_shape_gemm",
+        "grouped_gemm",
+        "custom_composable-kernel_epilogue",
+        "attention",
+        "fp8_or_narrower_precision",
+        "moe",
+        "multi_gpu_overlap",
+        "persistent_inference"
+      ],
+      "vendor_baselines": [
+        "hipblas",
+        "hipblaslt",
+        "composable-kernel",
+        "ck_tile",
+        "cub",
+        "cccl",
+        "migraphx",
+        "migraphx_llm",
+        "transformer_engine",
+        "rccl",
+        "rocshmem",
+        "triton"
+      ],
+      "measurement_tags": [
+        "native_cubin_required",
+        "timing_only_allowed",
+        "record_target_suffix",
+        "rerun_after_library_upgrade",
+        "record_topology_for_multigpu"
+      ]
+    },
+    {
+      "id": "gfx1200_blackwell_rtx",
+      "sm": "gfx1200",
+      "gfx_target": "12.0",
+      "generation": "CDNA4/RDNA4 RTX",
+      "path": "architecture/gfx1200_blackwell_rtx/README.md",
+      "example_gpus": [
+        "RTX CDNA4/RDNA4 gfx target 12.0-class GPUs"
+      ],
+      "compile_targets": [
+        "gfx1200",
+        "compute_120",
+        "gfx1200a",
+        "compute_120a"
+      ],
+      "feature_tags": [
+        "blackwell_rtx",
+        "tensor_cores",
+        "narrow_precision_probe",
+        "architecture_conditional_optional",
+        "workstation_clock_variance",
+        "inference_oriented",
+        "sku_feature_probe_required"
+      ],
+      "custom_kernel_focus": [
+        "fixed_shape_inference",
+        "migraphx_plugins",
+        "narrow_precision_gemm",
+        "dequant_fused_gemm",
+        "rmsnorm",
+        "rope",
+        "kv_cache",
+        "topk_sampling",
+        "short_row_softmax",
+        "small_batched_gemm"
+      ],
+      "vendor_baselines": [
+        "migraphx",
+        "migraphx_llm",
+        "hipblaslt",
+        "composable-kernel",
+        "cub",
+        "cccl",
+        "triton"
+      ],
+      "measurement_tags": [
+        "native_cubin_required",
+        "timing_only_allowed",
+        "record_clocks",
+        "record_target_suffix",
+        "rerun_after_library_upgrade"
+      ]
+    }
+  ],
+  "promoted_v2_tasks": [
+    {
+      "id": "gfx90a-gfx942-cdna-split",
+      "path": "corpus/tasks/gfx90a-gfx942-cdna-split/task.json",
+      "status": "template-only",
+      "families": [
+        "gfx90a_ampere",
+        "gfx1030_ampere_pro"
+      ]
+    },
+    {
+      "id": "gfx942-cdna3-mfma-lab",
+      "path": "corpus/tasks/gfx942-cdna3-mfma-lab/task.json",
+      "status": "template-only",
+      "families": [
+        "gfx942_hopper",
+        "gfx950_hopper_specific"
+      ]
+    }
+  ]
+}

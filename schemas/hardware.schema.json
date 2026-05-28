@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.local/rocm-agent-corpus/hardware.schema.json",
+  "title": "HIP/ROCm Agent Corpus Hardware Environment",
+  "type": "object",
+  "required": ["schema_version", "captured_at", "os", "python", "commands"],
+  "properties": {
+    "schema_version": { "type": "string" },
+    "captured_at": { "type": "string" },
+    "os": { "type": "string" },
+    "python": { "type": "string" },
+    "commands": { "type": "object" },
+    "gpus": { "type": "array", "items": { "type": "object" } }
+  },
+  "additionalProperties": false
+}
+

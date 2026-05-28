@@ -1,0 +1,32 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.local/rocm-agent-corpus/source.schema.json",
+  "title": "HIP/ROCm Agent Corpus Source Manifest",
+  "type": "object",
+  "required": ["schema_version", "observed_at", "sources"],
+  "properties": {
+    "schema_version": { "type": "string" },
+    "observed_at": { "type": "string" },
+    "sources": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "name", "url", "kind", "license", "use_policy", "priority", "topics"],
+        "properties": {
+          "id": { "type": "string" },
+          "name": { "type": "string" },
+          "url": { "type": "string" },
+          "kind": { "type": "string" },
+          "license": { "type": "string" },
+          "use_policy": { "type": "string" },
+          "priority": { "type": "integer", "minimum": 1, "maximum": 5 },
+          "topics": { "type": "array", "items": { "type": "string" } },
+          "notes": { "type": "string" }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false
+}
+

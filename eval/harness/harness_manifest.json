@@ -1,0 +1,55 @@
+{
+  "version": 1,
+  "status": "scaffolded",
+  "description": "Initial manifest for planned eval harness commands.",
+  "planned_modules": [
+    {
+      "name": "compile.py",
+      "status": "planned",
+      "purpose": "Compile a submitted custom HIP kernel for a task and target architecture.",
+      "planned_command": "python eval/harness/compile.py --task <task_id> --submission <submission_dir>"
+    },
+    {
+      "name": "test.py",
+      "status": "planned",
+      "purpose": "Run visible correctness tests and emit a correctness result JSON.",
+      "planned_command": "python eval/harness/test.py --task <task_id> --submission <submission_dir>"
+    },
+    {
+      "name": "baseline.py",
+      "status": "planned",
+      "purpose": "Run or prepare the strongest applicable vendor/framework baseline.",
+      "planned_command": "python eval/harness/baseline.py --task <task_id> --baseline <baseline_id>"
+    },
+    {
+      "name": "benchmark.py",
+      "status": "planned",
+      "purpose": "Collect HIP-event timing for submission and baseline sweeps.",
+      "planned_command": "python eval/harness/benchmark.py --task <task_id> --submission <submission_dir> --baseline <baseline_id>"
+    },
+    {
+      "name": "compare.py",
+      "status": "planned",
+      "purpose": "Compare submission timing and correctness against a baseline record.",
+      "planned_command": "python eval/harness/compare.py --attempt <attempt_json> --baseline <baseline_json>"
+    },
+    {
+      "name": "archive_attempt.py",
+      "status": "planned",
+      "purpose": "Archive successful and failed attempts with metadata and classification.",
+      "planned_command": "python eval/harness/archive_attempt.py --attempt <attempt_json> --output eval/reports/"
+    },
+    {
+      "name": "report.py",
+      "status": "planned",
+      "purpose": "Generate per-task, per-architecture, and corpus-wide reports.",
+      "planned_command": "python eval/harness/report.py --all"
+    }
+  ],
+  "default_evidence_labels": [
+    "template-only",
+    "timing-only-measured",
+    "counter-backed-measured",
+    "profile-attempted-blocked"
+  ]
+}

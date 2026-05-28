@@ -1,0 +1,109 @@
+{
+  "schema_version": "0.1.0",
+  "track_id": "memory-movement-kernel-track",
+  "status": "template-only",
+  "guide": "docs/MEMORY_MOVEMENT_KERNEL_GUIDE.md",
+  "mission": "Teach agents to reason about coalescing, irregular access, shared-memory reuse, halo loading, vectorized loads, and layout conversion before claiming custom memory-kernel wins.",
+  "evidence_policy": {
+    "default_status": "template-only",
+    "measured_without_profiler": "timing-only",
+    "must_not_claim": [
+      "rocprofiler/rocprof sector/request evidence without profile artifacts",
+      "architecture-general bandwidth wins from one GPU timing",
+      "library-unbeatable conclusions without scoped custom-kernel hypotheses"
+    ]
+  },
+  "source_refs": [
+    "amd-rocm-programming-guide",
+    "amd-hip-memory-performance",
+    "amd-hip-lds-memory",
+    "rocm-rocprim",
+    "rocm-examples"
+  ],
+  "tasks": [
+    {
+      "id": "gather-scatter-coalescing",
+      "status": "template-only",
+      "artifacts": {
+        "task": "corpus/tasks/gather-scatter-coalescing/task.json",
+        "baseline": "corpus/tasks/gather-scatter-coalescing/source/baseline.hip",
+        "optimized": "corpus/tasks/gather-scatter-coalescing/source/optimized.hip",
+        "harness": "harnesses/gather_scatter_benchmark.hip"
+      },
+      "objective": "Compare irregular index-map gather/scatter with a coalesced identity-map path that can use vectorized loads and stores.",
+      "candidate_shapes": [
+        "n=1048576 irregular",
+        "n=16777216 irregular",
+        "n=16777216 coalesced",
+        "n=16777219 coalesced-tail"
+      ],
+      "custom_hypotheses": [
+        "Identity or affine maps can skip index reads and use coalesced vectorized memory operations.",
+        "Arbitrary permutations are likely memory-transaction and index-stream bound unless the workload permits reordering or preprocessing."
+      ],
+      "required_evidence_before_claim": [
+        "mode recorded as irregular or coalesced",
+        "index generation contract",
+        "HIP-event timing label or profiler artifacts",
+        "correctness pass for gathered and scattered outputs"
+      ]
+    },
+    {
+      "id": "shared-halo-stencil-2d",
+      "status": "template-only",
+      "artifacts": {
+        "task": "corpus/tasks/shared-halo-stencil-2d/task.json",
+        "baseline": "corpus/tasks/shared-halo-stencil-2d/source/baseline.hip",
+        "optimized": "corpus/tasks/shared-halo-stencil-2d/source/optimized.hip",
+        "harness": "harnesses/stencil2d_benchmark.hip"
+      },
+      "objective": "Measure whether a shared-memory halo tile reduces redundant global loads enough to beat a simple global-memory stencil for one pass.",
+      "candidate_shapes": [
+        "4096x4096",
+        "8192x2048",
+        "1024x1024",
+        "1009x2039"
+      ],
+      "custom_hypotheses": [
+        "Shared halo reuse should help when neighboring cells are reused across threads.",
+        "For a single lightweight pass, synchronization and halo loading overhead can erase the benefit, making a negative example useful."
+      ],
+      "required_evidence_before_claim": [
+        "tile dimensions",
+        "boundary policy",
+        "HIP-event timing label or profiler artifacts",
+        "correctness pass against CPU stencil reference"
+      ]
+    },
+    {
+      "id": "aos-soa-layout-conversion",
+      "status": "template-only",
+      "artifacts": {
+        "task": "corpus/tasks/aos-soa-layout-conversion/task.json",
+        "baseline": "corpus/tasks/aos-soa-layout-conversion/source/baseline.hip",
+        "optimized": "corpus/tasks/aos-soa-layout-conversion/source/optimized.hip",
+        "harness": "harnesses/aos_soa_benchmark.hip"
+      },
+      "objective": "Convert x/y/z/w AoS tuples into SoA arrays while testing whether vectorized tuple loads improve a mostly bandwidth-bound layout transform.",
+      "candidate_shapes": [
+        "n=1048576",
+        "n=16777216",
+        "n=16777219"
+      ],
+      "custom_hypotheses": [
+        "A 16-byte aligned AoS input can be loaded as float4 while preserving coalesced writes to each SoA output.",
+        "Vectorized loads may be neutral if stores dominate or if alignment and register pressure offset transaction savings."
+      ],
+      "required_evidence_before_claim": [
+        "alignment contract",
+        "HIP-event timing label or profiler artifacts",
+        "correctness pass for all four output arrays"
+      ]
+    }
+  ],
+  "harnesses": [
+    "harnesses/gather_scatter_benchmark.hip",
+    "harnesses/stencil2d_benchmark.hip",
+    "harnesses/aos_soa_benchmark.hip"
+  ]
+}

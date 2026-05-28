@@ -1,0 +1,109 @@
+{
+  "version": 1,
+  "status": "scaffolded",
+  "description": "Index of the planned CUDA agent evaluation harness.",
+  "mission": "Evaluate custom HIP kernels against strong vendor and framework baselines, classify outcomes, and archive attempts as reusable corpus evidence.",
+  "components": [
+    {
+      "id": "agent_eval_harness_doc",
+      "path": "docs/AGENT_EVAL_HARNESS.md",
+      "status": "scaffolded",
+      "purpose": "Staged design for compile, test, benchmark, compare, classify, and archive loops."
+    },
+    {
+      "id": "eval_root",
+      "path": "eval/README.md",
+      "status": "scaffolded",
+      "purpose": "Top-level eval harness navigation."
+    },
+    {
+      "id": "eval_tasks",
+      "path": "eval/tasks/task_manifest.json",
+      "status": "scaffolded",
+      "purpose": "Planned task families and task contract fields."
+    },
+    {
+      "id": "eval_submissions",
+      "path": "eval/submissions/submission_manifest.json",
+      "status": "scaffolded",
+      "purpose": "Submission contract and submission lifecycle states."
+    },
+    {
+      "id": "eval_reports",
+      "path": "eval/reports/report_manifest.json",
+      "status": "scaffolded",
+      "purpose": "Attempt archive fields, result classes, and report types."
+    },
+    {
+      "id": "eval_harness_tooling",
+      "path": "eval/harness/harness_manifest.json",
+      "status": "scaffolded",
+      "purpose": "Planned harness command modules."
+    }
+  ],
+  "planned_commands": [
+    {
+      "name": "compile",
+      "status": "planned",
+      "command": "python eval/harness/compile.py --task <task_id> --submission <submission_dir>"
+    },
+    {
+      "name": "test",
+      "status": "planned",
+      "command": "python eval/harness/test.py --task <task_id> --submission <submission_dir>"
+    },
+    {
+      "name": "baseline",
+      "status": "planned",
+      "command": "python eval/harness/baseline.py --task <task_id> --baseline <baseline_id>"
+    },
+    {
+      "name": "benchmark",
+      "status": "planned",
+      "command": "python eval/harness/benchmark.py --task <task_id> --submission <submission_dir> --baseline <baseline_id>"
+    },
+    {
+      "name": "compare",
+      "status": "planned",
+      "command": "python eval/harness/compare.py --attempt <attempt_json> --baseline <baseline_json>"
+    },
+    {
+      "name": "archive_attempt",
+      "status": "planned",
+      "command": "python eval/harness/archive_attempt.py --attempt <attempt_json> --output eval/reports/"
+    },
+    {
+      "name": "report",
+      "status": "planned",
+      "command": "python eval/harness/report.py --all"
+    },
+    {
+      "name": "remote_run",
+      "status": "planned",
+      "command": "python eval/harness/remote_run.py --task <task_id> --submission <submission_dir> --gpu-class <class>"
+    }
+  ],
+  "classification_taxonomy": [
+    "win",
+    "match",
+    "specialized-win",
+    "loss",
+    "neutral",
+    "negative-example",
+    "correctness-fail",
+    "compile-fail",
+    "measurement-invalid",
+    "unsupported-configuration"
+  ],
+  "evidence_labels": [
+    "template-only",
+    "timing-only-measured",
+    "counter-backed-measured",
+    "profile-attempted-blocked"
+  ],
+  "next_stage": {
+    "id": "stage_1_compile_and_correctness_loop",
+    "status": "planned",
+    "summary": "Implement compile.py and test.py for one small CUDA task before adding benchmark and baseline comparison modules."
+  }
+}

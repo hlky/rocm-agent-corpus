@@ -1,0 +1,432 @@
+{
+  "schema_version": "0.1.0",
+  "id": "selection-sampling-library-baselines",
+  "task_id": "block-topk-sampling",
+  "status": "template-only",
+  "guide": "docs/SELECTION_SAMPLING_LIBRARY_BASELINES.md",
+  "track_guide": "docs/SELECTION_SAMPLING_KERNEL_GUIDE.md",
+  "purpose": "Define fair library and framework baselines for block-topk-sampling before claiming custom HIP wins.",
+  "seed_contract": {
+    "operation": "top-k-temperature-sampling",
+    "inputs": [
+      "float logits[rows, vocab_size]",
+      "float uniforms[rows]",
+      "int rows",
+      "int vocab_size",
+      "int k <= 8",
+      "float temperature > 0"
+    ],
+    "outputs": [
+      "sampled_indices[rows]",
+      "topk_indices[rows, k]",
+      "topk_values[rows, k]",
+      "topk_probs[rows, k]"
+    ],
+    "sortedness": "top-k candidates sorted by descending logit",
+    "tie_policy": "lower token id wins equal logits",
+    "rng_policy": "precomputed uniform per row is consumed by the kernel; RNG generation is not included",
+    "probability_policy": "softmax(top_k_logits / temperature) over the selected top-k candidates",
+    "top_p_policy": "not implemented by the seed task",
+    "nan_policy": "not part of the seed contract"
+  },
+  "fairness_metadata_required": [
+    "baseline_id",
+    "baseline_version_or_commit",
+    "baseline_entrypoint",
+    "gpu_name",
+    "gfx_target",
+    "driver_version",
+    "cuda_toolkit_version",
+    "compiler_or_framework_version",
+    "build_command_or_python_invocation",
+    "arch_flags",
+    "rows",
+    "vocab_size",
+    "k",
+    "temperature",
+    "top_p",
+    "top_k_top_p_filter_order",
+    "dtype",
+    "layout",
+    "strides",
+    "sortedness_contract",
+    "tie_policy",
+    "nan_policy",
+    "mask_policy",
+    "rng_source",
+    "rng_seed_or_state",
+    "rng_generation_timed",
+    "logits_processors_included",
+    "softmax_included",
+    "renormalization_included",
+    "output_probabilities_or_logprobs_materialized",
+    "workspace_bytes",
+    "workspace_query_timed",
+    "workspace_allocation_timed",
+    "workspace_reuse_policy",
+    "kernel_launch_count",
+    "framework_dispatch_included",
+    "stream",
+    "graph_capture_status",
+    "synchronization_points",
+    "correctness_reference",
+    "tolerance",
+    "sample_match_policy",
+    "timer_type",
+    "profiler_status",
+    "evidence_label",
+    "result_classification"
+  ],
+  "result_classifications": [
+    {
+      "id": "custom-win",
+      "meaning": "Custom kernel is correct and faster for the same contract."
+    },
+    {
+      "id": "custom-specialized-win",
+      "meaning": "Custom kernel wins by exploiting documented fixed shape, fusion, layout, RNG, or omitted generality."
+    },
+    {
+      "id": "near-match",
+      "meaning": "Performance is close enough to be useful, with no correctness gap."
+    },
+    {
+      "id": "library-win",
+      "meaning": "Best matching library or serving path is faster."
+    },
+    {
+      "id": "serving-win",
+      "meaning": "End-to-end serving path wins even if an isolated custom kernel is faster."
+    },
+    {
+      "id": "negative-example",
+      "meaning": "Attempt is correct but slower, and the reason is useful corpus data."
+    },
+    {
+      "id": "contract-mismatch",
+      "meaning": "Sortedness, tie policy, RNG, top-k/top-p semantics, processors, or output materialization differ."
+    },
+    {
+      "id": "comparison-incomplete",
+      "meaning": "Baseline path, workspace, RNG, processor, or launch boundary is missing."
+    },
+    {
+      "id": "correctness-fail",
+      "meaning": "Output contract is violated."
+    },
+    {
+      "id": "compile-fail",
+      "meaning": "Baseline or custom path does not build."
+    },
+    {
+      "id": "template-only",
+      "meaning": "Guidance or scaffold only; no GPU measurement is attached."
+    }
+  ],
+  "workload_distinctions": [
+    {
+      "id": "top-k",
+      "definition": "Keep candidates by rank, then renormalize probabilities over the selected k candidates.",
+      "seed_equivalent": true,
+      "must_record": [
+        "sorted or unsorted output",
+        "tie policy",
+        "whether top-k candidate list is materialized",
+        "whether sampling uses logits or probabilities"
+      ]
+    },
+    {
+      "id": "top-p",
+      "definition": "Keep the smallest probability-ordered prefix whose cumulative probability reaches p.",
+      "seed_equivalent": false,
+      "must_record": [
+        "probability sort or threshold algorithm",
+        "boundary token policy",
+        "top-k/top-p filter order when combined",
+        "renormalization policy"
+      ]
+    }
+  ],
+  "baselines": [
+    {
+      "id": "cub-device-topk",
+      "library": "hipCUB/rocPRIM/hipCUB/rocThrust",
+      "kind": "selection-baseline",
+      "entrypoints": [
+        "hipcub::DeviceTopK::MaxPairs",
+        "hipcub::DeviceTopK::MaxKeys"
+      ],
+      "local_references": [
+        "third_party/rocm-libraries/cub/cub/device/device_topk.hpp",
+        "third_party/rocm-libraries/cub/test/catch2_test_device_topk_api.hip"
+      ],
+      "covers": [
+        "top-k membership",
+        "keys or key-value pairs"
+      ],
+      "sortedness": "unsorted output only in the current API",
+      "tie_policy": "not guaranteed for equal elements across the kth boundary",
+      "rng_inclusion": "none",
+      "logits_processors": "not included",
+      "workspace_allocation": "requires temp storage query and device-accessible temporary storage",
+      "seed_contract_status": "contract-mismatch unless sortedness and deterministic tie repair are added or the custom contract is changed to unsorted",
+      "expected_classifications": [
+        "contract-mismatch",
+        "library-win",
+        "negative-example",
+        "custom-specialized-win"
+      ],
+      "notes": [
+        "Record cuda::execution determinism and output_ordering requirements.",
+        "Do not compare unsorted non-deterministic top-k directly against the sorted seed output."
+      ]
+    },
+    {
+      "id": "cub-device-select",
+      "library": "hipCUB/rocPRIM/hipCUB/rocThrust",
+      "kind": "threshold-compaction-building-block",
+      "entrypoints": [
+        "hipcub::DeviceSelect::If",
+        "hipcub::DeviceSelect::Flagged",
+        "hipcub::DeviceSelect::FlaggedIf"
+      ],
+      "local_references": [
+        "third_party/rocm-libraries/cub/cub/device/device_select.hpp"
+      ],
+      "covers": [
+        "predicate compaction",
+        "thresholded candidate collection",
+        "top-p or mask pipeline component"
+      ],
+      "sortedness": "preserves original relative order among selected items; does not rank selected items",
+      "tie_policy": "inherited from threshold or predicate producer",
+      "rng_inclusion": "none",
+      "logits_processors": "not included unless fused into predicate producer outside DeviceSelect",
+      "workspace_allocation": "requires temp storage query and device-accessible temporary storage",
+      "seed_contract_status": "not a standalone equivalent baseline for top-k sampling",
+      "expected_classifications": [
+        "comparison-incomplete",
+        "negative-example",
+        "custom-specialized-win"
+      ],
+      "notes": [
+        "Use only as one stage of a fully timed pipeline.",
+        "Record the separate threshold computation and launch count."
+      ]
+    },
+    {
+      "id": "cub-device-radix-sort",
+      "library": "hipCUB/rocPRIM/hipCUB/rocThrust",
+      "kind": "full-sort-oracle-and-baseline",
+      "entrypoints": [
+        "hipcub::DeviceRadixSort::SortPairsDescending",
+        "hipcub::DeviceRadixSort::SortKeysDescending"
+      ],
+      "local_references": [
+        "third_party/rocm-libraries/cub/cub/device/device_radix_sort.hpp"
+      ],
+      "covers": [
+        "globally sorted logits",
+        "sorted top-k by taking first k after full sort",
+        "deterministic oracle when composite keys encode tie policy"
+      ],
+      "sortedness": "sorted descending when descending API is used",
+      "tie_policy": "stable sort behavior; seed tie policy requires composite key or post-processing",
+      "rng_inclusion": "none",
+      "logits_processors": "not included",
+      "workspace_allocation": "requires temp storage; API variants use approximately N or 2N auxiliary storage",
+      "seed_contract_status": "equivalent for sorted top-k only if tie policy is encoded and sampling/softmax is added",
+      "expected_classifications": [
+        "library-win",
+        "negative-example",
+        "custom-specialized-win"
+      ],
+      "notes": [
+        "A full sort may be a strong correctness oracle but a weak performance baseline for fixed small k.",
+        "Record whether double-buffer or non-double-buffer APIs are used."
+      ]
+    },
+    {
+      "id": "vllm-rocm-sampling",
+      "library": "vLLM on ROCm",
+      "kind": "serving-baseline-and-extension-surface",
+      "entrypoints": [
+        "invokeBatchTopKSampling",
+        "invokeBatchTopPSampling",
+        "invokeBatchAirTopPSampling",
+        "topkLastDim AIR TopK paths"
+      ],
+      "local_references": [
+        "third_party/vllm-rocm/cpp/migraphx_llm/kernels/samplingTopKKernels.hip",
+        "third_party/vllm-rocm/cpp/migraphx_llm/kernels/samplingTopPKernels.hip",
+        "third_party/vllm-rocm/cpp/migraphx_llm/kernels/samplingAirTopPKernels.hip",
+        "third_party/vllm-rocm/cpp/migraphx_llm/kernels/topkLastDim.hip",
+        "third_party/vllm-rocm/docs/source/features/sampling.md"
+      ],
+      "covers": [
+        "top-k sampling",
+        "top-p sampling",
+        "AIR top-p",
+        "top-k plus top-p serving policies",
+        "finished sequence and runtime argument handling"
+      ],
+      "sortedness": "path-dependent; record whether selected candidates are returned, sorted, or only sampled",
+      "tie_policy": "implementation-dependent; vLLM on ROCm documentation does not guarantee a specific tied-probability policy",
+      "rng_inclusion": "uses library RNG state for sampling paths; record CURAND state and whether RNG is timed",
+      "logits_processors": "serving path may include temperature, penalties, logits processor hooks, return logits/logprobs, and batching policy",
+      "workspace_allocation": "record top-k, top-p, or AIR top-p workspace helpers and reuse/allocation policy",
+      "seed_contract_status": "equivalent only for top-k temperature sampling when processors, RNG, output materialization, and timing boundary are matched",
+      "expected_classifications": [
+        "library-win",
+        "serving-win",
+        "custom-specialized-win",
+        "contract-mismatch",
+        "comparison-incomplete"
+      ],
+      "notes": [
+        "Do not compare seed top-k-only sampling to top-p, beam, or return-logprob behavior as if they were equivalent.",
+        "Record sampler backend: Torch Sampler, TRTLLM Sampler, or direct kernel invocation."
+      ]
+    },
+    {
+      "id": "vllm-sampler",
+      "library": "vLLM",
+      "kind": "serving-and-framework-dispatch-baseline",
+      "entrypoints": [
+        "top_k_per_row_decode",
+        "top_k_per_row_prefill",
+        "TopKTopPSampler.forward_native",
+        "TopKTopPSampler.forward_cuda",
+        "apply_top_k_top_p_triton",
+        "FlashInfer-backed sampler path"
+      ],
+      "local_references": [
+        "third_party/vllm/csrc/topk.hip",
+        "third_party/vllm/csrc/persistent_topk.hpp",
+        "third_party/vllm/csrc/sampler.hip",
+        "third_party/vllm/vllm/v1/sample/ops/topk_topp_sampler.py",
+        "third_party/vllm/vllm/v1/sample/ops/topk_topp_triton.py",
+        "third_party/vllm/vllm/v1/sample/logits_processor/builtin.py",
+        "third_party/vllm/benchmarks/benchmark_topk_topp.py"
+      ],
+      "covers": [
+        "top-k",
+        "top-p",
+        "top-k plus top-p",
+        "PyTorch fallback",
+        "Triton filtering",
+        "FlashInfer sampling",
+        "logits processor integration"
+      ],
+      "sortedness": "path-dependent; record actual selected path and output contract",
+      "tie_policy": "path-dependent; PyTorch, Triton, FlashInfer, and CUDA paths may differ",
+      "rng_inclusion": "path-dependent; record PyTorch generators, FlashInfer deterministic mode, or fallback random_sample behavior",
+      "logits_processors": "record whether vLLM built-in or custom logits processors ran before sampling",
+      "workspace_allocation": "record framework allocations, contiguous copies, and any library workspace",
+      "seed_contract_status": "equivalent only if the selected vLLM path matches top-k temperature sampling, RNG, output materialization, and processor boundary",
+      "expected_classifications": [
+        "library-win",
+        "serving-win",
+        "custom-specialized-win",
+        "contract-mismatch",
+        "comparison-incomplete"
+      ],
+      "notes": [
+        "Record the actual dispatch path selected by vLLM.",
+        "Per-request generators or processed logits/logprobs can force fallback paths."
+      ]
+    },
+    {
+      "id": "flashinfer-sampling",
+      "library": "FlashInfer",
+      "kind": "inference-sampling-baseline",
+      "entrypoints": [
+        "flashinfer::sampling::SamplingFromLogits",
+        "flashinfer::sampling::SamplingFromProb",
+        "flashinfer::sampling::TopKSamplingFromProb",
+        "flashinfer::sampling::TopPSamplingFromProb",
+        "flashinfer::sampling::TopKTopPSamplingFromProb",
+        "flashinfer::sampling::air_top_p::AirTopPRenormProb"
+      ],
+      "local_references": [
+        "third_party/flashinfer/include/flashinfer/topk.hpp",
+        "third_party/flashinfer/include/flashinfer/sampling.hpp",
+        "third_party/flashinfer/include/flashinfer/air_top_p.hpp",
+        "third_party/flashinfer/csrc/topk.hip",
+        "third_party/flashinfer/csrc/sampling.hip",
+        "third_party/flashinfer/benchmarks/bench_topk.py",
+        "third_party/flashinfer/benchmarks/bench_sampling.py"
+      ],
+      "covers": [
+        "sampling from logits",
+        "sampling from probabilities",
+        "top-k sampling",
+        "top-p sampling",
+        "top-k plus top-p sampling",
+        "AIR top-p renormalization"
+      ],
+      "sortedness": "sampling APIs may not materialize sorted candidate lists; record exact outputs",
+      "tie_policy": "statistical sampling contract; exact tied-token behavior is path-dependent",
+      "rng_inclusion": "seed and offset arrays or scalar values; record deterministic mode and whether RNG is timed",
+      "logits_processors": "not included unless applied before FlashInfer call",
+      "workspace_allocation": "record dynamic shared memory and external workspace for AIR/top-p/renorm paths",
+      "seed_contract_status": "equivalent only when logits/probability input, RNG policy, and materialized outputs match the seed contract",
+      "expected_classifications": [
+        "library-win",
+        "near-match",
+        "custom-specialized-win",
+        "contract-mismatch"
+      ],
+      "notes": [
+        "If sampling is statistically equivalent but exact sampled ids differ, classify as near-match only with distribution tests.",
+        "Include softmax timing when using probability-consuming APIs unless the custom path also starts from probabilities."
+      ]
+    },
+    {
+      "id": "torch-topk-multinomial",
+      "library": "PyTorch",
+      "kind": "framework-baseline-and-oracle",
+      "entrypoints": [
+        "torch.topk",
+        "torch.softmax",
+        "torch.multinomial"
+      ],
+      "local_references": [],
+      "covers": [
+        "sorted top-k when sorted=True",
+        "temperature softmax over top-k",
+        "framework RNG sampling"
+      ],
+      "sortedness": "sorted if torch.topk(sorted=True) is used; unsorted if sorted=False",
+      "tie_policy": "PyTorch topk tie behavior may not match lower-token-id ties unless repaired",
+      "rng_inclusion": "torch.multinomial generates RNG internally; record generator and synchronization behavior",
+      "logits_processors": "not included unless separately applied in framework code",
+      "workspace_allocation": "record tensor allocation, allocator warmup, output preallocation, and framework dispatch",
+      "seed_contract_status": "good oracle but not necessarily strongest performance baseline; exact seed RNG policy requires custom use of precomputed uniforms instead of torch.multinomial",
+      "expected_classifications": [
+        "custom-win",
+        "custom-specialized-win",
+        "library-win",
+        "contract-mismatch",
+        "comparison-incomplete"
+      ],
+      "notes": [
+        "Use this baseline to check sorted output and probability values.",
+        "Do not ignore CPU-GPU synchronization or allocator effects."
+      ]
+    }
+  ],
+  "evidence_policy": {
+    "no_gpu_in_this_update": true,
+    "default_status": "template-only",
+    "timing_without_profiler_label": "timing-only",
+    "negative_label": "negative example",
+    "must_not_claim": [
+      "rocprofiler/rocprof counters unless collected",
+      "top-p equivalence from a top-k-only seed",
+      "fair serving comparison unless logits processors, RNG, workspace, and launch boundaries are recorded",
+      "sorted top-k equivalence when the baseline returns unsorted candidates",
+      "exact sampled-token equivalence when the baseline only promises statistical equivalence"
+    ]
+  }
+}

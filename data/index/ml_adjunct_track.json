@@ -1,0 +1,43 @@
+{
+  "schema_version": "0.1.0",
+  "purpose": "Machine-readable index for ML and LLM-adjacent custom HIP kernel scaffolds.",
+  "track": "ml-adjunct-kernels",
+  "evidence_policy": {
+    "unmeasured_label": "template-only",
+    "timed_without_profiler_counters": "timing-only",
+    "profiler_counter_rule": "Do not claim Nsight or hardware-counter evidence unless recorded with hardware and build metadata."
+  },
+  "tasks": [
+    {
+      "id": "fused-adamw-update",
+      "path": "corpus/tasks/fused-adamw-update",
+      "domain": "ml-training",
+      "status": "template-only",
+      "baseline": "multiple simple RDNA3mW update stages with a materialized update buffer",
+      "optimized": "single fused RDNA3mW update with float4 vector path and scalar fallback",
+      "source_refs": ["amd-rocm-programming-guide", "bitsandbytes", "transformer-engine"],
+      "custom_kernel_surface": ["fusion", "vectorized-contiguous-access", "optimizer-state-layout-specialization"]
+    },
+    {
+      "id": "rope-kv-cache-update",
+      "path": "corpus/tasks/rope-kv-cache-update",
+      "domain": "llm-inference",
+      "status": "template-only",
+      "baseline": "separate RoPE rotation plus K-cache and V-cache store kernels",
+      "optimized": "fused RoPE and KV-cache write for a contiguous non-paged cache layout",
+      "source_refs": ["amd-rocm-programming-guide", "vllm", "vllm", "flashinfer"],
+      "custom_kernel_surface": ["fusion", "kv-cache-layout-specialization", "decode-launch-reduction"]
+    },
+    {
+      "id": "moe-token-routing",
+      "path": "corpus/tasks/moe-token-routing",
+      "domain": "llm-inference",
+      "status": "template-only",
+      "baseline": "one thread per token scans experts and atomically scatters top-2 routes",
+      "optimized": "one block per token performs local top-2 merge before two atomic scatters",
+      "source_refs": ["amd-rocm-programming-guide", "rocm-rocprim", "vllm", "vllm"],
+      "custom_kernel_surface": ["block-local-selection", "atomic-scatter", "fixed-top2-routing"]
+    }
+  ],
+  "guide": "docs/ML_ADJUNCT_KERNEL_GUIDE.md"
+}

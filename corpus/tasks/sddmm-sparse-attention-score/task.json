@@ -1,0 +1,77 @@
+{
+  "schema_version": "0.1.0",
+  "id": "sddmm-sparse-attention-score",
+  "title": "SDDMM Sparse Attention Score Scaffold",
+  "domain": "sparse-linear-algebra",
+  "language": "hip-cpp",
+  "tags": [
+    "sddmm",
+    "sparse",
+    "attention",
+    "cusparse",
+    "composable-kernel",
+    "template-only"
+  ],
+  "source_refs": [
+    "rocm-examples",
+    "rocm-composable-kernel",
+    "amd-rocm-programming-guide",
+    "flash-attention"
+  ],
+  "problem": {
+    "summary": "Compute sampled dense-dense products only at sparse edge or block-mask locations, with attention-score metadata and coalescing contracts visible.",
+    "inputs": [
+      "dense Q-like matrix",
+      "dense K-like matrix",
+      "sparse COO/CSR/block mask",
+      "head_dim",
+      "scale"
+    ],
+    "outputs": [
+      "sparse score values matching the input sparsity pattern"
+    ],
+    "constraints": [
+      "Template-only; record sparse format, edge ordering, duplicate policy, and block size",
+      "Compare against cuSPARSE/Composable Kernel sparse where feasible",
+      "Do not fold softmax or PV timing into SDDMM-only claims"
+    ]
+  },
+  "artifacts": {
+    "baseline": "source/baseline.hip",
+    "optimized": "source/optimized.hip",
+    "harness": "source/harness_plan.md"
+  },
+  "verification": {
+    "status": "template-only",
+    "method": "Implement the baseline, optimized candidate, and CPU or strongest-library oracle where applicable; compare outputs before timing claims.",
+    "tolerances": {
+      "max_abs_error": 0.0001,
+      "max_rel_error": 0.0001
+    }
+  },
+  "benchmarking": {
+    "status": "template-only",
+    "operation": "sddmm-sparse-attention-score",
+    "required_metrics": [
+      "median latency",
+      "nnz",
+      "density",
+      "format",
+      "head_dim",
+      "block size",
+      "edge ordering",
+      "effective FLOP/s",
+      "correctness max error"
+    ],
+    "recommended_shapes": [
+      "rows=4096 cols=4096 nnz_per_row=16 head_dim=64",
+      "block_sparse seq=4096 block=64 density=0.1",
+      "power-law graph nnz=1048576 head_dim=128"
+    ]
+  },
+  "license": "Project seed example",
+  "curation": {
+    "status": "template-only",
+    "notes": "Promoted from the v2 extension backlog as wave 2. No performance, correctness, or profiler evidence is claimed yet."
+  }
+}

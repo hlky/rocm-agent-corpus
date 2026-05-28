@@ -1,0 +1,78 @@
+{
+  "schema_version": "0.1.0",
+  "id": "gfx90a-gfx942-cdna-split",
+  "title": "SM80 GFX86 CDNA2 Split Lab",
+  "domain": "architecture-lab",
+  "language": "architecture-workflow",
+  "tags": [
+    "ampere",
+    "sm80",
+    "sm86",
+    "global-to-LDS staging",
+    "tf32",
+    "architecture",
+    "template-only"
+  ],
+  "source_refs": [
+    "amd-cdna2-tuning-guide",
+    "amd-rocm-gpu-support",
+    "amd-hipblaslt-rocblas-docs",
+    "rocm-composable-kernel",
+    "amd-rocm-programming-guide"
+  ],
+  "problem": {
+    "summary": "Separate CDNA2 data-center gfx90a assumptions from consumer/pro gfx1030 behavior for global-to-LDS staging, TF32, cache, and library tactic comparisons.",
+    "inputs": [
+      "same task built for gfx90a and gfx1030",
+      "hardware metadata",
+      "compile flags",
+      "library versions"
+    ],
+    "outputs": [
+      "architecture comparison record",
+      "timing/profile artifacts",
+      "portability notes"
+    ],
+    "constraints": [
+      "Template-only; do not generalize gfx90a A100 behavior to gfx1030 GPUs",
+      "Record exact GPU model, gfx target, clocks, and arch flags",
+      "Compare same code path and shape suite where possible"
+    ]
+  },
+  "artifacts": {
+    "baseline": "source/baseline_plan.md",
+    "optimized": "source/optimized_plan.md",
+    "harness": "source/evidence_checklist.md"
+  },
+  "verification": {
+    "status": "template-only",
+    "method": "Attach this workflow to a task-specific correctness harness or compile/profile artifact before claiming evidence.",
+    "tolerances": {}
+  },
+  "benchmarking": {
+    "status": "template-only",
+    "operation": "gfx90a-gfx942-cdna-split",
+    "required_metrics": [
+      "gpu model",
+      "gfx target",
+      "arch flags",
+      "driver",
+      "ROCm toolkit",
+      "TF32 policy",
+      "global-to-LDS staging used",
+      "median latency",
+      "library algorithm",
+      "profile status"
+    ],
+    "recommended_shapes": [
+      "memory global-to-LDS staging tile",
+      "rocWMMA/HGEMM",
+      "attention prefill/decode"
+    ]
+  },
+  "license": "Project seed example",
+  "curation": {
+    "status": "template-only",
+    "notes": "Promoted from the v2 extension backlog as wave 2. No performance, correctness, or profiler evidence is claimed yet."
+  }
+}

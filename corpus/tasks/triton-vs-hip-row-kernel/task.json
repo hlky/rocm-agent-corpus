@@ -1,0 +1,70 @@
+{
+  "schema_version": "0.1.0",
+  "id": "triton-vs-hip-row-kernel",
+  "title": "Triton vs CUDA Row Kernel Pair",
+  "domain": "framework-kernel",
+  "language": "python+hip-cpp",
+  "tags": [
+    "triton",
+    "hip-cpp",
+    "rowwise",
+    "compiler-baseline",
+    "template-only",
+    "todo"
+  ],
+  "source_refs": [
+    "triton",
+    "amd-hip-programming-guide",
+    "amd-rocm-programming-guide"
+  ],
+  "problem": {
+    "summary": "Pair a concise Triton rowwise kernel against a HIP C++ rowwise kernel for future dispatch and generated-code comparison.",
+    "inputs": [
+      "float* input shaped [rows, cols]",
+      "float* output shaped [rows]",
+      "int rows",
+      "int cols"
+    ],
+    "outputs": [
+      "one row sum per row"
+    ],
+    "constraints": [
+      "Record whether Python/Triton dispatch is included in timing",
+      "Capture Triton meta-parameters",
+      "CUDA path should not claim a win without identical timing boundary"
+    ]
+  },
+  "artifacts": {
+    "baseline": "source/triton_baseline.py",
+    "optimized": "source/optimized.hip"
+  },
+  "verification": {
+    "status": "template-only",
+    "method": "Compare Triton and CUDA outputs with a CPU or framework row sum reference.",
+    "tolerances": {
+      "max_abs_error": 0.0001,
+      "max_rel_error": 0.0001
+    }
+  },
+  "benchmarking": {
+    "status": "template-only",
+    "operation": "rowwise-sum",
+    "required_metrics": [
+      "median kernel duration",
+      "dispatch boundary",
+      "Triton block size",
+      "CUDA block size",
+      "hardware_metadata"
+    ],
+    "recommended_shapes": [
+      "rows=4096,cols=1024",
+      "rows=65536,cols=128",
+      "rows=1024,cols=4096"
+    ]
+  },
+  "license": "Project seed example",
+  "curation": {
+    "status": "template-only",
+    "notes": "This task is for honest Triton/compiler baseline comparison before porting or specializing in HIP C++."
+  }
+}

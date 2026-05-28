@@ -1,0 +1,77 @@
+{
+  "schema_version": "0.1.0",
+  "id": "hip-ipc-multiprocess",
+  "title": "HIP IPC Multiprocess Shared Buffer Workflow",
+  "domain": "multi-process-runtime",
+  "language": "hip-cpp",
+  "tags": [
+    "cuda-ipc",
+    "events",
+    "multiprocess",
+    "p2p",
+    "rocm-parity",
+    "shared-memory",
+    "template-only"
+  ],
+  "source_refs": [
+    "amd-hip-programming-guide",
+    "rocm-examples",
+    "pytorch"
+  ],
+  "problem": {
+    "summary": "Template a producer/consumer CUDA IPC workflow with exported memory handles, event handles, optional P2P access, and explicit synchronization boundaries.",
+    "inputs": [
+      "producer process device allocation",
+      "cudaIpcMemHandle_t and cudaIpcEventHandle_t",
+      "consumer process stream and device ordinal",
+      "optional P2P topology metadata"
+    ],
+    "outputs": [
+      "shared device buffer observed by the consumer process",
+      "IPC setup, transfer, and kernel timing records"
+    ],
+    "constraints": [
+      "Template-only; no IPC latency, P2P bandwidth, or counter evidence is claimed",
+      "Record process topology, device ordinals, peer-access status, handle lifetime, and synchronization contract",
+      "Separate handle setup cost from steady-state cross-process work"
+    ]
+  },
+  "artifacts": {
+    "baseline": "source/baseline.hip",
+    "optimized": "source/optimized.hip",
+    "harness": "source/harness_plan.md",
+    "profiles": [],
+    "results": []
+  },
+  "verification": {
+    "status": "template-only",
+    "method": "Producer fills a shared device buffer, consumer opens the IPC handle, runs a verification kernel, and compares a checksum against host-side expected values.",
+    "tolerances": {
+      "checksum_mismatch": 0
+    }
+  },
+  "benchmarking": {
+    "status": "template-only",
+    "operation": "hip-ipc-multiprocess-shared-buffer",
+    "required_metrics": [
+      "handle export/import time",
+      "steady-state latency",
+      "effective bandwidth",
+      "device ordinals",
+      "peer access enabled",
+      "synchronization method",
+      "timer_type",
+      "hardware metadata"
+    ],
+    "recommended_shapes": [
+      "bytes=4MiB same-GPU two-process",
+      "bytes=64MiB same-node P2P two-GPU",
+      "bytes=256MiB producer-consumer ring"
+    ]
+  },
+  "license": "Project seed example",
+  "curation": {
+    "status": "template-only",
+    "notes": "ROCm parity port from CUDA task `cuda-ipc-multiprocess`. This is a template/harness scaffold only; CUDA-origin result artifacts were intentionally not copied, and no ROCm timing, correctness, or profiler-counter evidence is claimed yet. Run on AMD hardware, attach ROCm version, hipcc flags, gfx target, and label HIP-event-only results as timing-only."
+  }
+}

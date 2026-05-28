@@ -1,0 +1,84 @@
+{
+  "version": 1,
+  "status": "scaffolded",
+  "description": "Initial manifest for planned CUDA agent eval task families.",
+  "task_contract_fields": [
+    "task_id",
+    "task_version",
+    "operation",
+    "inputs",
+    "outputs",
+    "dtypes",
+    "layouts",
+    "visible_shapes",
+    "hidden_shape_policy",
+    "tolerance",
+    "allowed_libraries",
+    "disallowed_shortcuts",
+    "baseline_competitors",
+    "optimization_surfaces",
+    "architecture_notes"
+  ],
+  "planned_task_families": [
+    {
+      "family": "gemm",
+      "status": "planned",
+      "competitors": ["hipBLASLt", "Composable Kernel", "Triton"],
+      "custom_kernel_angles": ["fixed shapes", "custom epilogues", "layout specialization", "lower launch overhead"]
+    },
+    {
+      "family": "reduction",
+      "status": "planned",
+      "competitors": ["hipCUB", "rocPRIM/hipCUB/rocThrust", "Triton"],
+      "custom_kernel_angles": ["warp reductions", "block reductions", "fused postprocessing", "known sizes"]
+    },
+    {
+      "family": "scan",
+      "status": "planned",
+      "competitors": ["hipCUB", "rocPRIM/hipCUB/rocThrust"],
+      "custom_kernel_angles": ["segmented constraints", "small fixed arrays", "fused transforms"]
+    },
+    {
+      "family": "softmax",
+      "status": "planned",
+      "competitors": ["Triton", "MIOpen", "vLLM on ROCm"],
+      "custom_kernel_angles": ["row specialization", "mask fusion", "online softmax", "attention fusion"]
+    },
+    {
+      "family": "normalization",
+      "status": "planned",
+      "competitors": ["framework kernels", "Triton", "vLLM on ROCm"],
+      "custom_kernel_angles": ["RMSNorm", "LayerNorm", "residual fusion", "quantized outputs"]
+    },
+    {
+      "family": "attention",
+      "status": "planned",
+      "competitors": ["FlashAttention", "MIOpen", "vLLM on ROCm", "Triton"],
+      "custom_kernel_angles": ["fixed head size", "causal masks", "paged KV cache", "decode specialization"]
+    },
+    {
+      "family": "topk_sampling",
+      "status": "planned",
+      "competitors": ["hipCUB", "vLLM on ROCm", "framework kernels"],
+      "custom_kernel_angles": ["small k", "vocab partitioning", "sampling fusion", "beam helper fusion"]
+    },
+    {
+      "family": "quantization",
+      "status": "planned",
+      "competitors": ["MIGraphX", "vLLM on ROCm", "TransformerEngine", "framework kernels"],
+      "custom_kernel_angles": ["int8", "int4", "fp8", "fused dequantize epilogues"]
+    },
+    {
+      "family": "kv_cache",
+      "status": "planned",
+      "competitors": ["vLLM on ROCm", "vLLM", "FlashInfer"],
+      "custom_kernel_angles": ["paged layouts", "decode-only paths", "known block sizes", "layout-aware reads"]
+    },
+    {
+      "family": "convolution_stencil",
+      "status": "planned",
+      "competitors": ["MIOpen", "Composable Kernel", "framework kernels"],
+      "custom_kernel_angles": ["fixed filters", "separable filters", "stencils", "halo reuse"]
+    }
+  ]
+}

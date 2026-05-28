@@ -1,0 +1,424 @@
+{
+  "schema_version": "0.1.0",
+  "guide": "docs/TOPK_WILD_IDEAS_LAB.md",
+  "roadmap": "docs/ROAD_TO_SOTA_TOPK.md",
+  "task": "corpus/tasks/wide-k-topk-selection/task.json",
+  "status": "hypothesis-only",
+  "mission": "Track speculative Top-K optimization ideas as testable hypotheses with exactness class, k regime, likely failure mode, and first benchmark gate.",
+  "evidence_policy": [
+    "Every idea starts as hypothesis-only.",
+    "A timing record must include idea_id, k_regime, exactness class, repair policy, and same-hardware baselines.",
+    "Contract-changing ideas are not Top-K wins unless the caller explicitly accepts the changed operation.",
+    "Negative examples should be kept when an idea is correct but loses."
+  ],
+  "ideas": [
+    {
+      "id": "multi-pivot-fence",
+      "name": "Multi-pivot fence",
+      "exactness": "exact-after-repair",
+      "k_regimes": ["medium-k", "large-k"],
+      "weirdness": 3,
+      "plausibility": 4,
+      "core_hypothesis": "Count several thresholds per pass, then repair the bucket containing the kth score.",
+      "first_experiment": "Four-pivot FP32 pass for k=64,128,256,512 against hipCUB DeviceTopK and DeviceRadixSort.",
+      "failure_modes": ["extra full-row passes dominate", "flat distributions defeat pruning", "boundary duplicates require expensive repair"]
+    },
+    {
+      "id": "exponent-first-radix",
+      "name": "Exponent-first radix",
+      "exactness": "exact-after-repair",
+      "k_regimes": ["medium-k", "large-k"],
+      "weirdness": 4,
+      "plausibility": 3,
+      "core_hypothesis": "Use high-order sortable float-key bins to isolate likely winners before mantissa-level repair.",
+      "first_experiment": "Histogram exponent/sign bins, compact the winning bin, and sort/repair candidates.",
+      "failure_modes": ["most values land in one bucket", "NaN and signed-zero policy bugs", "quantized logits flatten useful bins"]
+    },
+    {
+      "id": "complement-topk",
+      "name": "Complement Top-K",
+      "exactness": "exact",
+      "k_regimes": ["near-full-k"],
+      "weirdness": 2,
+      "plausibility": 4,
+      "core_hypothesis": "When k/n is high, select or sort the bottom n-k and derive the top-k complement.",
+      "first_experiment": "Sweep k/n=0.1,0.25,0.5,0.9 against full radix sort.",
+      "failure_modes": ["sorted output still needs large sort", "output writes dominate", "full sort wins cleanly"]
+    },
+    {
+      "id": "unsorted-first-late-sort",
+      "name": "Unsorted-first late-sort",
+      "exactness": "exact",
+      "k_regimes": ["tiny-k", "small-k", "medium-k"],
+      "weirdness": 2,
+      "plausibility": 5,
+      "core_hypothesis": "Return or consume unsorted candidates and sort only when the caller requires sorted output.",
+      "first_experiment": "Compare unsorted membership, unsorted plus k-sort, and always-sorted paths for k=8,16,32,64.",
+      "failure_modes": ["API requires sorted output", "tie repair erases savings", "hipCUB unsorted baseline is already stronger"]
+    },
+    {
+      "id": "flashtopk-epilogue",
+      "name": "FlashTopK epilogue",
+      "exactness": "contract-changing",
+      "k_regimes": ["tiny-k", "small-k", "decode-lm-head"],
+      "weirdness": 5,
+      "plausibility": 4,
+      "core_hypothesis": "Do not materialize logits; have LM-head GEMM tiles emit local Top-K candidates for a hierarchical merge.",
+      "first_experiment": "Composable Kernel epilogue sketch that writes per-tile candidates and compares against materialized GEMM plus Top-K.",
+      "failure_modes": ["epilogue register pressure slows GEMM", "hipBLASLt epilogue not flexible enough", "downstream requires full logits/logprobs"]
+    },
+    {
+      "id": "temporal-candidate-cache",
+      "name": "Temporal candidate cache",
+      "exactness": "exact-after-repair",
+      "k_regimes": ["decode-lm-head", "tiny-k", "small-k"],
+      "weirdness": 4,
+      "plausibility": 3,
+      "core_hypothesis": "Reuse prior decode step candidate blocks, pivots, or thresholds, then validate exactly.",
+      "first_experiment": "Record hint hit rate and repair rate over real decode traces.",
+      "failure_modes": ["repair requires full scan every time", "cache misses branch-diverge", "token distribution shifts abruptly"]
+    },
+    {
+      "id": "hot-block-vocab-layout",
+      "name": "Hot-block vocab layout",
+      "exactness": "exact",
+      "k_regimes": ["decode-lm-head", "tiny-k", "small-k"],
+      "weirdness": 5,
+      "plausibility": 2,
+      "core_hypothesis": "Model-specific vocab permutation can make high-probability blocks easier to find and merge.",
+      "first_experiment": "Offline vocab permutation plus inverse index repair on one fixed model.",
+      "failure_modes": ["weight layout integration is too costly", "cold blocks still need full scan", "quantization layout breaks"]
+    },
+    {
+      "id": "k-regime-jit-ladder",
+      "name": "K-regime JIT ladder",
+      "exactness": "exact",
+      "k_regimes": ["all"],
+      "weirdness": 2,
+      "plausibility": 5,
+      "core_hypothesis": "Compile or cache specialized kernels for common k values instead of using one generic kernel.",
+      "first_experiment": "hipRTC or static dispatch for k=1,2,4,8,16,32,64,128,256 with amdclang++ resource/ISA resource capture.",
+      "failure_modes": ["code size and compile time grow", "dynamic request k values defeat caching", "dispatch overhead dominates"]
+    },
+    {
+      "id": "boundary-tie-microkernel",
+      "name": "Boundary-tie microkernel",
+      "exactness": "exact-after-repair",
+      "k_regimes": ["all"],
+      "weirdness": 3,
+      "plausibility": 3,
+      "core_hypothesis": "Run a fast deterministic path for rows without kth-boundary duplicates and repair rare tied rows.",
+      "first_experiment": "Quantized, all-equal, and random FP32 tie-rate sweep.",
+      "failure_modes": ["ties common after quantization/masking", "extra repair launch dominates", "fast path accidentally violates deterministic order"]
+    },
+    {
+      "id": "ragged-length-buckets",
+      "name": "Ragged length buckets",
+      "exactness": "exact",
+      "k_regimes": ["ragged-segmented"],
+      "weirdness": 2,
+      "plausibility": 5,
+      "core_hypothesis": "Bucket segments by length and route them to warp, CTA, or multi-CTA kernels.",
+      "first_experiment": "Zipf segment-length benchmark versus padded PyTorch and segmented hipCUB-style pipeline.",
+      "failure_modes": ["bucketing overhead erases win", "scatter/gather output cost dominates", "empty and short segments expose output-policy bugs"]
+    },
+    {
+      "id": "score-bin-bitset-select",
+      "name": "Score-bin bitset select",
+      "exactness": "exact-after-repair",
+      "k_regimes": ["small-k", "medium-k"],
+      "weirdness": 4,
+      "plausibility": 3,
+      "core_hypothesis": "Use coarse score bins and warp ballots to emit threshold candidates with compact bitsets.",
+      "first_experiment": "Per-tile bin counters plus bitset candidate emit for k=16,32,64,128.",
+      "failure_modes": ["bin collisions create huge repair set", "bitset memory traffic dominates", "score range is unstable"]
+    },
+    {
+      "id": "two-pass-topk-cdf",
+      "name": "Two-pass Top-K plus CDF",
+      "exactness": "exact-after-repair",
+      "k_regimes": ["tiny-k", "small-k", "sampling"],
+      "weirdness": 3,
+      "plausibility": 4,
+      "core_hypothesis": "For Top-K sampling, find the kth threshold, then compute exp sum and sample without sorting/materializing the k-list.",
+      "first_experiment": "Compare against block-topk-sampling and FlashInfer for k=4,8,16,32.",
+      "failure_modes": ["two passes lose for tiny k", "boundary ties complicate CDF", "caller needs top-k values/logprobs anyway"]
+    },
+    {
+      "id": "confidence-gated-argmax",
+      "name": "Confidence-gated argmax",
+      "exactness": "contract-changing",
+      "k_regimes": ["argmax-k1", "sampling"],
+      "weirdness": 3,
+      "plausibility": 2,
+      "core_hypothesis": "Very peaked rows can skip broad Top-K work under greedy or approximate sampling policies.",
+      "first_experiment": "Measure quality/perplexity and latency with margin thresholds; never classify as exact Top-K.",
+      "failure_modes": ["not exact Top-K", "sampling distribution drifts", "quality loss hides in rare tokens"]
+    },
+    {
+      "id": "grouped-tensor-parallel-merge",
+      "name": "Grouped tensor-parallel merge",
+      "exactness": "exact",
+      "k_regimes": ["multi-gpu", "large-vocab"],
+      "weirdness": 2,
+      "plausibility": 4,
+      "core_hypothesis": "Each vocab shard emits local top-k candidates, then ranks exchange only candidate lists.",
+      "first_experiment": "RCCL allgather of candidate pairs plus deterministic merge for tensor-parallel vocab shards.",
+      "failure_modes": ["RCCL latency dominates tiny batches", "local candidate count insufficient for ties", "serving stack already merges efficiently"]
+    },
+    {
+      "id": "adversarial-autotuner",
+      "name": "Adversarial autotuner",
+      "exactness": "testing-tool",
+      "k_regimes": ["all"],
+      "weirdness": 3,
+      "plausibility": 5,
+      "core_hypothesis": "Generate cases that make each candidate fail before trusting random-logit speedups.",
+      "first_experiment": "Add all-equal, kth-boundary ties, high k/n, NaNs, flat logits, and ragged extremes to the harness.",
+      "failure_modes": ["overweights rare cases", "slows benchmark iteration", "needs separate random/model-like/adversarial reporting"]
+    },
+    {
+      "id": "low-precision-prefilter",
+      "name": "Low-precision prefilter",
+      "exactness": "exact-after-repair",
+      "k_regimes": ["small-k", "medium-k", "large-k"],
+      "weirdness": 3,
+      "plausibility": 4,
+      "core_hypothesis": "Use half/int8/fp8 shadow scores or approximate loads to prune obvious losers, then reload exact scores for repair.",
+      "first_experiment": "Keep top-M approximate candidates for k=16,64,256, then prove or repair against exact FP32.",
+      "failure_modes": ["close boundary scores force large repair sets", "shadow buffer maintenance costs too much", "quantization creates tie-policy bugs"]
+    },
+    {
+      "id": "block-upper-bound-pruning",
+      "name": "Block upper-bound pruning",
+      "exactness": "exact-after-repair",
+      "k_regimes": ["decode-lm-head", "large-vocab"],
+      "weirdness": 5,
+      "plausibility": 3,
+      "core_hypothesis": "Use certified per-vocab-block upper bounds to skip blocks whose maximum possible score cannot beat the current kth score.",
+      "first_experiment": "Compare bound-based live-block scans against full scans on materialized logits and LM-head-integrated traces.",
+      "failure_modes": ["bounds are too loose", "bound computation costs as much as logits", "non-local processors invalidate metadata"]
+    },
+    {
+      "id": "max-k-superset-cache",
+      "name": "Max-K superset cache",
+      "exactness": "exact",
+      "k_regimes": ["mixed-policy", "small-k", "medium-k"],
+      "weirdness": 2,
+      "plausibility": 4,
+      "core_hypothesis": "For rows or requests with multiple requested k values, compute Kmax once and slice smaller k outputs.",
+      "first_experiment": "Group rows by Kmax and compare against separate k-specialized kernels for mixed k=4,8,16,32,64 batches.",
+      "failure_modes": ["Kmax much larger than most rows need", "sorted Kmax overpays for sample-only rows", "output writes dominate"]
+    },
+    {
+      "id": "policy-bucket-scheduler",
+      "name": "Policy bucket scheduler",
+      "exactness": "exact",
+      "k_regimes": ["serving-batch", "mixed-policy"],
+      "weirdness": 2,
+      "plausibility": 5,
+      "core_hypothesis": "Group rows by k, sortedness, dtype, output mode, and sampling policy before launching specialized kernels.",
+      "first_experiment": "Measure bucket overhead, launch count, graph replay compatibility, and latency versus one generic mixed-policy kernel.",
+      "failure_modes": ["too many tiny buckets", "scatter/gather overhead dominates", "graph capture becomes difficult"]
+    },
+    {
+      "id": "deterministic-packed-key",
+      "name": "Deterministic packed key",
+      "exactness": "exact",
+      "k_regimes": ["all", "sorted-deterministic"],
+      "weirdness": 2,
+      "plausibility": 5,
+      "core_hypothesis": "Pack sortable score bits and token-id tie policy into one integer key to simplify deterministic compare/sort/select.",
+      "first_experiment": "Build 64-bit packed-key oracle for FP32 logits and compare radix-sort overhead against pair compares.",
+      "failure_modes": ["64-bit keys increase bandwidth", "NaN and signed-zero canonicalization bugs", "score and token bits do not both fit cleanly"]
+    },
+    {
+      "id": "in-warp-reservoir-duel",
+      "name": "In-warp reservoir duel",
+      "exactness": "exact-after-repair",
+      "k_regimes": ["tiny-k", "small-k"],
+      "weirdness": 4,
+      "plausibility": 3,
+      "core_hypothesis": "Let lanes hold tiny reservoirs and duel pairwise with shuffle exchange instead of maintaining sorted per-thread lists.",
+      "first_experiment": "Compare reservoir duels against insertion lists and bitonic networks for k=4,8,16,32.",
+      "failure_modes": ["duel schedule misses candidates without repair", "shuffle traffic dominates", "insertion list remains simpler and faster"]
+    },
+    {
+      "id": "loser-tree-block-merge",
+      "name": "Loser-tree block merge",
+      "exactness": "exact",
+      "k_regimes": ["medium-k"],
+      "weirdness": 3,
+      "plausibility": 4,
+      "core_hypothesis": "Use a tournament or loser tree to merge sorted block candidate lists instead of repeated full k-list insertion.",
+      "first_experiment": "Second-pass-only benchmark with synthetic sorted lists, then real first-pass candidate lists for k=64,128,256.",
+      "failure_modes": ["first-pass lists are not sorted cheaply", "tree state is too bulky", "global temporary traffic dominates"]
+    },
+    {
+      "id": "persistent-topk-service",
+      "name": "Persistent Top-K service",
+      "exactness": "exact",
+      "k_regimes": ["small-batch-decode", "serving-batch"],
+      "weirdness": 4,
+      "plausibility": 3,
+      "core_hypothesis": "Use resident CTAs and a request queue to keep policy metadata and workspace hot for small decode batches.",
+      "first_experiment": "Compare ordinary launch, HIP Graph replay, and persistent service on the same batch-1..16 request trace.",
+      "failure_modes": ["queue management costs too much", "stream semantics become awkward", "fairness/cancellation bugs"]
+    },
+    {
+      "id": "cluster-dsm-candidate-ring",
+      "name": "Cluster DGFX candidate ring",
+      "exactness": "exact",
+      "k_regimes": ["hopper-blackwell", "few-row-large-vocab"],
+      "weirdness": 5,
+      "plausibility": 2,
+      "core_hypothesis": "Use CDNA3/CDNA4/RDNA4 cluster shared memory to merge candidates across CTAs before writing global temporary lists.",
+      "first_experiment": "CDNA3-only few-row huge-vocab prototype versus non-cluster multi-CTA merge.",
+      "failure_modes": ["cluster launch constraints reduce occupancy", "DGFX barriers cost more than global writes", "not portable to CDNA2/RDNA2/RDNA3"]
+    },
+    {
+      "id": "cp-async-score-conveyor",
+      "name": "cp.async score conveyor",
+      "exactness": "exact",
+      "k_regimes": ["large-contiguous-rows", "medium-k"],
+      "weirdness": 3,
+      "plausibility": 2,
+      "core_hypothesis": "Stage score tiles with async copy while candidate merge consumes the previous tile.",
+      "first_experiment": "CDNA2/RDNA2/CDNA3 cp.async prototype for k=128,256,512 with amdclang++ resource/ISA/AMD GCN ISA checks.",
+      "failure_modes": ["no reuse so shared staging just adds traffic", "occupancy drops", "compiler does not emit intended async path"]
+    },
+    {
+      "id": "token-class-split-lanes",
+      "name": "Token-class split lanes",
+      "exactness": "exact-after-repair",
+      "k_regimes": ["fixed-model-serving", "decode-lm-head"],
+      "weirdness": 5,
+      "plausibility": 2,
+      "core_hypothesis": "Split vocabulary into token classes, run class-local Top-M, and repair with a global merge.",
+      "first_experiment": "Special/control/numeric/frequent/rare class split with real trace hit-rate measurement.",
+      "failure_modes": ["class metadata dominates", "distribution shifts by domain", "global repair always needs full scan"]
+    },
+    {
+      "id": "gumbel-race-sampler",
+      "name": "Gumbel race sampler",
+      "exactness": "contract-changing",
+      "k_regimes": ["sampling"],
+      "weirdness": 4,
+      "plausibility": 3,
+      "core_hypothesis": "Use argmax over logit plus Gumbel noise or Gumbel candidate races when the caller needs samples rather than materialized Top-K.",
+      "first_experiment": "Distribution-test Gumbel paths against exact categorical and Top-K-filtered sampling.",
+      "failure_modes": ["not equivalent to Top-K-filtered sampling", "RNG cost dominates", "statistical tests replace exact token equality"]
+    },
+    {
+      "id": "sparsemax-simplex-decoder",
+      "name": "Sparsemax/simplex decoder",
+      "exactness": "contract-changing",
+      "k_regimes": ["sampling", "policy-experiment"],
+      "weirdness": 5,
+      "plausibility": 2,
+      "core_hypothesis": "Unify Top-K, Top-P, min-p, and sparse projection-style decoding as thresholded simplex operations.",
+      "first_experiment": "Implement one threshold solver and evaluate latency plus quality metrics separately from exact Top-K.",
+      "failure_modes": ["changes decoding policy", "probability semantics get muddled", "quality regressions hide behind speedups"]
+    },
+    {
+      "id": "draft-token-candidate-reuse",
+      "name": "Draft-token candidate reuse",
+      "exactness": "exact-after-repair",
+      "k_regimes": ["speculative-decoding", "decode-lm-head"],
+      "weirdness": 4,
+      "plausibility": 3,
+      "core_hypothesis": "Use draft-model tokens and accepted spans as hints for verifier-model candidate regions, then repair exactly.",
+      "first_experiment": "Trace accepted/rejected span hit rates and compare verifier Top-K with and without hints.",
+      "failure_modes": ["rejected spans give bad hints", "full validation erases savings", "integration complexity overwhelms kernel win"]
+    },
+    {
+      "id": "model-trace-offline-tuner",
+      "name": "Model-trace offline tuner",
+      "exactness": "testing-tool",
+      "k_regimes": ["all", "serving-batch"],
+      "weirdness": 2,
+      "plausibility": 5,
+      "core_hypothesis": "Mine real logits traces to choose dispatch rules, pivots, bucket sizes, and eligibility for wild ideas.",
+      "first_experiment": "Use train/holdout trace splits to select pivot and bucket heuristics without overfitting reported results.",
+      "failure_modes": ["trace overfit", "privacy/storage constraints", "synthetic and production distributions diverge"]
+    },
+    {
+      "id": "split-bucket-one-iteration",
+      "name": "Split-bucket one-iteration kernel",
+      "exactness": "exact-after-repair",
+      "k_regimes": ["medium-k", "large-k"],
+      "weirdness": 4,
+      "plausibility": 3,
+      "core_hypothesis": "Fuse bucket partitioning, local selection, and merge-ready candidate emission into one execution step while data is hot.",
+      "first_experiment": "Implement one SBP-style iteration for k=128,256,512,1024 and compare to separate bucket/select kernels plus hipCUB radix sort.",
+      "failure_modes": ["fused kernel register pressure", "bucket imbalance leaves CTAs idle", "global merge still dominates"]
+    },
+    {
+      "id": "cross-layer-topk-index-reuse",
+      "name": "Cross-layer Top-K index reuse",
+      "exactness": "contract-changing",
+      "k_regimes": ["sparse-attention", "long-context"],
+      "weirdness": 4,
+      "plausibility": 3,
+      "core_hypothesis": "Reuse Top-K sparse-attention indices from anchor layers in nearby layers, or validate and repair them when exactness is required.",
+      "first_experiment": "Measure anchor/reuse interval, reuse hit rate, quality drift, and repair cost on sparse attention traces.",
+      "failure_modes": ["not exact without validation", "quality drift appears on reasoning workloads", "layer-specific behavior overfits"]
+    }
+  ],
+  "first_lab_batch": [
+    "Add result metadata fields: idea_id, contract_class, k_regime, repair_rate.",
+    "Implement multi-pivot fence for k=64,128,256.",
+    "Implement unsorted-first plus late-sort for k=16,32.",
+    "Implement complement Top-K for high k/n.",
+    "Add low-precision prefilter with exact FP32 repair.",
+    "Add adversarial row generation before timing runs.",
+    "Add one trace-driven experiment if real logits traces are available."
+  ],
+  "idea_selection_grid": [
+    {
+      "situation": "k=1 greedy decode",
+      "try_first": ["deterministic-packed-key", "confidence-gated-argmax"],
+      "avoid_first": ["medium-k heaps"]
+    },
+    {
+      "situation": "k=4..8 with sampling",
+      "try_first": ["unsorted-first-late-sort", "two-pass-topk-cdf", "flashtopk-epilogue"],
+      "avoid_first": ["radix/full sort"]
+    },
+    {
+      "situation": "k=16..64 sorted output",
+      "try_first": ["in-warp-reservoir-duel", "unsorted-first-late-sort", "loser-tree-block-merge"],
+      "avoid_first": ["high-ratio complement path"]
+    },
+    {
+      "situation": "k=128..1024",
+      "try_first": ["multi-pivot-fence", "exponent-first-radix", "score-bin-bitset-select"],
+      "avoid_first": ["tiny-k insertion lists"]
+    },
+    {
+      "situation": "high k/n",
+      "try_first": ["complement-topk", "full-sort crossover study"],
+      "avoid_first": ["assuming selection must win"]
+    },
+    {
+      "situation": "ragged segments",
+      "try_first": ["ragged-length-buckets", "policy-bucket-scheduler"],
+      "avoid_first": ["padded-only conclusions"]
+    },
+    {
+      "situation": "decode LM-head bottleneck",
+      "try_first": ["flashtopk-epilogue", "block-upper-bound-pruning", "model-trace-offline-tuner"],
+      "avoid_first": ["isolated Top-K-only claims"]
+    },
+    {
+      "situation": "CDNA3/CDNA4/RDNA4 few-row huge-vocab",
+      "try_first": ["cluster-dsm-candidate-ring", "persistent-topk-service"],
+      "avoid_first": ["CDNA2/RDNA2-tuned CTA assumptions"]
+    },
+    {
+      "situation": "sparse attention Top-K indices",
+      "try_first": ["cross-layer-topk-index-reuse", "model-trace-offline-tuner"],
+      "avoid_first": ["claiming exact attention without repair"]
+    }
+  ]
+}

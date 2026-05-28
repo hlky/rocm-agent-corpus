@@ -1,0 +1,74 @@
+{
+  "schema_version": "0.1.0",
+  "id": "migraphx-custom-op-fused-op",
+  "title": "MIGraphX Plugin Fused Op Scaffold",
+  "domain": "inference-engine",
+  "language": "hip-cpp",
+  "tags": [
+    "migraphx",
+    "plugin",
+    "fused-op",
+    "shape-inference",
+    "serialization",
+    "template-only",
+    "todo"
+  ],
+  "source_refs": [
+    "amd-migraphx-docs",
+    "amd-migraphx",
+    "amd-rocm-programming-guide"
+  ],
+  "problem": {
+    "summary": "Sketch a minimal MIGraphX plugin lifecycle for a fused rowwise HIP op, including shape, format, enqueue, serialization, and plugin creation boundaries.",
+    "inputs": [
+      "MIGraphX input tensor X shaped [B,N]",
+      "optional scalar alpha",
+      "plugin namespace and serialized fields"
+    ],
+    "outputs": [
+      "MIGraphX output tensor Y shaped [B,N] with y = relu(alpha * x)"
+    ],
+    "constraints": [
+      "Template-only scaffold; no MIGraphX engine result is claimed",
+      "Plugin enqueue must launch on MIGraphX's stream and avoid host synchronization",
+      "Record supported datatype, tensor format, MIGraphX version, dynamic shape profile, and serialization contract"
+    ]
+  },
+  "artifacts": {
+    "baseline": "source/plugin_lifecycle_notes.cpp",
+    "optimized": "source/fused_relu_plugin.hip",
+    "harness": "source/fused_relu_kernel.hip"
+  },
+  "verification": {
+    "status": "template-only",
+    "method": "Load the plugin into a minimal MIGraphX network and compare outputs with framework relu(alpha*x) reference tensors.",
+    "tolerances": {
+      "max_abs_error": 1e-05,
+      "max_rel_error": 1e-05
+    }
+  },
+  "benchmarking": {
+    "status": "template-only",
+    "operation": "migraphx-plugin-fused-relu",
+    "required_metrics": [
+      "engine build time",
+      "plugin enqueue latency",
+      "runtime batch and shape",
+      "MIGraphX version",
+      "precision",
+      "format",
+      "workspace bytes",
+      "hardware_metadata"
+    ],
+    "recommended_shapes": [
+      "B=1,N=4096",
+      "B=8,N=4096",
+      "B=32,N=1024"
+    ]
+  },
+  "license": "Project seed example",
+  "curation": {
+    "status": "template-only",
+    "notes": "Lifecycle skeleton for MIGraphX plugin integration; HIP kernel source is included but no engine has been built or timed."
+  }
+}

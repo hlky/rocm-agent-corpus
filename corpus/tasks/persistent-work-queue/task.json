@@ -1,0 +1,67 @@
+{
+  "schema_version": "0.1.0",
+  "id": "persistent-work-queue",
+  "title": "Persistent Work Queue Scaffold",
+  "domain": "scheduling",
+  "language": "hip-cpp",
+  "tags": [
+    "persistent-threads",
+    "work-queue",
+    "atomics",
+    "load-balance",
+    "template-only",
+    "todo"
+  ],
+  "source_refs": [
+    "amd-hip-programming-guide",
+    "amd-rocm-programming-guide"
+  ],
+  "problem": {
+    "summary": "Compare one-block-per-task scheduling against a persistent CTA work queue for irregular task durations.",
+    "inputs": [
+      "Task* tasks",
+      "float* output",
+      "int task_count"
+    ],
+    "outputs": [
+      "output[task_id] contains a deterministic per-task reduction"
+    ],
+    "constraints": [
+      "Persistent kernel must bound resident CTAs explicitly",
+      "Atomic queue overhead can be a negative example for uniform tasks",
+      "Record occupancy and launch configuration before claiming a scheduling win"
+    ]
+  },
+  "artifacts": {
+    "baseline": "source/baseline.hip",
+    "optimized": "source/optimized.hip"
+  },
+  "verification": {
+    "status": "template-only",
+    "method": "Compare output per task against the one-block-per-task baseline.",
+    "tolerances": {
+      "max_abs_error": 1e-05
+    }
+  },
+  "benchmarking": {
+    "status": "template-only",
+    "operation": "irregular-task-queue",
+    "required_metrics": [
+      "median kernel duration",
+      "task duration distribution",
+      "resident blocks",
+      "atomic queue count",
+      "hardware_metadata"
+    ],
+    "recommended_shapes": [
+      "task_count=4096,uniform",
+      "task_count=4096,skewed",
+      "task_count=65536,skewed"
+    ]
+  },
+  "license": "Project seed example",
+  "curation": {
+    "status": "template-only",
+    "notes": "Use this to preserve both persistent-kernel wins and negative examples where queue overhead dominates."
+  }
+}

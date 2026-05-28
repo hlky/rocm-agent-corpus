@@ -1,0 +1,78 @@
+{
+  "schema_version": "0.1.0",
+  "id": "varlen-packed-attention",
+  "title": "Variable-Length Packed Attention",
+  "domain": "attention",
+  "language": "hip-cpp",
+  "tags": [
+    "attention",
+    "varlen",
+    "packed-sequences",
+    "flashattention",
+    "miopen",
+    "template-only"
+  ],
+  "source_refs": [
+    "flash-attention",
+    "amd-miopen-docs",
+    "amd-miopen",
+    "flashinfer",
+    "triton"
+  ],
+  "problem": {
+    "summary": "Handle packed variable-length Q/K/V batches without padding all sequences to the maximum length.",
+    "inputs": [
+      "packed Q/K/V tensors",
+      "cu_seqlens_q",
+      "cu_seqlens_k",
+      "max_q",
+      "max_k",
+      "head_dim",
+      "causal flag"
+    ],
+    "outputs": [
+      "packed attention output"
+    ],
+    "constraints": [
+      "Template-only; compare against FlashAttention varlen and MIOpen SDPA when available",
+      "Record offset dtype, empty-sequence behavior, causal alignment, and padding baseline",
+      "Do not mix padded and packed timing boundaries"
+    ]
+  },
+  "artifacts": {
+    "baseline": "source/baseline.hip",
+    "optimized": "source/optimized.hip",
+    "harness": "source/harness_plan.md"
+  },
+  "verification": {
+    "status": "template-only",
+    "method": "Implement the baseline, optimized candidate, and CPU or library oracle; compare all outputs across edge cases before timing claims.",
+    "tolerances": {
+      "max_abs_error": 0.0001,
+      "max_rel_error": 0.0001
+    }
+  },
+  "benchmarking": {
+    "status": "template-only",
+    "operation": "varlen-packed-attention",
+    "required_metrics": [
+      "median latency",
+      "non-padding token count",
+      "padding ratio",
+      "max sequence length",
+      "head_dim",
+      "library baseline version",
+      "correctness max error"
+    ],
+    "recommended_shapes": [
+      "batch=128 avg_q=64 max_q=256 head_dim=64",
+      "batch=32 avg_q=512 max_q=2048 head_dim=128",
+      "decode-like batch=256 q=1 variable_k<=8192"
+    ]
+  },
+  "license": "Project seed example",
+  "curation": {
+    "status": "template-only",
+    "notes": "Promoted from the v2 extension backlog as a template-only task. No performance, correctness, or profiler evidence is claimed yet."
+  }
+}

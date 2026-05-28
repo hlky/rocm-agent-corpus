@@ -1,0 +1,69 @@
+{
+  "schema_version": "0.1.0",
+  "id": "streamed-copy-compute-overlap",
+  "title": "Streamed Copy Compute Overlap Scaffold",
+  "domain": "runtime-memory",
+  "language": "hip-cpp",
+  "tags": [
+    "streams",
+    "async-copy",
+    "copy-compute-overlap",
+    "pinned-memory",
+    "template-only",
+    "todo"
+  ],
+  "source_refs": [
+    "amd-hip-programming-guide",
+    "amd-rocm-programming-guide"
+  ],
+  "problem": {
+    "summary": "Split a host-to-device, kernel, device-to-host pipeline into chunks and streams to study copy/compute overlap against a sequential baseline.",
+    "inputs": [
+      "float* host_in",
+      "float* host_out",
+      "float* device staging buffers",
+      "int n",
+      "int chunk_elements"
+    ],
+    "outputs": [
+      "host_out[i] contains a simple transformed value from host_in[i]"
+    ],
+    "constraints": [
+      "Pinned host memory is required for meaningful async H2D/D2H overlap",
+      "Record whether copy engines and corocprofrrent kernels are available",
+      "No overlap claim without measured timelines or timings"
+    ]
+  },
+  "artifacts": {
+    "baseline": "source/baseline.hip",
+    "optimized": "source/optimized.hip"
+  },
+  "verification": {
+    "status": "template-only",
+    "method": "Compare sequential and chunked-stream outputs elementwise.",
+    "tolerances": {
+      "max_abs_error": 1e-06
+    }
+  },
+  "benchmarking": {
+    "status": "template-only",
+    "operation": "h2d-kernel-d2h-pipeline",
+    "required_metrics": [
+      "median end-to-end duration",
+      "chunk size",
+      "stream count",
+      "copy engine metadata",
+      "timer_type",
+      "hardware_metadata"
+    ],
+    "recommended_shapes": [
+      "n=16777216,chunk=1048576,streams=4",
+      "n=67108864,chunk=4194304,streams=4"
+    ]
+  },
+  "license": "Project seed example",
+  "curation": {
+    "status": "template-only",
+    "notes": "This scaffold is for system-level overlap experiments. Future records should say timing-only unless a profiler timeline or counters are attached."
+  }
+}

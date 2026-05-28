@@ -1,0 +1,72 @@
+{
+  "schema_version": "0.1.0",
+  "id": "block-prefix-scan",
+  "title": "Block Prefix Scan",
+  "domain": "scan",
+  "language": "hip-cpp",
+  "tags": [
+    "scan",
+    "prefix-sum",
+    "shared-memory",
+    "block-scan",
+    "fixed-segment"
+  ],
+  "source_refs": [
+    "amd-rocm-programming-guide",
+    "rocm-rocprim",
+    "rocm-rocprim-docs"
+  ],
+  "problem": {
+    "summary": "Compute an inclusive prefix sum independently for each fixed-size segment of a contiguous float array. The baseline assigns one thread to each segment and scans sequentially. The optimized version assigns one CUDA block to each segment and performs a shared-memory inclusive scan.",
+    "inputs": [
+      "float* input",
+      "float* output",
+      "int segments",
+      "int segment_size"
+    ],
+    "outputs": [
+      "output[segment * segment_size + i] contains the inclusive prefix sum of input values from 0 through i within that segment"
+    ],
+    "constraints": [
+      "This is a fixed-segment block scan, not a full arbitrary-length device-wide scan",
+      "optimized seed supports 1 <= segment_size <= 1024",
+      "segments are independent and stored contiguously",
+      "floating-point addition order may differ for non-exact inputs"
+    ]
+  },
+  "artifacts": {
+    "baseline": "source/baseline.hip",
+    "optimized": "source/optimized.hip",
+    "harness": "../../../harnesses/prefix_scan_benchmark.hip"
+  },
+  "verification": {
+    "status": "port-pending-rocm-run",
+    "method": "Compare each segment against a CPU inclusive scan reference and count elements above tolerance. Ported from the CUDA corpus; rerun on ROCm hardware before marking passed.",
+    "tolerances": {
+      "max_abs_error": 1e-05
+    }
+  },
+  "benchmarking": {
+    "status": "rocm-measurement-pending",
+    "operation": "fixed-segment-inclusive-prefix-scan",
+    "required_metrics": [
+      "median kernel duration",
+      "p10 and p90 kernel duration",
+      "effective read plus write bandwidth",
+      "correctness max_abs_error",
+      "bad_count"
+    ],
+    "recommended_shapes": [
+      "65536x256",
+      "131072x128",
+      "8192x512",
+      "2048x1024",
+      "1009x257"
+    ]
+  },
+  "license": "Project seed example",
+  "curation": {
+    "status": "ported-seed",
+    "notes": "Ported from the CUDA corpus on 2026-05-20. CUDA-origin timing artifacts were removed; rerun on ROCm hardware before making performance claims."
+  }
+}

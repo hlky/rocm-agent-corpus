@@ -1,0 +1,40 @@
+{
+  "version": 1,
+  "status": "scaffolded",
+  "description": "Initial manifest for eval reports and attempt archives.",
+  "attempt_record_fields": [
+    "attempt_id",
+    "task_id",
+    "task_version",
+    "submission_id",
+    "baseline_id",
+    "hardware_id",
+    "toolchain",
+    "build",
+    "correctness",
+    "timing",
+    "evidence_label",
+    "classification",
+    "notes",
+    "next_attack_surface"
+  ],
+  "planned_classifications": [
+    "win",
+    "match",
+    "specialized-win",
+    "loss",
+    "neutral",
+    "negative-example",
+    "correctness-fail",
+    "compile-fail",
+    "measurement-invalid",
+    "unsupported-configuration"
+  ],
+  "planned_report_types": [
+    "per-task attempt archive",
+    "per-baseline comparison",
+    "per-architecture summary",
+    "negative example catalog",
+    "regression summary"
+  ]
+}

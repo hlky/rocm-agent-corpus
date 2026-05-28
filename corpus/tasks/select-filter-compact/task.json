@@ -1,0 +1,78 @@
+{
+  "schema_version": "0.1.0",
+  "id": "select-filter-compact",
+  "title": "Predicate Select Filter Compact Scaffold",
+  "domain": "parallel-primitives",
+  "language": "hip-cpp",
+  "tags": [
+    "select",
+    "filter",
+    "compact",
+    "cub",
+    "rocthrust",
+    "prefix-sum",
+    "library-baseline",
+    "atomic-compaction",
+    "harness-ready"
+  ],
+  "source_refs": [
+    "rocm-rocprim",
+    "rocm-rocprim-docs",
+    "amd-rocm-programming-guide"
+  ],
+  "problem": {
+    "summary": "Fuse predicate generation, prefix counts, and scatter for select/filter/compact workloads with explicit stable-order and output-count contracts.",
+    "inputs": [
+      "input values",
+      "predicate or predicate parameters",
+      "num_items",
+      "optional transform parameters",
+      "stable ordering flag"
+    ],
+    "outputs": [
+      "selected values",
+      "num_selected",
+      "optional transformed output"
+    ],
+    "constraints": [
+      "hipCUB DeviceSelect and rocThrust copy_if are mandatory baselines",
+      "Record mask density, stable ordering, allocation boundary, and num_selected semantics",
+      "Do not compare stable hipCUB output against unstable custom output unless contract allows it"
+    ]
+  },
+  "artifacts": {
+    "baseline": "source/baseline.hip",
+    "optimized": "source/optimized.hip",
+    "harness": "../../../harnesses/select_filter_compact_benchmark.hip"
+  },
+  "verification": {
+    "status": "harness-ready",
+    "method": "The harness builds unique integer inputs, validates selected count plus order-insensitive integer digest against a CPU oracle, and reports an unordered-equivalent output contract.",
+    "tolerances": {}
+  },
+  "benchmarking": {
+    "status": "harness-ready",
+    "operation": "select-filter-compact",
+    "required_metrics": [
+      "median latency",
+      "num_items",
+      "mask density",
+      "stable ordering",
+      "num_selected",
+      "temp storage bytes",
+      "launch count",
+      "correctness hash"
+    ],
+    "recommended_shapes": [
+      "n=1048576 density=0.01",
+      "n=1048576 density=0.5",
+      "n=16777216 density=0.9",
+      "rows=4096 items=256 per-row compact"
+    ]
+  },
+  "license": "Project seed example",
+  "curation": {
+    "status": "template-only",
+    "notes": "Wave 2 task now has a hipCUB DeviceSelect::Flagged baseline, custom unstable atomic compaction candidate, and HIP-event benchmark harness. No measured result is committed until a ROCm machine run writes result artifacts."
+  }
+}

@@ -1,0 +1,111 @@
+{
+  "schema_version": "0.1.0",
+  "observed_at": "2026-05-21",
+  "doc": "docs/PYTORCH_PUBLIC_API_KERNEL_CATALOG.md",
+  "real_shape_matrix_doc": "docs/PYTORCH_API_REAL_WORLD_SHAPE_MATRIX.md",
+  "real_shape_matrix_index": "data/index/pytorch_api_real_world_shape_matrix.json",
+  "admission_note": "Catalog entries are candidates. A public API becomes challenge-admitted only when it has a sourced row in the real-shape matrix.",
+  "source_refs": [
+    "pytorch-torch-api",
+    "pytorch-nn-functional-api",
+    "pytorch-nn-api",
+    "pytorch-linalg-api",
+    "pytorch-fft-api",
+    "pytorch-sparse-api",
+    "pytorch-special-api",
+    "pytorch-masked-api",
+    "pytorch-nested-api",
+    "pytorch-distributions-api"
+  ],
+  "scope": "CUDA-relevant public PyTorch APIs, grouped by kernel family rather than every documented symbol.",
+  "categories": [
+    {
+      "id": "tensor_creation_layout",
+      "public_api_examples": ["torch.empty", "torch.zeros", "torch.ones", "torch.full", "torch.arange", "torch.cat", "torch.stack", "torch.reshape", "torch.permute", "torch.contiguous"],
+      "kernel_families": ["fill", "copy", "cast", "layout-conversion", "concat-split"],
+      "custom_angles": ["fuse with producer or consumer", "specialize strides", "vectorized stores", "avoid temporary materialization"]
+    },
+    {
+      "id": "pointwise_and_comparison",
+      "public_api_examples": ["torch.add", "torch.mul", "torch.where", "torch.exp", "torch.rsqrt", "torch.clamp", "torch.eq", "torch.isnan"],
+      "kernel_families": ["unary-map", "binary-map", "broadcast-map", "predicate-map"],
+      "custom_angles": ["long-chain fusion", "GEMM epilogue fusion", "mask generation fused with select or reduce"]
+    },
+    {
+      "id": "reductions_scans_statistics",
+      "public_api_examples": ["torch.sum", "torch.mean", "torch.amax", "torch.argmax", "torch.var", "torch.logsumexp", "torch.cumsum", "torch.count_nonzero"],
+      "kernel_families": ["warp-reduction", "block-reduction", "arg-reduction", "scan", "segmented-scan"],
+      "custom_angles": ["fixed row width", "one CTA per row", "fused postprocessing", "stable accumulation"]
+    },
+    {
+      "id": "selection_sorting_indexing",
+      "public_api_examples": ["torch.topk", "torch.sort", "torch.argsort", "torch.kthvalue", "torch.gather", "torch.scatter_add", "torch.nonzero", "torch.unique"],
+      "kernel_families": ["topk", "partial-sort", "radix-sort", "gather", "scatter", "compaction", "run-length-encode"],
+      "custom_angles": ["tiny-k register selection", "wide-k radix selection", "dedupe repeated indices", "fuse sampling"]
+    },
+    {
+      "id": "dense_linear_algebra",
+      "public_api_examples": ["torch.mm", "torch.matmul", "torch.bmm", "torch.addmm", "torch.baddbmm", "torch.einsum", "torch.linalg.cholesky", "torch.linalg.solve", "torch.linalg.svd"],
+      "kernel_families": ["gemm", "batched-gemm", "gemv", "solver", "factorization"],
+      "custom_angles": ["fixed shapes", "custom epilogues", "small batched matrices", "ragged or grouped GEMM"]
+    },
+    {
+      "id": "nn_convolution_resampling",
+      "public_api_examples": ["torch.nn.Conv2d", "torch.nn.functional.conv2d", "torch.nn.functional.interpolate", "torch.nn.functional.grid_sample", "torch.nn.functional.unfold", "torch.nn.functional.max_pool2d"],
+      "kernel_families": ["conv", "direct-conv", "implicit-gemm-conv", "pooling", "resampling", "patchify"],
+      "custom_angles": ["fixed filters", "bias activation fusion", "NHWC islands", "Conv3d video patchify"]
+    },
+    {
+      "id": "normalization_activation_loss",
+      "public_api_examples": ["torch.nn.functional.layer_norm", "torch.nn.functional.group_norm", "torch.nn.functional.rms_norm", "torch.nn.functional.softmax", "torch.nn.functional.cross_entropy", "torch.nn.functional.gelu", "torch.nn.functional.silu"],
+      "kernel_families": ["row-reduction", "softmax", "activation-map", "loss-reduction"],
+      "custom_angles": ["residual norm fusion", "masked softmax", "target gather fused with loss", "fp32 accumulation with half output"]
+    },
+    {
+      "id": "attention_transformer",
+      "public_api_examples": ["torch.nn.functional.scaled_dot_product_attention", "torch.nn.MultiheadAttention", "torch.nn.TransformerEncoderLayer"],
+      "kernel_families": ["sdpa", "online-softmax-attention", "gqa-decode", "paged-kv-attention"],
+      "custom_angles": ["fixed head dim", "causal or sliding masks", "RoPE and QK norm fusion", "KV cache layout specialization"]
+    },
+    {
+      "id": "sparse_fft_random_optimizer",
+      "public_api_examples": ["torch.sparse.mm", "torch.sparse.softmax", "torch.fft.fft", "torch.multinomial", "torch.randperm", "torch.optim.RDNA3mW", "torch._foreach_add"],
+      "kernel_families": ["spmm", "sddmm", "sparse-softmax", "fft", "rng-sampling", "multi-tensor-update"],
+      "custom_angles": ["known sparse formats", "fused FFT pre/post transforms", "seeded sampling fusion", "multi-tensor launch amortization"]
+    },
+    {
+      "id": "special_masked_nested_distributions",
+      "public_api_examples": ["torch.special.logit", "torch.special.erf", "torch.special.gammaln", "torch.masked.mean", "torch.masked.var", "torch.masked.sum", "torch.nested.nested_tensor", "torch.distributions.Categorical"],
+      "kernel_families": ["special-pointwise", "masked-reduction", "ragged-dispatch", "distribution-sampling"],
+      "custom_angles": ["fuse mask and math", "bucket ragged shapes", "specialize nested tensor batches", "define distributional correctness"]
+    }
+  ],
+  "challenge_families": [
+    "map_fusion",
+    "row_reduction",
+    "norm_softmax",
+    "selection_sampling",
+    "gather_scatter",
+    "dense_linear",
+    "convolution_codec",
+    "attention_decode",
+    "position_scan_rope",
+    "sparse_irregular",
+    "optimizer_multi_tensor",
+    "fft_signal"
+  ],
+  "challenge_family_shape_matrix_refs": {
+    "map_fusion": ["pt_pointwise_cfg_scheduler"],
+    "row_reduction": ["pt_reduction_norm_rows"],
+    "norm_softmax": ["pt_reduction_norm_rows", "pt_softmax_attention_rows"],
+    "selection_sampling": ["pt_selection_sampling_rows"],
+    "gather_scatter": ["pt_gather_scatter_compaction"],
+    "dense_linear": ["pt_dense_linear_gemm_rows"],
+    "convolution_codec": ["pt_conv_resample_codec_rows"],
+    "attention_decode": ["pt_softmax_attention_rows"],
+    "position_scan_rope": ["pt_position_scan_rope_rows"],
+    "sparse_irregular": ["pt_sparse_block_extension"],
+    "optimizer_multi_tensor": [],
+    "fft_signal": ["pt_fft_stft_audio_frontend"]
+  }
+}

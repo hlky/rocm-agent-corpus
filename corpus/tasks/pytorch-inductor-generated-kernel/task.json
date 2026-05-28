@@ -1,0 +1,76 @@
+{
+  "schema_version": "0.1.0",
+  "id": "pytorch-inductor-generated-kernel",
+  "title": "PyTorch Inductor Generated Kernel Baseline",
+  "domain": "framework-compiler",
+  "language": "python+hip-cpp",
+  "tags": [
+    "pytorch",
+    "inductor",
+    "nvfuser",
+    "triton",
+    "compiler-baseline",
+    "template-only"
+  ],
+  "source_refs": [
+    "pytorch",
+    "triton",
+    "rocm-hip-python",
+    "amd-rocm-programming-guide"
+  ],
+  "problem": {
+    "summary": "Capture the workflow for comparing handwritten HIP against PyTorch eager, torch.compile/Inductor, nvFuser-like fusion, and Triton-generated kernels.",
+    "inputs": [
+      "PyTorch module or op expression",
+      "representative tensors",
+      "dynamic/static shape policy",
+      "dtype and layout"
+    ],
+    "outputs": [
+      "framework output",
+      "generated kernel artifact",
+      "custom HIP extension output"
+    ],
+    "constraints": [
+      "Template-only; report whether compile time, graph capture, and dispatch overhead are included",
+      "Generated code must be saved or referenced by hash/path",
+      "Custom CUDA comparison must share dtype/layout/stride semantics"
+    ]
+  },
+  "artifacts": {
+    "baseline": "source/baseline.py",
+    "optimized": "source/optimized.hip",
+    "harness": "source/harness_plan.md"
+  },
+  "verification": {
+    "status": "template-only",
+    "method": "Implement the baseline, optimized candidate, and CPU or library oracle; compare all outputs across edge cases before timing claims.",
+    "tolerances": {
+      "max_abs_error": 0.0001,
+      "max_rel_error": 0.0001
+    }
+  },
+  "benchmarking": {
+    "status": "template-only",
+    "operation": "framework-compiler-generated-kernel",
+    "required_metrics": [
+      "eager latency",
+      "compiled latency",
+      "custom extension latency",
+      "compile time",
+      "dispatch included",
+      "generated kernel hash",
+      "correctness tolerance"
+    ],
+    "recommended_shapes": [
+      "rowwise norm + activation rows=4096 cols=4096",
+      "masked elementwise fusion n=16777216",
+      "small dynamic-shape row op batch=1..64"
+    ]
+  },
+  "license": "Project seed example",
+  "curation": {
+    "status": "template-only",
+    "notes": "Promoted from the v2 extension backlog as a template-only task. No performance, correctness, or profiler evidence is claimed yet."
+  }
+}

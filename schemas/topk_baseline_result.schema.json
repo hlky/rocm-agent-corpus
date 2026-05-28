@@ -1,0 +1,143 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.local/rocm-agent-corpus/topk_baseline_result.schema.json",
+  "title": "Top-K Baseline Result",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "task_id",
+    "shape_id",
+    "backend",
+    "actual_backend_path",
+    "contract_family",
+    "timing_boundary",
+    "evidence_label",
+    "rows",
+    "n",
+    "k",
+    "dtype",
+    "sortedness",
+    "tie_policy",
+    "correctness_mode",
+    "median_ms",
+    "p10_ms",
+    "p90_ms",
+    "workspace_bytes",
+    "allocation_timed",
+    "launch_count",
+    "gpu_name",
+    "driver_version",
+    "rocm_or_cuda_runtime_version"
+  ],
+  "properties": {
+    "schema_version": { "type": "string" },
+    "task_id": { "type": "string" },
+    "shape_id": { "type": "string" },
+    "backend": { "type": "string" },
+    "backend_version_or_commit": { "type": "string" },
+    "actual_backend_path": { "type": "string" },
+    "contract_family": {
+      "type": "string",
+      "enum": [
+        "selection",
+        "selection-unsorted",
+        "framework-selection",
+        "full-sort",
+        "sampling",
+        "serving-sampling",
+        "serving-dispatch",
+        "moe-routing",
+        "epilogue-fusion",
+        "ragged-indexer",
+        "oracle"
+      ]
+    },
+    "timing_boundary": {
+      "type": "string",
+      "enum": [
+        "kernel_only",
+        "steady_state_api",
+        "api_with_allocation",
+        "graph_replay",
+        "framework_call",
+        "serving_step",
+        "not_timed"
+      ]
+    },
+    "evidence_label": {
+      "type": "string",
+      "enum": [
+        "timing-only",
+        "counter-backed",
+        "profile-attempted-blocked",
+        "correctness-only",
+        "template-only"
+      ]
+    },
+    "rows": { "type": "integer", "minimum": 0 },
+    "n": {
+      "oneOf": [
+        { "type": "integer", "minimum": 0 },
+        { "type": "string" }
+      ]
+    },
+    "k": {
+      "oneOf": [
+        { "type": "integer", "minimum": 0 },
+        { "type": "string" }
+      ]
+    },
+    "dtype": { "type": "string" },
+    "sortedness": {
+      "type": "string",
+      "enum": ["sorted", "unsorted", "mask-only", "not-materialized", "mixed"]
+    },
+    "tie_policy": { "type": "string" },
+    "nan_policy": { "type": "string" },
+    "mask_policy": { "type": "string" },
+    "rng_source": { "type": "string" },
+    "sample_match_policy": { "type": "string" },
+    "filter_order": { "type": "string" },
+    "correctness_mode": {
+      "type": "string",
+      "enum": [
+        "exact_sorted",
+        "exact_unsorted_membership",
+        "threshold_equivalent",
+        "exact_uniform_replay",
+        "exact_seed_replay",
+        "distributional",
+        "contract_mismatch",
+        "correctness_fail",
+        "not_checked"
+      ]
+    },
+    "median_ms": { "type": "number", "minimum": 0 },
+    "p10_ms": { "type": "number", "minimum": 0 },
+    "p90_ms": { "type": "number", "minimum": 0 },
+    "min_ms": { "type": "number", "minimum": 0 },
+    "max_ms": { "type": "number", "minimum": 0 },
+    "workspace_bytes": { "type": "integer", "minimum": 0 },
+    "row_state_bytes": { "type": "integer", "minimum": 0 },
+    "dynamic_shared_memory_bytes": { "type": "integer", "minimum": 0 },
+    "allocation_timed": { "type": "boolean" },
+    "workspace_query_timed": { "type": "boolean" },
+    "row_state_memset_timed": { "type": "boolean" },
+    "contiguous_copy_timed": { "type": "boolean" },
+    "framework_dispatch_timed": { "type": "boolean" },
+    "launch_count": { "type": "integer", "minimum": 0 },
+    "gpu_name": { "type": "string" },
+    "gfx_target": { "type": "string" },
+    "compute_capability": { "type": "string" },
+    "driver_version": { "type": "string" },
+    "rocm_version": { "type": "string" },
+    "rocm_or_cuda_runtime_version": { "type": "string" },
+    "cuda_toolkit_version": { "type": "string" },
+    "compiler_or_framework_version": { "type": "string" },
+    "build_command_or_python_invocation": { "type": "string" },
+    "correctness_hash": { "type": "string" },
+    "mismatch_count": { "type": "integer", "minimum": 0 },
+    "notes": { "type": "string" }
+  },
+  "additionalProperties": false
+}

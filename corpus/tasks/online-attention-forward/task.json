@@ -1,0 +1,97 @@
+{
+  "schema_version": "0.1.0",
+  "id": "online-attention-forward",
+  "title": "Online Softmax Attention Forward",
+  "domain": "deep-learning",
+  "language": "hip-cpp",
+  "tags": [
+    "attention",
+    "flash-attention",
+    "online-softmax",
+    "shared-memory",
+    "tiling",
+    "causal-mask",
+    "custom-kernel-competition",
+    "llm-inference"
+  ],
+  "source_refs": [
+    "amd-hip-programming-guide",
+    "amd-rocm-programming-guide",
+    "rocm-composable-kernel",
+    "amd-miopen-docs",
+    "amd-miopen",
+    "flash-attention",
+    "vllm",
+    "flashinfer",
+    "triton"
+  ],
+  "problem": {
+    "summary": "Compute FP32 scaled dot-product attention forward, O = softmax(scale * Q * K^T + mask) * V, for contiguous [batch, heads, sequence, head_dim] tensors. The baseline assigns one thread to each output element and recomputes the softmax row for every value dimension. The optimized seed assigns one CTA to each query row, stages K/V key tiles in shared memory, and uses FlashAttention-style online softmax statistics to avoid materializing the full attention matrix.",
+    "inputs": [
+      "float* q: row-major contiguous [batch_size, num_heads, query_length, head_dim]",
+      "float* k: row-major contiguous [batch_size, num_heads, key_length, head_dim]",
+      "float* v: row-major contiguous [batch_size, num_heads, key_length, head_dim]",
+      "float* output: row-major contiguous [batch_size, num_heads, query_length, head_dim]",
+      "int batch_size",
+      "int num_heads",
+      "int query_length",
+      "int key_length",
+      "int head_dim",
+      "float scale",
+      "int causal"
+    ],
+    "outputs": [
+      "For each batch, head, and query position, output equals the stable softmax-weighted sum over visible V rows"
+    ],
+    "constraints": [
+      "FP32 inputs, FP32 accumulation, and head_dim == value_dim in this seed",
+      "Contiguous B,H,S,D layout only; no ragged batches, padding masks, dropout, rotary embedding, paged KV cache, or grouped-query attention yet",
+      "The optimized seed is intended for head_dim <= 128 and uses a fixed 32-key tile with one CTA per query row",
+      "Causal masking treats query positions as aligned to the suffix of the KV sequence, so query_length=1,key_length=N models decode at the latest token",
+      "The default 1x4x128x128x64 causal shape is a ROCm timing target; no ROCm result files are currently attached"
+    ]
+  },
+  "artifacts": {
+    "baseline": "source/baseline.hip",
+    "optimized": "source/optimized.hip",
+    "harness": "../../../harnesses/attention_forward_benchmark.hip"
+  },
+  "verification": {
+    "status": "port-pending-rocm-run",
+    "method": "The harness computes a CPU double-precision stable attention reference for the same scale and causal mask, then reports max_abs_error, max_rel_error, bad_count, and passed. Ported from the CUDA corpus; rerun on ROCm hardware before marking passed.",
+    "tolerances": {
+      "max_abs_error": 0.001,
+      "max_rel_error": 0.001
+    }
+  },
+  "benchmarking": {
+    "status": "rocm-measurement-pending",
+    "operation": "scaled-dot-product-attention-forward",
+    "required_metrics": [
+      "median kernel duration",
+      "p10 kernel duration",
+      "p90 kernel duration",
+      "logical_gflop_per_s",
+      "minimum_logical_gib_per_s",
+      "max_abs_error",
+      "max_rel_error",
+      "bad_count",
+      "evidence_label",
+      "baseline_versions",
+      "win_loss_notes"
+    ],
+    "recommended_shapes": [
+      "batch=1,heads=4,query=128,key=128,head_dim=64,causal=1",
+      "batch=1,heads=8,query=512,key=512,head_dim=64,causal=1",
+      "batch=1,heads=32,query=1,key=2048,head_dim=128,causal=1",
+      "batch=4,heads=16,query=1,key=8192,head_dim=128,causal=1",
+      "batch=1,heads=8,query=257,key=257,head_dim=64,causal=0",
+      "batch=2,heads=4,query=96,key=160,head_dim=80,causal=0"
+    ]
+  },
+  "license": "Project seed example",
+  "curation": {
+    "status": "ported-seed",
+    "notes": "Ported from the CUDA corpus on 2026-05-20. CUDA-origin timing artifacts were removed; rerun on ROCm hardware before making performance claims."
+  }
+}

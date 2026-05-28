@@ -1,0 +1,291 @@
+{
+  "schema_version": "0.1.0",
+  "entrypoints": [
+    {
+      "intent": "optimize_kernel",
+      "paths": [
+        "docs/CUSTOM_KERNEL_COMPETITION_GUIDE.md",
+        "docs/CASE_COVERAGE_PLAN.md",
+        "docs/CORPUS_EXPANSION_STAGES.md",
+        "docs/INITIAL_TRACKING_LIST.md",
+        "docs/AGENT_GUIDE.md",
+        "docs/OPTIMIZATION_PLAYBOOK.md",
+        "docs/CASE_CATALOG.md",
+        "data/index/case_catalog.json",
+        "corpus/tasks"
+      ]
+    },
+    {
+      "intent": "choose_rocm_library",
+      "paths": [
+        "docs/CUSTOM_KERNEL_COMPETITION_GUIDE.md",
+        "docs/LIBRARY_GUIDE.md",
+        "docs/HIPBLAS_ROCBLAS_GUIDE.md",
+        "docs/COMPOSABLE_KERNEL_EXTENSION_GUIDE.md",
+        "docs/ATTENTION_LIBRARY_BASELINES.md",
+        "docs/SELECTION_SAMPLING_LIBRARY_BASELINES.md",
+        "docs/QUANTIZATION_LIBRARY_BASELINES.md",
+        "docs/MIGRAPHX_INFERENCE_GUIDE.md",
+        "docs/TRITON_KERNEL_GUIDE.md",
+        "third_party/rocm-examples",
+        "third_party/composable-kernel",
+        "third_party/rocm-libraries",
+        "third_party/migraphx",
+        "third_party/vllm-rocm",
+        "third_party/triton",
+        "third_party/vllm",
+        "third_party/flashinfer",
+        "third_party/bitsandbytes",
+        "third_party/transformer-engine"
+      ]
+    },
+    {
+      "intent": "gpu_architecture_specific_tuning",
+      "paths": [
+        "docs/ARCHITECTURE_LABS.md",
+        "docs/GPU_GFX_ARCHITECTURE_GUIDE.md",
+        "data/index/gpu_architectures.json",
+        "data/index/architecture_labs.json",
+        "third_party/composable-kernel",
+        "third_party/cuda-samples",
+        "corpus/tasks/gfx90a-gfx942-cdna-split",
+        "corpus/tasks/gfx942-cdna3-mfma-lab"
+      ]
+    },
+    {
+      "intent": "gemm_competition_track",
+      "paths": [
+        "docs/GEMM_COMPETITION_TRACK.md",
+        "data/index/gemm_competition_track.json",
+        "examples/gemm",
+        "docs/HIPBLAS_ROCBLAS_GUIDE.md",
+        "harnesses/hipblaslt_hgemm_benchmark.hip",
+        "tools/run_library_baseline.py",
+        "docs/COMPOSABLE_KERNEL_EXTENSION_GUIDE.md",
+        "third_party/composable-kernel",
+        "third_party/rocm-examples"
+      ]
+    },
+    {
+      "intent": "rocprim_competition_track",
+      "paths": [
+        "docs/ROCPRIM_COMPETITION_TRACK.md",
+        "data/index/rocprim_competition_track.json",
+        "examples/rocprim",
+        "docs/ROCPRIM_HIPCUB_ROCTHRUST_GUIDE.md",
+        "third_party/rocm-libraries"
+      ]
+    },
+    {
+      "intent": "memory_movement_track",
+      "paths": [
+        "docs/MEMORY_MOVEMENT_KERNEL_GUIDE.md",
+        "data/index/memory_movement_track.json",
+        "corpus/tasks/gather-scatter-coalescing",
+        "corpus/tasks/shared-halo-stencil-2d",
+        "corpus/tasks/aos-soa-layout-conversion",
+        "harnesses/gather_scatter_benchmark.hip",
+        "harnesses/stencil2d_benchmark.hip",
+        "harnesses/aos_soa_benchmark.hip"
+      ]
+    },
+    {
+      "intent": "sparse_irregular_track",
+      "paths": [
+        "docs/SPARSE_IRREGULAR_KERNEL_GUIDE.md",
+        "data/index/sparse_irregular_track.json",
+        "corpus/tasks/segmented-reduction-fixed-and-ragged",
+        "corpus/tasks/csr-spmv-load-balance",
+        "corpus/tasks/embedding-gather-dedup",
+        "corpus/tasks/frontier-compaction-bfs",
+        "corpus/tasks/block-sparse-attention-forward",
+        "corpus/tasks/sddmm-sparse-attention-score",
+        "corpus/tasks/spgemm-merge-hash",
+        "corpus/tasks/sparse-format-conversion"
+      ]
+    },
+    {
+      "intent": "system_low_level_track",
+      "paths": [
+        "docs/SYSTEM_LOW_LEVEL_KERNEL_GUIDE.md",
+        "data/index/system_low_level_track.json",
+        "corpus/tasks/hip-graphs-launch-overhead",
+        "corpus/tasks/streamed-copy-compute-overlap",
+        "corpus/tasks/hiprtc-specialized-kernel-cache",
+        "corpus/tasks/persistent-work-queue",
+        "corpus/tasks/warp-reduce-scan-vote",
+        "corpus/tasks/lds-tiled-copy",
+        "corpus/tasks/cdna-mfma-gemm",
+        "corpus/tasks/inline-mfma-skeleton",
+        "corpus/tasks/migraphx-engine-tuning-sweep",
+        "corpus/tasks/triton-vs-hip-row-kernel"
+      ]
+    },
+    {
+      "intent": "ml_adjunct_track",
+      "paths": [
+        "docs/ML_ADJUNCT_KERNEL_GUIDE.md",
+        "data/index/ml_adjunct_track.json",
+        "corpus/tasks/fused-adamw-update",
+        "corpus/tasks/rope-kv-cache-update",
+        "corpus/tasks/moe-token-routing"
+      ]
+    },
+    {
+      "intent": "integration_epilogue_track",
+      "paths": [
+        "docs/INTEGRATION_EPILOGUE_TASK_GUIDE.md",
+        "data/index/integration_epilogue_track.json",
+        "corpus/tasks/gemm-bias-activation-epilogue",
+        "corpus/tasks/migraphx-custom-op-fused-op",
+        "corpus/tasks/pytorch-hip-extension-op"
+      ]
+    },
+    {
+      "intent": "multigpu_task_track",
+      "paths": [
+        "docs/MULTIGPU_TASK_GUIDE.md",
+        "data/index/multigpu_task_track.json",
+        "corpus/tasks/rccl-overlap-allreduce",
+        "corpus/tasks/rocshmem-queue",
+        "docs/MULTIGPU_GUIDE.md",
+        "corpus/tasks/reduce-scatter-overlap",
+        "corpus/tasks/allgather-overlap",
+        "corpus/tasks/alltoall-moe-exchange"
+      ]
+    },
+    {
+      "intent": "agent_eval_harness",
+      "paths": [
+        "docs/AGENT_EVAL_HARNESS.md",
+        "data/index/eval_harness.json",
+        "eval"
+      ]
+    },
+    {
+      "intent": "v2_extension_promoted_wave",
+      "paths": [
+        "docs/V2_EXTENSION_PROMOTION_WAVE.md",
+        "data/index/v2_extension_wave.json",
+        "docs/CASE_CATALOG.md",
+        "docs/CASE_COVERAGE_PLAN.md",
+        "corpus/tasks/paged-kv-cache-attention",
+        "corpus/tasks/gqa-mqa-decode-attention",
+        "corpus/tasks/varlen-packed-attention",
+        "corpus/tasks/fused-mlp-swiglu",
+        "corpus/tasks/direct-convolution-2d",
+        "corpus/tasks/conv2d-fused-bias-activation",
+        "corpus/tasks/radix-sort-key-value",
+        "corpus/tasks/top-p-nucleus-sampling",
+        "corpus/tasks/fp8-cast-scale-amax",
+        "corpus/tasks/block-scaled-fp4-gemm",
+        "corpus/tasks/int8-dot-mfma-gemm",
+        "corpus/tasks/structured-sparsity-2to4",
+        "corpus/tasks/ragged-grouped-gemm",
+        "corpus/tasks/composable-kernel-custom-epilogue",
+        "corpus/tasks/pytorch-inductor-generated-kernel",
+        "corpus/tasks/rocprof-counter-roofline",
+        "corpus/tasks/select-filter-compact",
+        "corpus/tasks/groupby-reduce-by-key",
+        "corpus/tasks/unique-run-length-encode",
+        "corpus/tasks/sddmm-sparse-attention-score",
+        "corpus/tasks/spgemm-merge-hash",
+        "corpus/tasks/sparse-format-conversion",
+        "corpus/tasks/reduce-scatter-overlap",
+        "corpus/tasks/allgather-overlap",
+        "corpus/tasks/alltoall-moe-exchange",
+        "corpus/tasks/rocm-sanitizer-racecheck",
+        "corpus/tasks/amdisa-diff-regression",
+        "corpus/tasks/autotune-parameter-sweep",
+        "corpus/tasks/gfx90a-gfx942-cdna-split",
+        "corpus/tasks/gfx942-cdna3-mfma-lab",
+        "docs/V2_EXTENSION_WAVE3.md",
+        "corpus/tasks/strided-batched-layout-transform",
+        "corpus/tasks/packed-layout-transcode",
+        "corpus/tasks/memory-pool-allocator",
+        "corpus/tasks/implicit-gemm-convolution",
+        "corpus/tasks/depthwise-separable-convolution",
+        "corpus/tasks/normalization-backward",
+        "corpus/tasks/multi-tensor-adamw",
+        "corpus/tasks/splitk-reduction-gemm",
+        "corpus/tasks/wide-k-topk-selection",
+        "corpus/tasks/graph-captured-inference-step",
+        "corpus/tasks/hip-ipc-multiprocess",
+        "corpus/tasks/miopen-frontend-fusion",
+        "corpus/tasks/vllm-rocm-custom-plugin"
+      ]
+    },
+    {
+      "intent": "framework_or_inference_integration",
+      "paths": [
+        "docs/FRAMEWORK_EXTENSION_GUIDE.md",
+        "docs/MIGRAPHX_INFERENCE_GUIDE.md",
+        "docs/ATTENTION_LIBRARY_BASELINES.md",
+        "docs/SELECTION_SAMPLING_LIBRARY_BASELINES.md",
+        "docs/QUANTIZATION_LIBRARY_BASELINES.md",
+        "docs/MIOPEN_ATTENTION_GUIDE.md",
+        "third_party/oneflow",
+        "third_party/migraphx",
+        "third_party/vllm-rocm",
+        "third_party/miopen-frontend"
+      ]
+    },
+    {
+      "intent": "add_measurement",
+      "paths": [
+        "docs/BENCHMARKING_GUIDE.md",
+        "docs/INGESTION.md",
+        "tools/run_hip_task.py",
+        "tools/run_matrix_task.py",
+        "schemas/optimization_record.schema.json"
+      ]
+    },
+    {
+      "intent": "selection_sampling_topk_track",
+      "paths": [
+        "docs/SELECTION_SAMPLING_KERNEL_GUIDE.md",
+        "docs/SELECTION_SAMPLING_LIBRARY_BASELINES.md",
+        "docs/ROAD_TO_SOTA_TOPK.md",
+        "docs/TOPK_IMPLEMENTATION_SURVEY.md",
+        "docs/TOPK_BASELINE_HARNESS_BLUEPRINT.md",
+        "docs/TOPK_WILD_IDEAS_LAB.md",
+        "data/index/selection_sampling_track.json",
+        "data/index/selection_sampling_library_baselines.json",
+        "data/index/topk_implementation_survey.json",
+        "data/index/topk_baseline_harness_blueprint.json",
+        "data/index/topk_wide_k_matrix.json",
+        "data/index/topk_wild_ideas.json",
+        "corpus/tasks/block-topk-sampling",
+        "corpus/tasks/wide-k-topk-selection",
+        "corpus/tasks/top-p-nucleus-sampling",
+        "harnesses/topk_sampling_benchmark.hip"
+      ]
+    },
+    {
+      "intent": "pytorch_baseline_challenge",
+      "paths": [
+        "docs/PYTORCH_PUBLIC_API_KERNEL_CATALOG.md",
+        "docs/PYTORCH_API_REAL_WORLD_SHAPE_MATRIX.md",
+        "docs/REAL_MODEL_PROBLEM_SIZES.md",
+        "docs/PYTORCH_BASELINE_CHALLENGE.md",
+        "eval/tasks/pytorch_baseline_challenge_manifest.json",
+        "data/index/pytorch_public_api_kernel_catalog.json",
+        "data/index/pytorch_api_real_world_shape_matrix.json",
+        "data/index/real_model_problem_sizes.json",
+        "data/index/pytorch_baseline_challenge.json",
+        "schemas/pytorch_baseline_challenge_result.schema.json",
+        "tools/run_rowwise_softmax_pytorch_baseline.py",
+        "tools/run_topk_sampling_pytorch_baseline.py",
+        "tools/run_normalization_pytorch_baseline.py",
+        "tools/run_normalization_triton_baseline.py"
+      ]
+    }
+  ],
+  "evidence_order": [
+    "counter-backed-measured",
+    "timing-only-measured",
+    "timing-only-measured-negative",
+    "correctness-only",
+    "template-only"
+  ]
+}

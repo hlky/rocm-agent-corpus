@@ -1,0 +1,76 @@
+{
+  "schema_version": "0.1.0",
+  "id": "direct-convolution-2d",
+  "title": "Direct 2D Convolution Microkernel",
+  "domain": "convolution",
+  "language": "hip-cpp",
+  "tags": [
+    "convolution",
+    "miopen",
+    "composable-kernel",
+    "direct",
+    "shared-memory",
+    "template-only"
+  ],
+  "source_refs": [
+    "amd-miopen-docs",
+    "amd-miopen",
+    "rocm-composable-kernel",
+    "amd-rocm-programming-guide"
+  ],
+  "problem": {
+    "summary": "Teach direct convolution indexing, boundary handling, shared input tile reuse, and MIOpen/Composable Kernel baseline comparison.",
+    "inputs": [
+      "NCHW or NHWC input",
+      "filter tensor",
+      "stride/padding/dilation",
+      "groups",
+      "output layout"
+    ],
+    "outputs": [
+      "convolution output"
+    ],
+    "constraints": [
+      "Template-only; record exact layout and convolution descriptor",
+      "Compare against MIOpen and Composable Kernel conv where feasible",
+      "Keep direct, implicit-GEMM, and Winograd claims separate"
+    ]
+  },
+  "artifacts": {
+    "baseline": "source/baseline.hip",
+    "optimized": "source/optimized.hip",
+    "harness": "source/harness_plan.md"
+  },
+  "verification": {
+    "status": "template-only",
+    "method": "Implement the baseline, optimized candidate, and CPU or library oracle; compare all outputs across edge cases before timing claims.",
+    "tolerances": {
+      "max_abs_error": 0.0001,
+      "max_rel_error": 0.0001
+    }
+  },
+  "benchmarking": {
+    "status": "template-only",
+    "operation": "direct-convolution-2d",
+    "required_metrics": [
+      "median latency",
+      "layout",
+      "filter shape",
+      "stride/padding",
+      "effective FLOP/s",
+      "DRAM bytes estimate",
+      "MIOpen algorithm",
+      "correctness max error"
+    ],
+    "recommended_shapes": [
+      "N=1 C=64 H=W=56 K=64 R=S=3",
+      "N=32 C=64 H=W=56 K=128 R=S=3",
+      "N=1 C=3 H=W=224 K=64 R=S=7"
+    ]
+  },
+  "license": "Project seed example",
+  "curation": {
+    "status": "template-only",
+    "notes": "Promoted from the v2 extension backlog as a template-only task. No performance, correctness, or profiler evidence is claimed yet."
+  }
+}

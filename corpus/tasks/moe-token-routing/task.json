@@ -1,0 +1,81 @@
+{
+  "schema_version": "0.1.0",
+  "id": "moe-token-routing",
+  "title": "MoE Token Top-2 Routing",
+  "domain": "llm-inference",
+  "language": "hip-cpp",
+  "tags": [
+    "moe",
+    "routing",
+    "top-2",
+    "atomic-scatter",
+    "block-reduction",
+    "template-only"
+  ],
+  "source_refs": [
+    "amd-rocm-programming-guide",
+    "rocm-rocprim",
+    "vllm"
+  ],
+  "problem": {
+    "summary": "Route tokens to their top-2 experts from router logits and scatter token ids into per-expert capacity slots. The baseline uses one thread per token, serial expert scan, and atomic scatter. The optimized scaffold uses one block per token with thread-local expert scans and a block-local top-2 merge before the two atomic scatters.",
+    "inputs": [
+      "float* logits shaped [tokens, experts]",
+      "int tokens",
+      "int experts",
+      "int capacity_per_expert",
+      "int* expert_counts initialized to zero"
+    ],
+    "outputs": [
+      "int* route_indices shaped [tokens, 2]",
+      "float* route_weights shaped [tokens, 2]",
+      "int* expert_token_slots shaped [experts, capacity_per_expert]",
+      "float* expert_token_weights shaped [experts, capacity_per_expert]"
+    ],
+    "constraints": [
+      "fp32 router logits",
+      "top-2 experts are sorted by descending logit with lower expert id winning ties",
+      "softmax weights are computed over the selected top-2 logits only",
+      "overflow slots are dropped after route_indices and route_weights are written",
+      "expert_counts must be initialized by the caller"
+    ]
+  },
+  "artifacts": {
+    "baseline": "source/baseline.hip",
+    "optimized": "source/optimized.hip"
+  },
+  "verification": {
+    "status": "template-only",
+    "method": "TODO: compare route_indices and route_weights against a CPU top-2 router; validate expert slot contents after deterministic single-stream launches.",
+    "tolerances": {
+      "route_index_mismatch_count": 0,
+      "max_weight_abs_error": 1e-05
+    }
+  },
+  "benchmarking": {
+    "status": "template-only",
+    "operation": "moe-token-routing-top2",
+    "required_metrics": [
+      "median kernel duration",
+      "tokens",
+      "experts",
+      "capacity_per_expert",
+      "overflow count",
+      "atomic count",
+      "correctness mismatch counts",
+      "hardware and build metadata",
+      "evidence label"
+    ],
+    "recommended_shapes": [
+      "tokens=1024 experts=8 capacity=256",
+      "tokens=4096 experts=16 capacity=768",
+      "tokens=8192 experts=64 capacity=512",
+      "tokens=2048 experts=128 capacity=128"
+    ]
+  },
+  "license": "Project seed example",
+  "curation": {
+    "status": "template-only",
+    "notes": "Template-only MoE routing scaffold. hipCUB/rocPRIM/hipCUB/rocThrust block primitives, vLLM on ROCm, and vLLM are reference paths for stronger routing, sorting, and serving integration before claiming a custom routing win."
+  }
+}

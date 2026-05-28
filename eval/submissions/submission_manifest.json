@@ -1,0 +1,36 @@
+{
+  "version": 1,
+  "status": "scaffolded",
+  "description": "Initial manifest for custom HIP kernel submissions.",
+  "submission_contract_fields": [
+    "submission_id",
+    "task_id",
+    "task_version",
+    "source_files",
+    "entry_points",
+    "build_system",
+    "target_architectures",
+    "optimization_hypothesis",
+    "dropped_generality",
+    "known_limitations",
+    "expected_evidence_label"
+  ],
+  "planned_submission_states": [
+    "created",
+    "compile-pass",
+    "compile-fail",
+    "correctness-pass",
+    "correctness-fail",
+    "benchmarked",
+    "archived"
+  ],
+  "planned_artifacts": [
+    "submission.json",
+    "source snapshot",
+    "build log",
+    "correctness log",
+    "benchmark result",
+    "comparison result",
+    "attempt archive record"
+  ]
+}

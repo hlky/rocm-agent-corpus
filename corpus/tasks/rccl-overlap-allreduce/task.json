@@ -1,0 +1,77 @@
+{
+  "schema_version": "0.1.0",
+  "id": "rccl-overlap-allreduce",
+  "title": "RCCL AllReduce Compute Overlap Scaffold",
+  "domain": "multi-gpu-collectives",
+  "language": "hip-cpp",
+  "tags": [
+    "rccl",
+    "allreduce",
+    "multi-gpu",
+    "compute-communication-overlap",
+    "streams",
+    "template-only",
+    "todo"
+  ],
+  "source_refs": [
+    "amd-rccl",
+    "amd-rccl-docs",
+    "amd-hip-programming-guide",
+    "amd-rocm-programming-guide"
+  ],
+  "problem": {
+    "summary": "Compare a phase-separated compute then RCCL AllReduce path against a chunked pipeline that overlaps independent per-chunk compute with RCCL collectives.",
+    "inputs": [
+      "float* local_in",
+      "float* local_scratch",
+      "float* reduced_out",
+      "size_t elements",
+      "int chunk_elements",
+      "rcclComm_t comm"
+    ],
+    "outputs": [
+      "reduced_out contains the sum-reduced transformed input for every element across ranks"
+    ],
+    "constraints": [
+      "No overlap claim without multi-GPU timing or timeline evidence",
+      "Each chunk must have explicit stream dependency from compute completion to RCCL launch",
+      "Record RCCL version, topology, rank count, stream count, and environment knobs for any future measurement"
+    ]
+  },
+  "artifacts": {
+    "baseline": "source/baseline.hip",
+    "optimized": "source/optimized.hip"
+  },
+  "verification": {
+    "status": "template-only",
+    "method": "Compare reduced_out against a host or single-stream RCCL reference for identical rank inputs.",
+    "tolerances": {
+      "max_abs_error": 1e-05
+    }
+  },
+  "benchmarking": {
+    "status": "template-only",
+    "operation": "compute-plus-allreduce",
+    "required_metrics": [
+      "median end-to-end duration",
+      "rank_count",
+      "bytes_per_rank",
+      "chunk_elements",
+      "stream_count",
+      "RCCL version",
+      "topology metadata",
+      "timer_type",
+      "hardware_metadata"
+    ],
+    "recommended_shapes": [
+      "ranks=2,elements=16777216,chunk=1048576",
+      "ranks=4,elements=67108864,chunk=2097152",
+      "ranks=8,elements=134217728,chunk=4194304"
+    ]
+  },
+  "license": "Project seed example",
+  "curation": {
+    "status": "template-only",
+    "notes": "This task is a compile-oriented scaffold for future multi-GPU runs. Treat RCCL as baseline, correctness oracle, and communication primitive; any result without profiler timeline or counters should say timing-only."
+  }
+}

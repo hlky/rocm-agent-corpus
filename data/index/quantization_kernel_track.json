@@ -1,0 +1,342 @@
+{
+  "schema_version": "0.1.0",
+  "track_id": "quantization-kernel-track",
+  "guide": "docs/QUANTIZATION_KERNEL_GUIDE.md",
+  "mission": "Teach agents to write, measure, and explain custom quantization and fused dequantization kernels that beat, match, specialize beyond, or extend bitsandbytes, Transformer Engine on ROCm, Composable Kernel, hipBLASLt, MIGraphX, vLLM on ROCm, Triton, vLLM, FlashInfer, and framework-generated baselines for scoped workloads.",
+  "evidence_policy": {
+    "default_unmeasured_status": "template-only",
+    "default_profiler_status": "timing-only",
+    "required_result_classes": [
+      "custom-win",
+      "custom-specialized-win",
+      "near-match",
+      "library-win",
+      "negative-example",
+      "correctness-fail",
+      "compile-fail",
+      "template-only"
+    ],
+    "must_not_claim": [
+      "rocprofiler/rocprof counters unless collected",
+      "fair low-bit library comparison unless scale, zero-point, packing, accumulator, output dtype, and epilogue contracts match",
+      "custom win over vLLM on ROCm or Composable Kernel unless their closest matching quantized path was configured and measured",
+      "packed-load efficiency without profiling or a timing-backed comparison",
+      "FP8 or NVFP4 numerical equivalence unless format, scale, saturation, and amax policy are recorded"
+    ]
+  },
+  "metadata_requirements": [
+    "task_id",
+    "result_class",
+    "gpu_name",
+    "gfx_target",
+    "driver_version",
+    "cuda_toolkit_version",
+    "compiler_version",
+    "build_command",
+    "arch_flags",
+    "operation",
+    "m",
+    "n",
+    "k",
+    "batch_count",
+    "rows",
+    "cols",
+    "head_dim",
+    "dtype_quantized",
+    "dtype_scale",
+    "dtype_accumulator",
+    "dtype_output",
+    "quant_format",
+    "packing_order",
+    "group_size",
+    "scale_layout",
+    "zero_point_layout",
+    "activation_scale_layout",
+    "epilogue",
+    "alignment_bytes",
+    "packed_load_width",
+    "warmup_iterations",
+    "measured_iterations",
+    "timer_type",
+    "profiler_status",
+    "correctness_reference",
+    "tolerance",
+    "seed",
+    "baseline_versions",
+    "win_loss_notes"
+  ],
+  "baseline_definitions": [
+    {
+      "id": "host-reference",
+      "kind": "correctness-oracle",
+      "records": [
+        "packing_order",
+        "scale_layout",
+        "zero_point_layout",
+        "accumulator_semantics",
+        "rounding_and_cast_policy"
+      ]
+    },
+    {
+      "id": "materialized-dequant",
+      "kind": "educational-baseline",
+      "records": [
+        "dequant_output_dtype",
+        "temporary_bytes",
+        "extra_kernel_launches",
+        "gemv_or_gemm_backend"
+      ]
+    },
+    {
+      "id": "custom-naive-fused",
+      "kind": "educational-custom",
+      "records": [
+        "indexing",
+        "unpack_logic",
+        "group_metadata_lookup",
+        "accumulation_order"
+      ]
+    },
+    {
+      "id": "custom-cooperative-fused",
+      "kind": "custom-baseline",
+      "records": [
+        "cta_or_warp_mapping",
+        "packed_load_width",
+        "reduction_strategy",
+        "shared_memory_bytes",
+        "edge_handling"
+      ]
+    },
+    {
+      "id": "bitsandbytes",
+      "kind": "library-competitor-and-reference",
+      "records": [
+        "repository_commit",
+        "quantization_mode",
+        "kernel_or_api",
+        "layout_contract"
+      ]
+    },
+    {
+      "id": "transformer-engine",
+      "kind": "library-competitor-and-reference",
+      "records": [
+        "repository_commit",
+        "fp8_or_block_scaled_format",
+        "amax_policy",
+        "scale_update_policy"
+      ]
+    },
+    {
+      "id": "composable-kernel",
+      "kind": "competitor-and-extension-surface",
+      "records": [
+        "composable-kernel_commit",
+        "example_ancestor",
+        "cta_tile",
+        "warp_tile",
+        "instruction_tile",
+        "stages",
+        "scheduler",
+        "epilogue_operator",
+        "scale_layout"
+      ]
+    },
+    {
+      "id": "hipblaslt",
+      "kind": "vendor-competitor",
+      "records": [
+        "matmul_desc",
+        "matrix_layouts",
+        "compute_type",
+        "scale_type",
+        "workspace_bytes",
+        "selected_algorithm",
+        "epilogue_attributes"
+      ]
+    },
+    {
+      "id": "vllm-rocm",
+      "kind": "deployment-competitor-and-extension-surface",
+      "records": [
+        "repository_commit",
+        "plugin_or_engine_path",
+        "quantization_config",
+        "batching_policy",
+        "serving_metric"
+      ]
+    },
+    {
+      "id": "triton",
+      "kind": "compiler-competitor",
+      "records": [
+        "meta_parameters",
+        "compile_boundary",
+        "framework_version",
+        "dispatch_included"
+      ]
+    }
+  ],
+  "tasks": [
+    {
+      "id": "fused-int4-dequant-gemv",
+      "status": "timing-only-measured",
+      "path": "corpus/tasks/fused-int4-dequant-gemv/task.json",
+      "objective": "Teach packed int4 weight-only GEMV with per-row/per-group scale and zero-point metadata, fusing unpack, dequantization, multiply, and reduction.",
+      "shape_families": [
+        "decode-gemv",
+        "weight-only-linear",
+        "small-batch-inference"
+      ],
+      "candidate_shapes": [
+        {
+          "rows": 4096,
+          "cols": 4096,
+          "group_size": 128
+        },
+        {
+          "rows": 4096,
+          "cols": 11008,
+          "group_size": 128
+        },
+        {
+          "rows": 11008,
+          "cols": 4096,
+          "group_size": 128
+        },
+        {
+          "rows": 32000,
+          "cols": 4096,
+          "group_size": 128
+        },
+        {
+          "rows": 4096,
+          "cols": 4097,
+          "group_size": 128
+        }
+      ],
+      "dtypes": [
+        "uint4-packed-weight",
+        "fp32-scale",
+        "uint4-zero-point",
+        "fp32-activation",
+        "fp32-accumulate",
+        "fp32-output"
+      ],
+      "layouts": [
+        "row-major packed weights",
+        "even K in low nibble",
+        "odd K in high nibble",
+        "per-row per-group scale",
+        "per-row per-group zero point"
+      ],
+      "baselines": [
+        "host-reference",
+        "materialized-dequant",
+        "custom-naive-fused",
+        "custom-cooperative-fused",
+        "bitsandbytes",
+        "composable-kernel",
+        "hipblaslt",
+        "vllm-rocm",
+        "triton",
+        "framework-generated"
+      ],
+      "custom_candidates": [
+        "one-thread-per-row fused kernel",
+        "one-CTA-per-row fused reduction",
+        "one-warp-per-row fused reduction",
+        "vectorized packed-byte or packed-word loads",
+        "scale reuse across group-size chunks",
+        "fused bias or activation",
+        "half or bfloat16 output path"
+      ],
+      "win_hypotheses": [
+        "Fusing dequantization into GEMV avoids materialized FP16 or FP32 weights and reduces memory traffic.",
+        "Known group size and packing order remove generic quantization branches.",
+        "Decode-like GEMV shapes can reward one-row cooperative scheduling over generic GEMM machinery.",
+        "Fusing bias, activation, or output quantization can remove extra launches and memory passes."
+      ],
+      "negative_examples_to_keep": [
+        "Unpacking and scale loads dominate for small K or tiny rows.",
+        "One CTA per row underutilizes the GPU for too few rows.",
+        "Shared-memory reduction loses to warp-level reduction because synchronization overhead is too high.",
+        "Custom kernel beats materialized dequant but loses to a matching vLLM on ROCm, Composable Kernel, or bitsandbytes path.",
+        "Numerical mismatch from zero-point layout or nibble order invalidates a speed result."
+      ]
+    },
+    {
+      "id": "int8-gemm-requant-epilogue",
+      "status": "planned",
+      "objective": "Compare custom INT8 GEMM with fused bias, activation, scale, clamp, and output cast against hipBLASLt, Composable Kernel, MIGraphX, and Triton paths.",
+      "shape_families": [
+        "mlp-projection",
+        "batched-inference",
+        "requantized-output"
+      ],
+      "dtypes": [
+        "int8-input",
+        "int32-accumulate",
+        "fp32-scale",
+        "int8-or-fp16-output"
+      ],
+      "baselines": [
+        "host-reference",
+        "hipblaslt",
+        "composable-kernel",
+        "migraphx-plugin",
+        "triton"
+      ]
+    },
+    {
+      "id": "fp8-transformer-block-scaled-gemm",
+      "status": "planned",
+      "objective": "Study FP8 or block-scaled transformer GEMM paths with explicit scale, amax, accumulator, and output contracts.",
+      "shape_families": [
+        "transformer-mlp",
+        "attention-projection",
+        "training-or-inference"
+      ],
+      "dtypes": [
+        "fp8-input",
+        "fp32-or-fp16-accumulate",
+        "fp32-scale",
+        "fp8-fp16-or-bf16-output"
+      ],
+      "baselines": [
+        "host-reference",
+        "transformer-engine",
+        "composable-kernel",
+        "hipblaslt",
+        "triton",
+        "framework-generated"
+      ]
+    },
+    {
+      "id": "quantized-attention-kv-dequant",
+      "status": "planned",
+      "objective": "Fuse dequantized KV-cache loads with attention score or value accumulation for decode and paged-cache layouts.",
+      "shape_families": [
+        "decode-attention",
+        "paged-kv-cache",
+        "small-batch-serving"
+      ],
+      "dtypes": [
+        "int8-kv",
+        "int4-kv",
+        "fp8-kv",
+        "fp16-or-bf16-query",
+        "fp32-accumulate"
+      ],
+      "baselines": [
+        "host-reference",
+        "flashinfer",
+        "vllm",
+        "vllm-rocm",
+        "flash-attention",
+        "triton"
+      ]
+    }
+  ]
+}

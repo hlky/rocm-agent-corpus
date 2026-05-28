@@ -1,0 +1,75 @@
+{
+  "schema_version": "0.1.0",
+  "id": "histogram-privatized-atomics",
+  "title": "Histogram With Privatized Atomics",
+  "domain": "histogram",
+  "language": "hip-cpp",
+  "tags": [
+    "histogram",
+    "atomics",
+    "contention",
+    "shared-memory",
+    "privatization",
+    "fixed-bins",
+    "uint32-input",
+    "custom-kernel-competition"
+  ],
+  "source_refs": [
+    "amd-hip-programming-guide",
+    "amd-rocm-programming-guide",
+    "rocm-rocprim"
+  ],
+  "problem": {
+    "summary": "Compute a 256-bin histogram from uint32 input values. The baseline atomically increments global bins for every element. The optimized seed privatizes the 256 bins in shared memory per block, then merges block-private bin counts into global memory.",
+    "inputs": [
+      "uint32_t* input",
+      "uint32_t* histogram",
+      "int n"
+    ],
+    "outputs": [
+      "histogram[0:256] contains exact counts for input[i] & 255"
+    ],
+    "constraints": [
+      "bin count is fixed at 256",
+      "counts are expected to fit in uint32_t for benchmarked shapes",
+      "input distribution strongly affects atomic contention and should be recorded with every result"
+    ]
+  },
+  "artifacts": {
+    "baseline": "source/baseline.hip",
+    "optimized": "source/optimized.hip",
+    "harness": "../../../harnesses/histogram_benchmark.hip"
+  },
+  "verification": {
+    "status": "port-pending-rocm-run",
+    "method": "CPU reference histogram over the same generated input, exact per-bin comparison, and total-count check. Ported from the CUDA corpus; rerun on ROCm hardware before marking passed.",
+    "tolerances": {
+      "mismatched_bins": 0,
+      "max_abs_error": 0
+    }
+  },
+  "benchmarking": {
+    "status": "rocm-measurement-pending",
+    "operation": "histogram-256",
+    "required_metrics": [
+      "median kernel duration",
+      "p10 kernel duration",
+      "p90 kernel duration",
+      "effective input GiB/s",
+      "mismatched bin count",
+      "input distribution"
+    ],
+    "recommended_shapes": [
+      "1048576 skewed",
+      "16777216 skewed",
+      "16777216 uniform",
+      "16777216 single-bin",
+      "65539 sequential"
+    ]
+  },
+  "license": "Project seed example",
+  "curation": {
+    "status": "ported-seed",
+    "notes": "Ported from the CUDA corpus on 2026-05-20. CUDA-origin timing artifacts were removed; rerun on ROCm hardware before making performance claims."
+  }
+}

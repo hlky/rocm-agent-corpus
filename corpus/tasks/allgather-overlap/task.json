@@ -1,0 +1,76 @@
+{
+  "schema_version": "0.1.0",
+  "id": "allgather-overlap",
+  "title": "All Gather Overlap Scaffold",
+  "domain": "multi-gpu",
+  "language": "hip-cpp+rccl",
+  "tags": [
+    "rccl",
+    "all-gather",
+    "overlap",
+    "multi-gpu",
+    "template-only"
+  ],
+  "source_refs": [
+    "amd-rccl",
+    "amd-rccl-docs",
+    "megatron-lm",
+    "amd-rocm-programming-guide"
+  ],
+  "problem": {
+    "summary": "Overlap all-gather of remote shards with local compute over already available tensor-parallel blocks.",
+    "inputs": [
+      "local shard",
+      "rank count",
+      "gather order",
+      "consumer compute kernel",
+      "RCCL communicator"
+    ],
+    "outputs": [
+      "gathered tensor or consumed partial outputs",
+      "timing/timeline metadata"
+    ],
+    "constraints": [
+      "Template-only; timeline evidence is required before claiming overlap",
+      "Record gather order, buffer aliasing, and whether consumer waits on full tensor",
+      "Compare full all-gather then compute versus pipelined consume"
+    ]
+  },
+  "artifacts": {
+    "baseline": "source/baseline.hip",
+    "optimized": "source/optimized.hip",
+    "harness": "source/harness_plan.md"
+  },
+  "verification": {
+    "status": "template-only",
+    "method": "Implement the baseline, optimized candidate, and CPU or strongest-library oracle where applicable; compare outputs before timing claims.",
+    "tolerances": {
+      "max_abs_error": 0.0001,
+      "max_rel_error": 0.0001
+    }
+  },
+  "benchmarking": {
+    "status": "template-only",
+    "operation": "allgather-overlap",
+    "required_metrics": [
+      "end-to-end latency",
+      "rank count",
+      "bytes per shard",
+      "pipeline depth",
+      "topology",
+      "stream count",
+      "timeline evidence",
+      "correctness max error"
+    ],
+    "recommended_shapes": [
+      "ranks=2 hidden=4096 tokens=4096",
+      "ranks=4 hidden=8192 tokens=2048",
+      "ranks=8 hidden=12288 tokens=1024"
+    ]
+  },
+  "license": "Project seed example",
+  "curation": {
+    "status": "template-only",
+    "notes": "Promoted from the v2 extension backlog as wave 2. No performance, correctness, or profiler evidence is claimed yet."
+  }
+}

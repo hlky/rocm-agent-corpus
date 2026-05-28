@@ -1,0 +1,239 @@
+{
+  "schema_version": "0.1.0",
+  "observed_at": "2026-05-21",
+  "doc": "docs/REAL_MODEL_PROBLEM_SIZES.md",
+  "source_roots": [
+    "H:/dinoml_v2_agents/agents/plans/diffusers/*/report.md",
+    "H:/dinoml_v2_agents/agents/plans/transformers/*/report.md"
+  ],
+  "evidence_label": "extracted-problem-size",
+  "api_shape_matrix": "data/index/pytorch_api_real_world_shape_matrix.json",
+  "shape_suites": [
+    {
+      "id": "image_vae_conv_islands",
+      "shape_ids": ["sd15_vae_decode_512", "sdxl_vae_decode_1024", "flux_vae_decode_1024"],
+      "primary_kernel_families": ["conv2d", "groupnorm", "activation", "upsample", "layout-conversion"]
+    },
+    {
+      "id": "image_transformer_denoisers",
+      "shape_ids": ["sd3_transformer_1024", "flux_transformer_1024", "sana_1024_linear_attention", "sana_4k_linear_attention"],
+      "primary_kernel_families": ["patchify", "attention", "linear", "rmsnorm", "elementwise"]
+    },
+    {
+      "id": "video_transformer_denoisers",
+      "shape_ids": ["cogvideox_t2v_49f_720x480", "wan_i2v_81f_480x832", "wan_i2v_condition_81f"],
+      "primary_kernel_families": ["conv3d", "video-attention", "ncthw-layout", "vae-temporal-codec"]
+    },
+    {
+      "id": "audio_generation",
+      "shape_ids": ["stable_audio_latent_1024", "longcat_audio_5_15_30s"],
+      "primary_kernel_families": ["conv1d", "audio-attention", "cross-attention", "sequence-kernel"]
+    },
+    {
+      "id": "llm_dense_decode",
+      "shape_ids": ["llama2_7b_prefill_decode", "llama3_8b_gqa", "apertus_8b_long_context", "qwen3_8b_dense", "qwen3_4b_2507_long"],
+      "primary_kernel_families": ["rmsnorm", "qkv-gemm", "rope", "gqa-attention", "kv-cache", "lm-head", "topk"]
+    },
+    {
+      "id": "moe_routing",
+      "shape_ids": ["qwen3_moe_30b_a3b", "qwen3_moe_235b_a22b", "mixtral_8x7b_moe"],
+      "primary_kernel_families": ["router-softmax", "topk", "grouped-gemm", "scatter-add"]
+    },
+    {
+      "id": "vision_classic_transformers",
+      "shape_ids": ["vit_base_patch16_224", "vit_large_patch32_384", "clipseg_352_mask", "detr_resnet50_800_1333"],
+      "primary_kernel_families": ["patch-conv", "attention", "cross-attention", "mask-head", "box-head"]
+    },
+    {
+      "id": "position_scan_rope",
+      "shape_ids": ["allegro_3d_rope_grid", "bloom_alibi_position_cumsum", "qwen3_vl_cu_seqlens_mrope", "mm_grounding_dino_special_logit"],
+      "primary_kernel_families": ["prefix-scan", "rope", "position-embedding", "packed-sequence-metadata"]
+    }
+  ],
+  "shapes": [
+    {
+      "id": "sd15_vae_decode_512",
+      "source": "H:/dinoml_v2_agents/agents/plans/diffusers/stable_diffusion_1_5/report.md:186",
+      "inputs": [{"name": "latents", "shape": "[B,4,64,64]", "layout": "NCHW"}],
+      "outputs": [{"name": "image", "shape": "[B,3,512,512]", "layout": "NCHW"}],
+      "dtypes": ["float16", "bfloat16", "float32"],
+      "candidate_pytorch_ops": ["conv2d", "group_norm", "silu", "interpolate"]
+    },
+    {
+      "id": "sdxl_unet_cfg_1024",
+      "source": "H:/dinoml_v2_agents/agents/plans/diffusers/stable_diffusion_xl/report.md:170",
+      "inputs": [{"name": "latent_model_input", "shape": "[2B,4,128,128]"}, {"name": "prompt_embeds", "shape": "[2B,77,2048]"}],
+      "outputs": [{"name": "noise_pred", "shape": "[2B,4,128,128]"}],
+      "dtypes": ["float16", "bfloat16"],
+      "candidate_pytorch_ops": ["conv2d", "group_norm", "scaled_dot_product_attention", "linear"]
+    },
+    {
+      "id": "flux_transformer_1024",
+      "source": "H:/dinoml_v2_agents/agents/plans/diffusers/flux/report.md:155",
+      "inputs": [{"name": "packed_latents", "shape": "[B,4096,64]"}, {"name": "t5_prompt", "shape": "[B,512,4096]"}, {"name": "clip_pooled", "shape": "[B,768]"}],
+      "outputs": [{"name": "noise_pred", "shape": "[B,4096,64]"}],
+      "dtypes": ["bfloat16", "float16"],
+      "candidate_pytorch_ops": ["linear", "scaled_dot_product_attention", "rms_norm", "silu"]
+    },
+    {
+      "id": "wan_i2v_81f_480x832",
+      "source": "H:/dinoml_v2_agents/agents/plans/diffusers/wan/report.md:202",
+      "inputs": [{"name": "latents", "shape": "[B,16,21,60,104]", "layout": "NCTHW"}],
+      "outputs": [{"name": "video", "shape": "[B,3,81,480,832]", "layout": "NCTHW"}],
+      "dtypes": ["bfloat16", "float16"],
+      "candidate_pytorch_ops": ["conv3d", "linear", "scaled_dot_product_attention", "permute", "reshape"]
+    },
+    {
+      "id": "qwen3_8b_dense",
+      "source": "H:/dinoml_v2_agents/agents/plans/transformers/qwen3/report.md:115",
+      "inputs": [{"name": "hidden", "shape": "[B,S,4096]"}, {"name": "kv_cache", "shape": "[B,8,T,128]"}],
+      "outputs": [{"name": "logits", "shape": "[B,S_or_1,151936]"}],
+      "dtypes": ["bfloat16"],
+      "candidate_pytorch_ops": ["rms_norm", "linear", "scaled_dot_product_attention", "topk"]
+    },
+    {
+      "id": "qwen3_moe_30b_a3b",
+      "source": "H:/dinoml_v2_agents/agents/plans/transformers/qwen3_moe/report.md:115",
+      "inputs": [{"name": "tokens", "shape": "[M,2048]"}, {"name": "router_logits", "shape": "[M,128]"}],
+      "outputs": [{"name": "hidden", "shape": "[M,2048]"}],
+      "dtypes": ["bfloat16", "float32-router"],
+      "candidate_pytorch_ops": ["softmax", "topk", "gather", "scatter_add", "bmm"]
+    },
+    {
+      "id": "aimv2_rmsnorm_l2",
+      "source": "H:/dinoml_v2_agents/agents/plans/transformers/aimv2/report.md:187",
+      "inputs": [{"name": "features", "shape": "[B,projection_dim]"}, {"name": "hidden", "shape": "[B,S,768_or_1024]"}],
+      "outputs": [{"name": "normalized", "shape": "[B,projection_dim]"}],
+      "dtypes": ["float16", "bfloat16", "float32"],
+      "candidate_pytorch_ops": ["sum", "mean", "rsqrt", "rms_norm", "matmul"]
+    },
+    {
+      "id": "rag_doc_scores_and_marginalize",
+      "source": "H:/dinoml_v2_agents/agents/plans/transformers/rag/report.md:93",
+      "inputs": [{"name": "question_hidden", "shape": "[B,768]"}, {"name": "retrieved_doc_embeds", "shape": "[B,n_docs,768]"}, {"name": "gen_logits", "shape": "[B*n_docs,T,V]"}],
+      "outputs": [{"name": "doc_scores", "shape": "[B,n_docs]"}, {"name": "marginalized_logits", "shape": "[B,T,V]"}],
+      "dtypes": ["float32", "float16", "bfloat16"],
+      "candidate_pytorch_ops": ["bmm", "log_softmax", "logsumexp", "gather", "sum", "masked_fill"]
+    },
+    {
+      "id": "superpoint_superglue_480x640",
+      "source": "H:/dinoml_v2_agents/agents/plans/transformers/superglue/report.md:139",
+      "inputs": [{"name": "pixel_values", "shape": "[B,2,3,480,640]"}],
+      "outputs": [{"name": "keypoints", "shape": "[B,2,K,2]"}, {"name": "descriptors", "shape": "[B,2,K,256]"}],
+      "dtypes": ["float32"],
+      "candidate_pytorch_ops": ["conv2d", "relu", "max_pool2d", "softmax", "nonzero", "topk", "grid_sample", "logsumexp"]
+    },
+    {
+      "id": "ace_step_audio_dit_patchify",
+      "source": "H:/dinoml_v2_agents/agents/plans/diffusers/ace_step/report.md:148",
+      "inputs": [{"name": "context_latents", "shape": "[B,T,128]"}, {"name": "noisy_latents", "shape": "[B,T,64]"}],
+      "outputs": [{"name": "patch_tokens", "shape": "[B,2048,T/2]"}],
+      "dtypes": ["bfloat16", "float16"],
+      "candidate_pytorch_ops": ["cat", "pad", "transpose", "conv1d", "conv_transpose1d"]
+    },
+    {
+      "id": "audioflamingo3_stft_pool_stitch",
+      "source": "H:/dinoml_v2_agents/agents/plans/transformers/audioflamingo3/report.md:133",
+      "inputs": [{"name": "log_mel", "shape": "[num_windows_total,128,3000]"}, {"name": "audio_encoder", "shape": "[W,1500,1280]"}],
+      "outputs": [{"name": "pooled_audio", "shape": "[W,750,1280]"}, {"name": "audio_rows", "shape": "[sum(post_lengths),3584]"}],
+      "dtypes": ["float32", "float16", "bfloat16"],
+      "candidate_pytorch_ops": ["stft", "avg_pool1d", "nonzero", "masked_scatter"]
+    },
+    {
+      "id": "patchtsmixer_temporal_unfold",
+      "source": "H:/dinoml_v2_agents/agents/plans/transformers/patchtsmixer/report.md:101",
+      "inputs": [{"name": "series", "shape": "[B,T,C]"}],
+      "outputs": [{"name": "patches", "shape": "[B,C,P,patch_length]"}],
+      "dtypes": ["float32", "float16"],
+      "candidate_pytorch_ops": ["unfold", "reshape", "permute"]
+    },
+    {
+      "id": "vit_mae_masked_reconstruction",
+      "source": "H:/dinoml_v2_agents/agents/plans/transformers/vit_mae/report.md:117",
+      "inputs": [{"name": "noise", "shape": "[B,196]"}, {"name": "target", "shape": "[B,L,P*P*C]"}],
+      "outputs": [{"name": "loss", "shape": "scalar"}],
+      "dtypes": ["float32", "float16"],
+      "candidate_pytorch_ops": ["argsort", "gather", "mse_loss", "sum"]
+    },
+    {
+      "id": "bark_fine_codebook_sampling",
+      "source": "H:/dinoml_v2_agents/agents/plans/transformers/bark/report.md:242",
+      "inputs": [{"name": "fine_logits", "shape": "[*,1024]"}],
+      "outputs": [{"name": "codebook_ids", "shape": "[*]"}],
+      "dtypes": ["float32", "float16"],
+      "candidate_pytorch_ops": ["argmax", "softmax", "multinomial"]
+    },
+    {
+      "id": "allegro_3d_rope_grid",
+      "source": "H:/dinoml_v2_agents/agents/plans/diffusers/allegro/report.md:306",
+      "inputs": [{"name": "q_or_k", "shape": "[B,24,79200,96]"}, {"name": "grid", "shape": "[3,1,79200]"}],
+      "outputs": [{"name": "rotated_q_or_k", "shape": "[B,24,79200,96]"}],
+      "dtypes": ["bfloat16", "float16", "float32-rope"],
+      "candidate_pytorch_ops": ["cartesian_prod", "arange", "sin", "cos", "gather", "mul", "add"]
+    },
+    {
+      "id": "bloom_alibi_position_cumsum",
+      "source": "H:/dinoml_v2_agents/agents/plans/transformers/bloom/report.md:89",
+      "inputs": [{"name": "attention_mask", "shape": "[B,S]"}],
+      "outputs": [{"name": "position_ids", "shape": "[B,S]"}, {"name": "alibi", "shape": "[B*num_heads,1,S]"}],
+      "dtypes": ["int64", "float32", "bfloat16"],
+      "candidate_pytorch_ops": ["cumsum", "masked_fill", "view", "expand"]
+    },
+    {
+      "id": "qwen3_vl_cu_seqlens_mrope",
+      "source": "H:/dinoml_v2_agents/agents/plans/transformers/qwen3_vl/report.md:187",
+      "inputs": [{"name": "grid_thw", "shape": "[num_items,3]"}, {"name": "position_ids", "shape": "[4,B,S]"}],
+      "outputs": [{"name": "cu_seqlens", "shape": "[num_segments+1]"}, {"name": "cos_sin", "shape": "[B,S,head_dim]"}],
+      "dtypes": ["int64", "float32", "bfloat16"],
+      "candidate_pytorch_ops": ["repeat_interleave", "cumsum", "pad", "searchsorted", "sin", "cos"]
+    },
+    {
+      "id": "aria_idefics_bucketized_positions",
+      "source": "H:/dinoml_v2_agents/agents/plans/transformers/aria/report.md:285",
+      "inputs": [{"name": "patch_mask_or_grid", "shape": "Aria 490/980, Idefics2 70x70, Idefics3 26x26"}],
+      "outputs": [{"name": "position_ids", "shape": "[num_valid_patches]"}],
+      "dtypes": ["int64", "float32"],
+      "candidate_pytorch_ops": ["bucketize", "clamp", "arange", "masked_scatter"]
+    },
+    {
+      "id": "shap_e_searchsorted_unique_render",
+      "source": "H:/dinoml_v2_agents/agents/plans/diffusers/shap_e/report.md:498",
+      "inputs": [{"name": "prior_latents", "shape": "[B,1024,1024]"}, {"name": "cdf", "shape": "[*,samples]"}],
+      "outputs": [{"name": "sample_indices", "shape": "[*,samples]"}, {"name": "mesh_vertices_faces", "shape": "dynamic"}],
+      "dtypes": ["float32", "int64"],
+      "candidate_pytorch_ops": ["searchsorted", "unique", "sort", "gather", "rand"]
+    },
+    {
+      "id": "mm_grounding_dino_special_logit",
+      "source": "H:/dinoml_v2_agents/agents/plans/transformers/mm_grounding_dino/report.md:143",
+      "inputs": [{"name": "reference_boxes", "shape": "[B,900,4]"}, {"name": "pixel_mask", "shape": "[B,H,W]"}],
+      "outputs": [{"name": "box_logits", "shape": "[B,900,4]"}, {"name": "position_embeddings", "shape": "[B,H,W,C]"}],
+      "dtypes": ["float32", "float16"],
+      "candidate_pytorch_ops": ["special.logit", "cumsum", "meshgrid", "linspace", "where", "clamp"]
+    },
+    {
+      "id": "pe_audio_masked_groupnorm",
+      "source": "H:/dinoml_v2_agents/agents/plans/transformers/pe_audio/report.md:91",
+      "inputs": [{"name": "audio_hidden", "shape": "[B,T,768_or_1024_or_1792]"}, {"name": "padding_mask", "shape": "[B,T]"}],
+      "outputs": [{"name": "normalized", "shape": "[B,T,H]"}],
+      "dtypes": ["float32", "float16", "bfloat16"],
+      "candidate_pytorch_ops": ["masked.mean", "masked.var", "rsqrt", "mul", "add"]
+    },
+    {
+      "id": "helios_cholesky_noise_blocks",
+      "source": "H:/dinoml_v2_agents/agents/plans/diffusers/helios/report.md:519",
+      "inputs": [{"name": "covariance", "shape": "[patch_elems,patch_elems]"}, {"name": "noise_blocks", "shape": "[num_blocks,patch_elems]"}],
+      "outputs": [{"name": "correlated_noise_blocks", "shape": "[num_blocks,patch_elems]"}],
+      "dtypes": ["float32", "float16"],
+      "candidate_pytorch_ops": ["linalg.cholesky", "matmul"]
+    },
+    {
+      "id": "bamba_mamba2_chunk_scan",
+      "source": "H:/dinoml_v2_agents/agents/plans/transformers/bamba/report.md:341",
+      "inputs": [{"name": "hidden", "shape": "[B,S,4096]"}, {"name": "conv_state", "shape": "[B,8448,4]"}, {"name": "recurrent_state", "shape": "[B,128,64,128]"}],
+      "outputs": [{"name": "hidden", "shape": "[B,S,4096]"}],
+      "dtypes": ["bfloat16", "float32"],
+      "candidate_pytorch_ops": ["linear", "split", "conv1d", "chunked_scan", "rms_norm"]
+    }
+  ]
+}

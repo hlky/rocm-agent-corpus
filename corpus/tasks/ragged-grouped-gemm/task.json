@@ -1,0 +1,78 @@
+{
+  "schema_version": "0.1.0",
+  "id": "ragged-grouped-gemm",
+  "title": "Ragged Grouped GEMM Scaffold",
+  "domain": "gemm",
+  "language": "hip-cpp",
+  "tags": [
+    "gemm",
+    "grouped-gemm",
+    "ragged",
+    "moe",
+    "hipblaslt",
+    "composable-kernel",
+    "template-only"
+  ],
+  "source_refs": [
+    "amd-hipblaslt-rocblas-docs",
+    "rocm-composable-kernel",
+    "vllm",
+    "triton",
+    "amd-rocm-programming-guide"
+  ],
+  "problem": {
+    "summary": "Model grouped and ragged GEMM workloads common in MoE and batched inference, including shape bucketing and padding tradeoffs.",
+    "inputs": [
+      "arrays of A/B/C pointers",
+      "per-group M/N/K",
+      "leading dimensions",
+      "group count",
+      "optional expert/token mapping"
+    ],
+    "outputs": [
+      "per-group GEMM outputs"
+    ],
+    "constraints": [
+      "Template-only; compare looped hipBLAS/rocBLAS/hipBLASLt, Composable Kernel grouped GEMM, and Triton grouped matmul when available",
+      "Record shape histogram and padding policy",
+      "Separate pointer-array overhead from kernel time"
+    ]
+  },
+  "artifacts": {
+    "baseline": "source/baseline.hip",
+    "optimized": "source/optimized.hip",
+    "harness": "source/harness_plan.md"
+  },
+  "verification": {
+    "status": "template-only",
+    "method": "Implement the baseline, optimized candidate, and CPU or library oracle; compare all outputs across edge cases before timing claims.",
+    "tolerances": {
+      "max_abs_error": 0.0001,
+      "max_rel_error": 0.0001
+    }
+  },
+  "benchmarking": {
+    "status": "template-only",
+    "operation": "ragged-grouped-gemm",
+    "required_metrics": [
+      "median latency",
+      "group count",
+      "shape histogram",
+      "padding bytes",
+      "library calls",
+      "scheduler policy",
+      "effective FLOP/s",
+      "correctness max error"
+    ],
+    "recommended_shapes": [
+      "experts=8 tokens_per_expert varied 0..256 hidden=4096 inter=11008",
+      "groups=128 small M varied N=K=256",
+      "groups=16 mixed M,N,K"
+    ]
+  },
+  "license": "Project seed example",
+  "curation": {
+    "status": "template-only",
+    "notes": "Promoted from the v2 extension backlog as a template-only task. No performance, correctness, or profiler evidence is claimed yet."
+  }
+}

@@ -1,0 +1,62 @@
+{
+  "schema_version": "0.1.0",
+  "id": "memory-coalesced-matrix-copy",
+  "title": "Coalesced Row-Major Matrix Copy",
+  "domain": "memory",
+  "language": "hip-cpp",
+  "tags": [
+    "coalescing",
+    "strided-access",
+    "launch-config"
+  ],
+  "source_refs": [
+    "amd-rocm-programming-guide",
+    "amd-rocprofiler-docs"
+  ],
+  "problem": {
+    "summary": "Copy a row-major matrix from input to output while preserving values. The baseline maps adjacent lanes across rows, causing strided row-major access. The optimized version maps adjacent lanes across columns.",
+    "inputs": [
+      "float* input",
+      "float* output",
+      "int rows",
+      "int cols"
+    ],
+    "outputs": [
+      "output contains input[row * cols + col] for every valid element"
+    ],
+    "constraints": [
+      "rows and cols may not be multiples of the block dimensions",
+      "input and output do not alias"
+    ]
+  },
+  "artifacts": {
+    "baseline": "source/baseline.hip",
+    "optimized": "source/optimized.hip"
+  },
+  "verification": {
+    "status": "port-pending-rocm-run",
+    "method": "Compare output against host or device reference copy for multiple matrix shapes. Ported from the CUDA corpus; rerun on ROCm hardware before marking passed.",
+    "tolerances": {}
+  },
+  "benchmarking": {
+    "status": "rocm-measurement-pending",
+    "operation": "copy",
+    "required_metrics": [
+      "median kernel duration",
+      "global load sectors per request",
+      "global store sectors per request",
+      "effective memory bandwidth"
+    ],
+    "recommended_shapes": [
+      "4096x4096",
+      "8192x1024",
+      "1024x8192",
+      "1009x2039"
+    ]
+  },
+  "license": "Project seed example",
+  "curation": {
+    "status": "ported-seed",
+    "notes": "Ported from the CUDA corpus on 2026-05-20. CUDA-origin timing artifacts were removed; rerun on ROCm hardware before making performance claims."
+  }
+}

@@ -1,0 +1,77 @@
+{
+  "schema_version": "0.1.0",
+  "id": "fp8-cast-scale-amax",
+  "title": "FP8 Cast Scale Amax Scaffold",
+  "domain": "quantization",
+  "language": "hip-cpp",
+  "tags": [
+    "fp8",
+    "amax",
+    "scale",
+    "transformer-engine",
+    "quantization",
+    "template-only"
+  ],
+  "source_refs": [
+    "transformer-engine",
+    "rocm-composable-kernel",
+    "amd-hipblaslt-rocblas-docs",
+    "amd-rocm-programming-guide"
+  ],
+  "problem": {
+    "summary": "Fuse FP8 cast, scale application, saturation, and amax collection so agents can reason about Transformer Engine on ROCm and hipBLASLt FP8 contracts.",
+    "inputs": [
+      "fp16/bf16/fp32 tensor",
+      "input scale",
+      "output scale inverse",
+      "amax output",
+      "format selector"
+    ],
+    "outputs": [
+      "fp8-packed tensor",
+      "amax or updated scale metadata"
+    ],
+    "constraints": [
+      "Template-only; exact FP8 format, saturation policy, amax reduction order, and delayed scaling policy must be recorded",
+      "Do not claim numerical equivalence without format-aware oracle",
+      "Compare against Transformer Engine on ROCm where available"
+    ]
+  },
+  "artifacts": {
+    "baseline": "source/baseline.hip",
+    "optimized": "source/optimized.hip",
+    "harness": "source/harness_plan.md"
+  },
+  "verification": {
+    "status": "template-only",
+    "method": "Implement the baseline, optimized candidate, and CPU or library oracle; compare all outputs across edge cases before timing claims.",
+    "tolerances": {
+      "max_abs_error": 0.0001,
+      "max_rel_error": 0.0001
+    }
+  },
+  "benchmarking": {
+    "status": "template-only",
+    "operation": "fp8-cast-scale-amax",
+    "required_metrics": [
+      "median latency",
+      "num elements",
+      "FP8 format",
+      "scale dtype",
+      "amax reduction policy",
+      "saturation count",
+      "bandwidth",
+      "correctness tolerance"
+    ],
+    "recommended_shapes": [
+      "n=1048576 fp16->fp8",
+      "rows=4096 cols=4096",
+      "rows=16384 cols=11008"
+    ]
+  },
+  "license": "Project seed example",
+  "curation": {
+    "status": "template-only",
+    "notes": "Promoted from the v2 extension backlog as a template-only task. No performance, correctness, or profiler evidence is claimed yet."
+  }
+}

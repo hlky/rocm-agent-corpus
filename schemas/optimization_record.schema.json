@@ -1,0 +1,53 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.local/rocm-agent-corpus/optimization_record.schema.json",
+  "title": "HIP/ROCm Agent Corpus Optimization Record",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "id",
+    "task_id",
+    "status",
+    "optimization_tags",
+    "baseline_artifact",
+    "optimized_artifact",
+    "claim",
+    "expected_profiler_signals",
+    "correctness_status",
+    "curation_note"
+  ],
+  "properties": {
+    "schema_version": { "type": "string" },
+    "id": { "type": "string" },
+    "task_id": { "type": "string" },
+    "status": { "type": "string" },
+    "optimization_tags": { "type": "array", "items": { "type": "string" } },
+    "baseline_artifact": { "type": "string" },
+    "optimized_artifact": { "type": "string" },
+    "claim": { "type": "string" },
+    "expected_profiler_signals": { "type": "array", "items": { "type": "string" } },
+    "correctness_status": { "type": "string" },
+    "measurement": {
+      "anyOf": [
+        { "type": "null" },
+        {
+          "type": "object",
+          "required": ["hardware_id", "baseline_ms", "optimized_ms", "speedup"],
+          "properties": {
+            "hardware_id": { "type": "string" },
+            "baseline_ms": { "type": "number" },
+            "optimized_ms": { "type": "number" },
+            "speedup": { "type": "number" },
+            "result_file": { "type": "string" },
+            "result_files": { "type": "array", "items": { "type": "string" } },
+            "profile_file": { "type": "string" },
+            "profile_files": { "type": "array", "items": { "type": "string" } }
+          },
+          "additionalProperties": false
+        }
+      ]
+    },
+    "curation_note": { "type": "string" }
+  },
+  "additionalProperties": false
+}

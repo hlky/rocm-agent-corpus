@@ -1,0 +1,82 @@
+{
+  "schema_version": "0.1.0",
+  "id": "top-p-nucleus-sampling",
+  "title": "Top-p Nucleus Sampling Scaffold",
+  "domain": "selection-sampling",
+  "language": "hip-cpp",
+  "tags": [
+    "top-p",
+    "sampling",
+    "logits",
+    "cub",
+    "vllm-rocm",
+    "vllm",
+    "flashinfer",
+    "template-only"
+  ],
+  "source_refs": [
+    "rocm-rocprim",
+    "rocm-rocprim-docs",
+    "vllm",
+    "flashinfer",
+    "pytorch"
+  ],
+  "problem": {
+    "summary": "Extend top-k/logits work to top-p sampling, where sorted or partially sorted probabilities are accumulated until a probability threshold is reached.",
+    "inputs": [
+      "logits",
+      "temperature",
+      "top_p threshold",
+      "optional top_k cap",
+      "RNG state",
+      "batch rows"
+    ],
+    "outputs": [
+      "sampled token ids",
+      "optional probabilities or selected counts"
+    ],
+    "constraints": [
+      "Template-only; define sorted/unsorted and tie semantics explicitly",
+      "Record RNG seed/algorithm and probability normalization contract",
+      "Compare against vLLM on ROCm, vLLM, FlashInfer, hipCUB/rocThrust, and PyTorch where feasible"
+    ]
+  },
+  "artifacts": {
+    "baseline": "source/baseline.hip",
+    "optimized": "source/optimized.hip",
+    "harness": "source/harness_plan.md"
+  },
+  "verification": {
+    "status": "template-only",
+    "method": "Implement CPU and strongest-library references, then compare outputs before timing claims.",
+    "tolerances": {
+      "max_abs_error": 0.0001,
+      "max_rel_error": 0.0001
+    }
+  },
+  "benchmarking": {
+    "status": "template-only",
+    "operation": "top-p-nucleus-sampling",
+    "required_metrics": [
+      "median latency",
+      "batch",
+      "vocab",
+      "top_p",
+      "top_k cap",
+      "RNG seed",
+      "selected count distribution",
+      "baseline versions",
+      "correctness/statistical checks"
+    ],
+    "recommended_shapes": [
+      "batch=1 vocab=32000 top_p=0.9",
+      "batch=32 vocab=32000 top_p=0.95",
+      "batch=128 vocab=128000 top_p=0.9"
+    ]
+  },
+  "license": "Project seed example",
+  "curation": {
+    "status": "template-only",
+    "notes": "Promoted from the v2 extension backlog as a template-only task. No performance, correctness, or profiler evidence is claimed yet."
+  }
+}

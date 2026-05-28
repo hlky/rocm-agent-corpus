@@ -1,0 +1,281 @@
+{
+  "schema_version": "0.1.0",
+  "track_id": "attention-kernel-track",
+  "guide": "docs/ATTENTION_KERNEL_GUIDE.md",
+  "mission": "Teach agents to write, benchmark, and explain custom FlashAttention-style HIP kernels that can beat, match, specialize beyond, or extend FlashAttention, MIOpen, vLLM on ROCm, vLLM, FlashInfer, Triton, Composable Kernel, and framework-generated attention for scoped workloads.",
+  "evidence_policy": {
+    "default_status": "template-only",
+    "measured_without_profiler": "timing-only",
+    "required_result_classes": [
+      "custom-win",
+      "custom-specialized-win",
+      "near-match",
+      "library-win",
+      "negative-example",
+      "correctness-fail",
+      "compile-fail"
+    ],
+    "must_not_claim": [
+      "rocprofiler/rocprof counters unless collected",
+      "FlashAttention comparison unless mask, dtype, scale, layout, dropout, and sequence contract match",
+      "vLLM on ROCm, vLLM, or FlashInfer serving wins from an isolated kernel timing alone",
+      "Decode win unless KV-cache layout, batching, and query-position semantics are recorded",
+      "Prefill win unless full QK, softmax, and PV traffic are included"
+    ]
+  },
+  "metadata_requirements": [
+    "task_id",
+    "result_class",
+    "gpu_name",
+    "gfx_target",
+    "driver_version",
+    "cuda_toolkit_version",
+    "compiler_version",
+    "build_command",
+    "arch_flags",
+    "batch_size",
+    "num_heads",
+    "query_length",
+    "key_length",
+    "head_dim",
+    "value_dim",
+    "dtype_q",
+    "dtype_k",
+    "dtype_v",
+    "dtype_accumulator",
+    "dtype_output",
+    "layout_q",
+    "layout_k",
+    "layout_v",
+    "layout_output",
+    "scale",
+    "causal",
+    "mask_type",
+    "dropout",
+    "kv_cache_layout",
+    "prefill_or_decode",
+    "tile_m",
+    "tile_n",
+    "tile_d",
+    "shared_memory_bytes",
+    "registers_per_thread",
+    "warmup_iterations",
+    "measured_iterations",
+    "timer_type",
+    "profiler_status",
+    "correctness_reference",
+    "tolerance",
+    "seed",
+    "baseline_versions",
+    "win_loss_notes"
+  ],
+  "baseline_definitions": [
+    {
+      "id": "host-reference",
+      "kind": "correctness-oracle",
+      "records": [
+        "stable softmax formula",
+        "causal and padding mask semantics",
+        "accumulator and output rounding policy"
+      ]
+    },
+    {
+      "id": "custom-naive",
+      "kind": "educational-custom",
+      "records": [
+        "one thread per output element",
+        "materialized logical softmax row",
+        "known redundant QK recomputation"
+      ]
+    },
+    {
+      "id": "custom-online-tiled",
+      "kind": "custom-baseline",
+      "records": [
+        "online max and denominator recurrence",
+        "K/V tile shape",
+        "shared memory bytes",
+        "causal edge handling"
+      ]
+    },
+    {
+      "id": "custom-tensor-core-attention",
+      "kind": "custom-advanced",
+      "records": [
+        "MFMA instruction or library-derived mainloop",
+        "QK and PV tile shapes",
+        "pipeline stages",
+        "accumulator type"
+      ]
+    },
+    {
+      "id": "flash-attention",
+      "kind": "reference-and-competitor",
+      "records": [
+        "repository commit",
+        "API entrypoint",
+        "dtype and head_dim support",
+        "mask and dropout support",
+        "tile and architecture path when available"
+      ]
+    },
+    {
+      "id": "miopen-frontend",
+      "kind": "library-competitor-and-plan-reference",
+      "records": [
+        "operation graph",
+        "engine config",
+        "workspace bytes",
+        "plan filters",
+        "determinism and precision settings"
+      ]
+    },
+    {
+      "id": "triton",
+      "kind": "compiler-competitor",
+      "records": [
+        "kernel source or generated code reference",
+        "meta-parameters",
+        "compile boundary",
+        "framework dispatch included"
+      ]
+    },
+    {
+      "id": "vllm-rocm",
+      "kind": "serving-competitor-and-extension-surface",
+      "records": [
+        "plugin or kernel entrypoint",
+        "KV-cache layout",
+        "batching and scheduler assumptions",
+        "engine/runtime timing boundary"
+      ]
+    },
+    {
+      "id": "vllm",
+      "kind": "serving-reference",
+      "records": [
+        "paged attention configuration",
+        "block size",
+        "scheduler and batch composition",
+        "end-to-end metric boundary"
+      ]
+    },
+    {
+      "id": "flashinfer",
+      "kind": "inference-competitor-and-reference",
+      "records": [
+        "decode or prefill API",
+        "paged KV layout",
+        "planning metadata",
+        "batch and sequence constraints"
+      ]
+    }
+  ],
+  "tasks": [
+    {
+      "id": "online-attention-forward",
+      "status": "timing-only-measured",
+      "objective": "Teach online softmax, QK/V tiling, shared-memory staging, causal masking, and the difference between prefill and decode before adding stronger Matrix Core and serving-library baselines.",
+      "artifacts": {
+        "task": "corpus/tasks/online-attention-forward/task.json",
+        "baseline": "corpus/tasks/online-attention-forward/source/baseline.hip",
+        "optimized": "corpus/tasks/online-attention-forward/source/optimized.hip",
+        "harness": "harnesses/attention_forward_benchmark.hip"
+      },
+      "shape_families": [
+        "prefill",
+        "decode",
+        "causal",
+        "noncausal",
+        "sequence-length-sweep",
+        "awkward-head-dim"
+      ],
+      "candidate_shapes": [
+        {
+          "batch_size": 1,
+          "num_heads": 4,
+          "query_length": 128,
+          "key_length": 128,
+          "head_dim": 64,
+          "causal": true
+        },
+        {
+          "batch_size": 1,
+          "num_heads": 8,
+          "query_length": 512,
+          "key_length": 512,
+          "head_dim": 64,
+          "causal": true
+        },
+        {
+          "batch_size": 1,
+          "num_heads": 32,
+          "query_length": 1,
+          "key_length": 2048,
+          "head_dim": 128,
+          "causal": true
+        },
+        {
+          "batch_size": 4,
+          "num_heads": 16,
+          "query_length": 1,
+          "key_length": 8192,
+          "head_dim": 128,
+          "causal": true
+        },
+        {
+          "batch_size": 2,
+          "num_heads": 4,
+          "query_length": 96,
+          "key_length": 160,
+          "head_dim": 80,
+          "causal": false
+        }
+      ],
+      "dtypes": [
+        "fp32-seed",
+        "fp16-future",
+        "bf16-future",
+        "fp8-future"
+      ],
+      "layouts": [
+        "contiguous B,H,S,D",
+        "BSHD future",
+        "paged-kv-cache future",
+        "grouped-query future"
+      ],
+      "baselines": [
+        "host-reference",
+        "custom-naive",
+        "custom-online-tiled",
+        "flash-attention",
+        "miopen-frontend",
+        "triton",
+        "vllm-rocm",
+        "vllm",
+        "flashinfer"
+      ],
+      "custom_candidates": [
+        "one CTA per query row online softmax",
+        "warp-specialized decode for query_length=1",
+        "Matrix Core QK and PV tiles",
+        "double-buffered K/V shared-memory tiles",
+        "causal tile skipping",
+        "fixed-shape head_dim specialization",
+        "paged-KV layout specialization",
+        "fused rotary or bias before QK"
+      ],
+      "win_hypotheses": [
+        "The online custom seed should reduce memory traffic versus materializing scores and probabilities.",
+        "A narrow decode kernel can win when query_length=1, head_dim and KV layout are fixed, and serving libraries carry more general batching or paging support than the workload needs.",
+        "A custom fused variant can win when scale, mask, rotary, bias, or output transform would otherwise require extra launches or memory passes."
+      ],
+      "negative_examples_to_keep": [
+        "The online seed loses because scalar dot products do not use Matrix Cores.",
+        "A larger key tile loses due to shared-memory pressure or lower occupancy.",
+        "A decode-specialized kernel wins isolated timing but loses end-to-end serving latency once KV-cache layout and scheduler costs are included.",
+        "A custom prefill kernel loses to FlashAttention because its mainloop lacks global-to-LDS staging, MFMA, or better work partitioning."
+      ]
+    }
+  ]
+}

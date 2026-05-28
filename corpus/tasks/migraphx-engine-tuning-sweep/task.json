@@ -1,0 +1,70 @@
+{
+  "schema_version": "0.1.0",
+  "id": "migraphx-engine-tuning-sweep",
+  "title": "MIGraphX Engine Tactic Sweep Scaffold",
+  "domain": "inference-engine",
+  "language": "python",
+  "tags": [
+    "migraphx",
+    "engine-build",
+    "tactic-sweep",
+    "timing-cache",
+    "template-only",
+    "todo"
+  ],
+  "source_refs": [
+    "amd-migraphx-docs",
+    "amd-rocm-programming-guide"
+  ],
+  "problem": {
+    "summary": "Record a MIGraphX engine build and tactic sweep boundary so agents can compare plugin/custom HIP paths against deployment-engine baselines.",
+    "inputs": [
+      "ONNX model path",
+      "shape profiles",
+      "precision flags",
+      "timing cache path"
+    ],
+    "outputs": [
+      "serialized engine and tactic/build metadata"
+    ],
+    "constraints": [
+      "Engine build time and runtime latency are separate metrics",
+      "Record MIGraphX version and builder flags",
+      "A library win should still identify plugin or custom-kernel extension surfaces"
+    ]
+  },
+  "artifacts": {
+    "baseline": "source/baseline.py",
+    "optimized": "source/optimized.py"
+  },
+  "verification": {
+    "status": "template-only",
+    "method": "Compare MIGraphX outputs with framework or ONNX Runtime reference outputs for fixed inputs.",
+    "tolerances": {
+      "max_abs_error": 0.001,
+      "max_rel_error": 0.001
+    }
+  },
+  "benchmarking": {
+    "status": "template-only",
+    "operation": "migraphx-engine-tuning-sweep",
+    "required_metrics": [
+      "engine build time",
+      "timing cache hit status",
+      "median runtime latency",
+      "selected precision",
+      "dynamic shape profile",
+      "MIGraphX version"
+    ],
+    "recommended_shapes": [
+      "batch=1 static",
+      "batch=1..8 dynamic",
+      "production profile"
+    ]
+  },
+  "license": "Project seed example",
+  "curation": {
+    "status": "template-only",
+    "notes": "This task is source-only planning code; no MIGraphX result is claimed."
+  }
+}

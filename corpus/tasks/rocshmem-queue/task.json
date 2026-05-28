@@ -1,0 +1,76 @@
+{
+  "schema_version": "0.1.0",
+  "id": "rocshmem-queue",
+  "title": "rocSHMEM GPU-Initiated Queue Scaffold",
+  "domain": "multi-gpu-one-sided",
+  "language": "hip-cpp",
+  "tags": [
+    "rocshmem",
+    "multi-gpu",
+    "gpu-initiated-communication",
+    "work-queue",
+    "one-sided",
+    "template-only",
+    "todo"
+  ],
+  "source_refs": [
+    "amd-rocshmem",
+    "amd-hip-programming-guide",
+    "amd-rocm-programming-guide"
+  ],
+  "problem": {
+    "summary": "Compare a host-mediated cross-PE queue path against a GPU-initiated rocSHMEM queue where device code publishes work directly to a remote PE.",
+    "inputs": [
+      "QueueEntry* local_queue",
+      "QueueEntry* symmetric_remote_queue",
+      "int* symmetric_remote_tail",
+      "int entry_count",
+      "int target_pe"
+    ],
+    "outputs": [
+      "target PE queue receives deterministic QueueEntry records in bounded slots"
+    ],
+    "constraints": [
+      "No latency or throughput claim without multi-PE timing",
+      "Symmetric allocation and rocSHMEM initialization are required outside the scaffold",
+      "Queue capacity, memory ordering, and overflow policy must be documented before measurement"
+    ]
+  },
+  "artifacts": {
+    "baseline": "source/baseline.hip",
+    "optimized": "source/optimized.hip"
+  },
+  "verification": {
+    "status": "template-only",
+    "method": "Drain the target queue and compare received payloads, source PE ids, and sequence numbers against the host-mediated reference.",
+    "tolerances": {
+      "missing_entries": 0,
+      "duplicate_entries": 0
+    }
+  },
+  "benchmarking": {
+    "status": "template-only",
+    "operation": "cross-pe-work-queue",
+    "required_metrics": [
+      "median enqueue latency",
+      "entries_per_second",
+      "PE count",
+      "queue_capacity",
+      "entry_size_bytes",
+      "rocSHMEM version",
+      "transport metadata",
+      "timer_type",
+      "hardware_metadata"
+    ],
+    "recommended_shapes": [
+      "pes=2,entries=65536,capacity=4096",
+      "pes=4,entries=1048576,capacity=16384",
+      "pes=8,entries=1048576,capacity=32768"
+    ]
+  },
+  "license": "Project seed example",
+  "curation": {
+    "status": "template-only",
+    "notes": "This scaffold records the host-mediated versus GPU-initiated design boundary only. Future records must label HIP-event-only measurements as timing-only and preserve losing attempts as negative examples."
+  }
+}

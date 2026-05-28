@@ -1,0 +1,78 @@
+{
+  "schema_version": "0.1.0",
+  "id": "fused-mlp-swiglu",
+  "title": "Fused MLP SwiGLU Boundary",
+  "domain": "ml-kernels",
+  "language": "hip-cpp",
+  "tags": [
+    "mlp",
+    "swiglu",
+    "epilogue",
+    "gemm",
+    "fusion",
+    "template-only"
+  ],
+  "source_refs": [
+    "amd-hipblaslt-rocblas-docs",
+    "rocm-composable-kernel",
+    "vllm",
+    "transformer-engine",
+    "triton",
+    "tiny-cuda-nn"
+  ],
+  "problem": {
+    "summary": "Compare staged MLP projection, gate activation, multiply, and down-projection boundaries against fused epilogue or custom intermediate-avoidance paths.",
+    "inputs": [
+      "activation X",
+      "gate/up/down weights",
+      "optional bias",
+      "activation type",
+      "batch tokens",
+      "hidden/intermediate dimensions"
+    ],
+    "outputs": [
+      "MLP output"
+    ],
+    "constraints": [
+      "Template-only; GEMM work must be compared against hipBLASLt/Composable Kernel/vLLM on ROCm or Triton",
+      "Separate epilogue-only fusion from full custom GEMM claims",
+      "Record intermediate tensor bytes and launch count"
+    ]
+  },
+  "artifacts": {
+    "baseline": "source/baseline.hip",
+    "optimized": "source/optimized.hip",
+    "harness": "source/harness_plan.md"
+  },
+  "verification": {
+    "status": "template-only",
+    "method": "Implement the baseline, optimized candidate, and CPU or library oracle; compare all outputs across edge cases before timing claims.",
+    "tolerances": {
+      "max_abs_error": 0.0001,
+      "max_rel_error": 0.0001
+    }
+  },
+  "benchmarking": {
+    "status": "template-only",
+    "operation": "fused-mlp-swiglu",
+    "required_metrics": [
+      "end-to-end MLP latency",
+      "intermediate bytes",
+      "launch count",
+      "GEMM library algorithm",
+      "epilogue type",
+      "correctness tolerance",
+      "hardware metadata"
+    ],
+    "recommended_shapes": [
+      "tokens=1 hidden=4096 inter=11008",
+      "tokens=128 hidden=4096 inter=11008",
+      "tokens=4096 hidden=8192 inter=28672"
+    ]
+  },
+  "license": "Project seed example",
+  "curation": {
+    "status": "template-only",
+    "notes": "Promoted from the v2 extension backlog as a template-only task. No performance, correctness, or profiler evidence is claimed yet."
+  }
+}
