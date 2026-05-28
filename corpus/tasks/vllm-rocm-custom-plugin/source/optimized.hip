@@ -1,6 +1,6 @@
 #include <hip/hip_runtime.h>
 
-// Template-only TensorRT-LLM custom plugin kernel candidate.
+// Template-only MIGraphX-LLM custom plugin kernel candidate.
 // Integrate this kind of launch from a plugin enqueue path after defining
 // shape, dtype, tensor format, workspace, and serialization contracts.
 

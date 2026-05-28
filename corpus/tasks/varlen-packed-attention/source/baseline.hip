@@ -9,7 +9,7 @@
 namespace {
 
 __global__ void varlen_packed_attention_baseline_kernel() {
-  // TODO: implement the baseline CUDA path and preserve this task's contract.
+  // TODO: implement the baseline HIP path and preserve this task's contract.
 }
 
 }  // namespace

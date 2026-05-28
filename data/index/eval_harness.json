@@ -1,7 +1,7 @@
 {
   "version": 1,
   "status": "scaffolded",
-  "description": "Index of the planned CUDA agent evaluation harness.",
+  "description": "Index of the planned HIP/ROCm agent evaluation harness.",
   "mission": "Evaluate custom HIP kernels against strong vendor and framework baselines, classify outcomes, and archive attempts as reusable corpus evidence.",
   "components": [
     {
@@ -104,6 +104,6 @@
   "next_stage": {
     "id": "stage_1_compile_and_correctness_loop",
     "status": "planned",
-    "summary": "Implement compile.py and test.py for one small CUDA task before adding benchmark and baseline comparison modules."
+    "summary": "Implement compile.py and test.py for one small HIP task before adding benchmark and baseline comparison modules."
   }
 }

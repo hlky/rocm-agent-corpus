@@ -34,7 +34,7 @@ modifies the specialization surface.
 ## FP8 Boundary
 
 For FP8 or block-scaled low precision, start with library baselines and Composable Kernel
-examples before writing raw CUDA. Record the FP8 format, scale layout, amax
+examples before writing raw HIP. Record the FP8 format, scale layout, amax
 policy, accumulator type, output type, and any fast-accumulation mode. Do not
 mix FP8 and FP16 records unless the task is explicitly comparing numerical
 contracts.

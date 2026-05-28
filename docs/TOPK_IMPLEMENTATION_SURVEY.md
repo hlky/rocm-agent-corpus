@@ -22,7 +22,7 @@ and public docs. Re-check before treating any item as the current latest.
 | --- | --- | --- | --- | --- |
 | PyTorch/ATen | `torch.topk` | `sorted=True`; tied indices are not stable | kth-value radix select, gather, optional sort; full-sort fallback on some ROCm paths | Fixed shape, known layout, no framework allocation, fused consumer |
 | hipCUB/rocPRIM | `hipcub::DeviceTopK` | Unsorted; determinism not guaranteed | AIR radix Top-K with candidate buffers and filter passes | Sorted/tie-specific custom path, or fused downstream use |
-| CUDA-origin TensorRT-LLM contrast | sampling kernels, `topkLastDim` | Serving-dependent | two-stage block-reduce sampling; AIR/radix last-dim Top-K; small MoE reduce | Use as algorithm contrast only; prefer vLLM on ROCm/FlashInfer for ROCm baselines |
+| CUDA-origin MIGraphX-LLM contrast | sampling kernels, `topkLastDim` | Serving-dependent | two-stage block-reduce sampling; AIR/radix last-dim Top-K; small MoE reduce | Use as algorithm contrast only; prefer vLLM on ROCm/FlashInfer for ROCm baselines |
 | FlashInfer | `flashinfer.top_k`, sampling APIs | `top_k` unsorted by default; sampling is statistical | radix Top-K, cluster path, FilteredTopK, rejection sampling | Match exact narrow contract, avoid sort/materialization, exploit graph/static shapes |
 | vLLM | sampler dispatch, Triton, persistent Top-K | Runtime-selected | FlashInfer/PyTorch/Triton Qrita-style masking; persistent sparse-attention indexer | Beat the actual selected path for fixed mode, not the name "vLLM" |
 | OneFlow | framework `top_k` op | sorted indices | heap path for small k, full sort for larger k or single instance | Simple baseline for heap-vs-sort crossover and framework-op cost |
@@ -173,7 +173,7 @@ Custom attack surfaces:
 - Segmented or ragged specialization where public `DeviceTopK` is not the exact
   interface.
 
-## CUDA-Origin TensorRT-LLM Contrast
+## CUDA-Origin MIGraphX-LLM Contrast
 
 CUDA-origin references from the source corpus:
 
@@ -187,7 +187,7 @@ CUDA-origin references from the source corpus:
 
 Observed contract:
 
-- TensorRT-LLM Top-K is usually serving sampling, not standalone tensor
+- MIGraphX-LLM Top-K is usually serving sampling, not standalone tensor
   selection.
 - The current public sampling docs describe Torch Sampler as default for
   non-beam sampling, TRTLLM Sampler as deprecated, and Top-K/Top-P behavior in
@@ -220,7 +220,7 @@ Implementation notes:
   sample from sorted probabilities.
 - AIR Top-P uses histogram/radix thresholding and has deterministic variants
   with constraints.
-- TensorRT-LLM Triton Top-K packs value and index into integer keys, uses
+- MIGraphX-LLM Triton Top-K packs value and index into integer keys, uses
   `tl.topk`, then bitonic merge state.
 
 How to use it in this corpus:
@@ -380,7 +380,7 @@ How to use it in this corpus:
 - Always record the actual selected vLLM path. A result against PyTorch
   fallback is not a result against FlashInfer, and vice versa.
 - Record environment variables, gfx target support, logprob mode,
-  generator use, contiguous-copy cost, logits processors, CUDA workspace, and
+  generator use, contiguous-copy cost, logits processors, backend workspace, and
   whether the boundary is isolated sampling or full decode.
 - Treat Triton pivot masking as a filtering/sampling baseline, not a sorted
   values+indices Top-K baseline unless the exact outputs are materialized and
@@ -401,9 +401,9 @@ Custom attack surfaces:
 
 Primary local references:
 
-- `third_party/oneflow/oneflow/user/kernels/top_k_kernel.cu`
-- `third_party/oneflow/oneflow/core/functional/functional_api.yaml`
-- `third_party/oneflow/oneflow/core/functional/impl/array_functor.cpp`
+- `source:oneflow/oneflow/user/kernels/top_k_kernel.cu`
+- `source:oneflow/oneflow/core/functional/functional_api.yaml`
+- `source:oneflow/oneflow/core/functional/impl/array_functor.cpp`
 
 Observed contract:
 
@@ -443,11 +443,11 @@ Custom attack surfaces:
 
 Primary local references:
 
-- `third_party/transformer-engine/transformer_engine/pytorch/router.py`
-- `third_party/transformer-engine/transformer_engine/common/fused_router/fused_topk_with_score_function.cu`
-- `third_party/transformer-engine/transformer_engine/common/fused_router/fused_score_for_moe_aux_loss.cu`
-- `third_party/transformer-engine/transformer_engine/common/include/transformer_engine/fused_router.h`
-- `third_party/transformer-engine/transformer_engine/common/util/topk.cu`
+- `source:transformer-engine/transformer_engine/pytorch/router.py`
+- `source:transformer-engine/transformer_engine/common/fused_router/fused_topk_with_score_function.cu`
+- `source:transformer-engine/transformer_engine/common/fused_router/fused_score_for_moe_aux_loss.cu`
+- `source:transformer-engine/transformer_engine/common/include/transformer_engine/fused_router.h`
+- `source:transformer-engine/transformer_engine/common/util/topk.cu`
 
 Observed contract:
 
@@ -614,7 +614,7 @@ and whether the baseline selected a different backend on that GPU.
   vLLM on ROCm, and vLLM baseline harnesses for the wide-k matrix.
 - Add a standalone hipCUB `DeviceTopK` example that records the required
   execution environment and validates unordered membership.
-- Add PyTorch extension harnesses that separate framework dispatch from CUDA
+- Add PyTorch extension harnesses that separate framework dispatch from HIP
   kernel time.
 - Add a FlashInfer baseline script that toggles `sorted`, `deterministic`,
   tie-break, graph-safe mode, and small/large vocab shapes.

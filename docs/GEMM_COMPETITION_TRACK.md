@@ -44,7 +44,7 @@ but the record should still explain the next plausible custom path.
 - `negative-example`: attempted optimization is neutral or slower.
 - `correctness-fail`: output is wrong or numerics do not satisfy the contract.
 - `compile-fail`: the implementation does not build on the target environment.
-- `timing-only`: timing uses HIP events without Nsight counter evidence.
+- `timing-only`: timing uses HIP events without rocprofiler/rocprof counter evidence.
 
 ## Baseline Ladder
 
@@ -373,7 +373,7 @@ Risk:
 
 ### Matrix Core Mainloops
 
-Use rocWMMA, MFMA, WGMFMA, Composable Kernel, or CK Tile to target Matrix Cores.
+Use rocWMMA, MFMA, MFMA, Composable Kernel, or CK Tile to target Matrix Cores.
 
 Good targets:
 
@@ -397,7 +397,7 @@ Tune how work maps to GFXs:
 - Split-K or stream-K.
 - Persistent CTAs.
 - Grouped work queues.
-- CDNA3/CDNA4/RDNA4 clusters and global-to-LDS staging/WGMFMA where applicable.
+- CDNA3/CDNA4/RDNA4 clusters and global-to-LDS staging/MFMA where applicable.
 
 Risk:
 
@@ -438,7 +438,7 @@ custom competition when the agent makes and records meaningful choices:
 - Pipeline stages and copy atom.
 - Swizzle, scheduler, or persistent strategy.
 - Custom epilogue visitor or output operator.
-- Architecture path such as CDNA2 `global-to-LDS staging`, CDNA3 global-to-LDS staging/WGMFMA, or future
+- Architecture path such as CDNA2 `global-to-LDS staging`, CDNA3 global-to-LDS staging/MFMA, or future
   CDNA4/RDNA4-specific paths.
 
 Recommended workflow:

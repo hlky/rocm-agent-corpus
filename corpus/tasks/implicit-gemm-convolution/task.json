@@ -22,7 +22,7 @@
     "amd-migraphx-docs"
   ],
   "problem": {
-    "summary": "Implement or specialize convolution through implicit GEMM without materializing im2col. The baseline uses MIOpen or Composable Kernel implicit-GEMM convolution plans; the custom path studies iterator math, layout constraints, and Tensor Core eligibility for fixed convolution shapes.",
+    "summary": "Implement or specialize convolution through implicit GEMM without materializing im2col. The baseline uses MIOpen or Composable Kernel implicit-GEMM convolution plans; the custom path studies iterator math, layout constraints, and Matrix Core eligibility for fixed convolution shapes.",
     "inputs": [
       "activation tensor NCHW or NHWC",
       "filter tensor KRSC or KCRS",
@@ -35,7 +35,7 @@
     ],
     "constraints": [
       "Template-only; no performance, correctness, or profiler evidence is claimed",
-      "Record layout, dtype, accumulator type, math mode, workspace, algorithm or tactic, and Tensor Core eligibility",
+      "Record layout, dtype, accumulator type, math mode, workspace, algorithm or tactic, and Matrix Core eligibility",
       "Library baselines should include MIOpen/backend plans, Composable Kernel implicit-GEMM convolution, MIGraphX tactics for inference, and framework convolution calls where applicable",
       "A custom kernel can compete by specializing fixed shapes, static padding, channel multiples, fused epilogues, or avoiding separate layout transforms"
     ]
@@ -64,7 +64,7 @@
       "layout",
       "workspace bytes",
       "algorithm or tactic",
-      "Tensor Core eligibility",
+      "Matrix Core eligibility",
       "correctness max error"
     ],
     "recommended_shapes": [

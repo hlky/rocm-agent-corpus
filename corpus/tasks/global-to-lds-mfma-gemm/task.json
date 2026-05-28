@@ -1,0 +1,59 @@
+{
+  "schema_version": "0.1.0",
+  "id": "global-to-lds-mfma-gemm",
+  "title": "Global-to-LDS MFMA GEMM Boundary",
+  "domain": "architecture-lab",
+  "language": "hip-cpp",
+  "tags": ["cdna", "mfma", "lds", "software-pipeline", "gemm", "composable-kernel", "template-only"],
+  "source_refs": ["amd-hip-programming-guide", "amd-gcn-isa", "amd-hip-lds-memory", "rocm-composable-kernel", "amd-cdna2-tuning-guide", "amd-cdna3-tuning-guide"],
+  "problem": {
+    "summary": "Define the ROCm custom-kernel boundary corresponding to CUDA TMA-style GEMM studies: explicit LDS tile staging, MFMA math, barrier/wait discipline, and comparison with CK/hipBLASLt.",
+    "inputs": ["half* A", "half* B", "float* C", "int M", "int N", "int K", "tile shape", "stage count"],
+    "outputs": ["C = A * B with FP32 accumulation"],
+    "constraints": [
+      "Template-only; no timing or profiler evidence is claimed",
+      "This is not NVIDIA TMA multicast; record the actual AMD LDS staging mechanism used",
+      "Keep gfx90a, gfx942, and gfx950 results separate",
+      "Record library baseline algorithm or CK collective whenever available"
+    ]
+  },
+  "artifacts": {
+    "baseline": "source/baseline.hip",
+    "optimized": "source/optimized.hip",
+    "harness": "source/harness_plan.md",
+    "profiles": [],
+    "results": []
+  },
+  "verification": {
+    "status": "template-only",
+    "method": "Compare against CPU FP32 accumulation and a library GEMM baseline for identical inputs, dtype, layout, and math contract.",
+    "tolerances": { "max_abs_error": 0.05, "max_rel_error": 0.02 }
+  },
+  "benchmarking": {
+    "status": "template-only",
+    "operation": "global-to-lds-mfma-gemm",
+    "required_metrics": [
+      "median latency",
+      "effective TFLOP/s",
+      "gfx target",
+      "tile shape",
+      "stage count",
+      "LDS bytes",
+      "VGPRs/SGPRs",
+      "library algorithm",
+      "disassembly/profiler evidence status",
+      "evidence label"
+    ],
+    "recommended_shapes": [
+      "M=8192 N=8192 K=8192 fp16",
+      "M=16384 N=4096 K=8192 fp16",
+      "M=4096 N=16384 K=8192 fp16",
+      "M=4096 N=4096 K=32768 split-K probe"
+    ]
+  },
+  "license": "Project seed example",
+  "curation": {
+    "status": "template-only",
+    "notes": "Second parity pass analog for CUDA task `tma-multicast-gemm`, translated into an AMD/ROCm LDS-staged MFMA competition boundary."
+  }
+}

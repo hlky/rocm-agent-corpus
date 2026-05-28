@@ -88,8 +88,8 @@ Changes:
 - Tune block size.
 - Reduce live ranges.
 - Consider launch bounds only after measuring.
-- For CUDA 13+, shared-memory register spilling can help specific
-  register-limited kernels, but it consumes shared memory.
+- On ROCm, inspect VGPR pressure, occupancy, and spill code before changing
+  launch bounds or forcing narrower live ranges.
 
 Risks:
 
@@ -103,7 +103,7 @@ Before writing custom kernels, inspect the strongest relevant library path:
 - hipCUB/rocPRIM/hipCUB/rocThrust for reductions, scans, sorts, selections.
 - hipBLAS/rocBLAS/hipBLASLt/Composable Kernel for GEMM-like work.
 - MIOpen for neural network primitives.
-- cuSPARSE/cuSOLVER/cuFFT for domain kernels.
+- rocSPARSE/rocSOLVER/rocFFT for domain kernels.
 
 Do this to establish the bar, not to end the investigation. Custom kernels are
 most likely to win when they exploit assumptions a general library cannot:

@@ -1,6 +1,6 @@
-# rocPRIM/hipCUB/rocThrust, hipCUB, rocThrust, and libcu++ Guide
+# rocPRIM, hipCUB, rocThrust, and libcudacxx Guide
 
-rocPRIM/hipCUB/rocThrust is the practical default for many non-GEMM CUDA primitives. Agents should
+rocPRIM/hipCUB/rocThrust is the practical default for many non-GEMM ROCm primitives. Agents should
 prefer these primitives over hand-written kernels unless fusion, unusual
 operators, or fixed-shape specialization justify custom code.
 
@@ -38,11 +38,11 @@ Risks:
 - Chained algorithms may launch multiple kernels.
 - Custom execution policies and allocators may be needed for production.
 
-## libcu++
+## libcudacxx
 
 Use libcudacxx for:
 
-- CUDA-aware standard-library-like facilities.
+- GPU-aware standard-library-like facilities.
 - Barriers, atomics, and synchronization primitives.
 - Type utilities and device-compatible building blocks.
 

@@ -2,7 +2,7 @@
 
 // Template-only custom HIP candidate for miopen-frontend-fusion.
 // Replace this placeholder with the fixed-shape fusion path being compared
-// against cuDNN frontend, CUTLASS, and TensorRT baselines.
+// against MIOpen frontend, Composable Kernel, and MIGraphX baselines.
 
 namespace {
 

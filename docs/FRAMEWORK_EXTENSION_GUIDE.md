@@ -15,7 +15,7 @@ Key pieces:
 
 - `torch.utils.cpp_extension`
 - C++ binding layer.
-- CUDA `.hip` implementation.
+- HIP `.hip` implementation.
 - Autograd wrapper when backward is needed.
 - Shape, dtype, device checks.
 
@@ -41,14 +41,14 @@ Look for:
 
 Submodule:
 
-- `third_party/oneflow`
+- `source:oneflow`
 
 Corpus tasks to add:
 
 - OneFlow operator anatomy notes.
 - OneFlow HIP kernel case study.
 - Distributed tensor placement example.
-- Comparison of framework-level fusion versus hand-written CUDA extension.
+- Comparison of framework-level fusion versus hand-written HIP extension.
 
 ## TensorFlow and XLA
 
@@ -56,7 +56,7 @@ Planned references:
 
 - TensorFlow custom ops.
 - XLA custom calls.
-- CUDA graph capture interactions.
+- HIP graph capture interactions.
 - Shape specialization and compiler-generated kernels.
 
 ## JAX and Pallas
@@ -72,7 +72,7 @@ Planned references:
 When optimizing in a framework, record:
 
 - Framework version.
-- CUDA and compiler versions.
+- ROCm/HIP and compiler versions.
 - Tensor shapes, strides, dtypes, layouts.
 - Whether timing includes framework dispatch and synchronization.
 - Whether graph compilation or warmup is included.

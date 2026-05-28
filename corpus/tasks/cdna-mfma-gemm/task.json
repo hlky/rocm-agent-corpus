@@ -1,13 +1,13 @@
 {
   "schema_version": "0.1.0",
   "id": "cdna-mfma-gemm",
-  "title": "CDNA3 WGMFMA global-to-LDS staging GEMM Skeleton",
+  "title": "CDNA MFMA GEMM Skeleton",
   "domain": "linear-algebra",
   "language": "hip-cpp",
   "tags": [
-    "hopper",
-    "wgmma",
-    "tma",
+    "cdna",
+    "mfma",
+    "lds",
     "gemm",
     "composable-kernel",
     "template-only",
@@ -20,7 +20,7 @@
     "amd-rocm-programming-guide"
   ],
   "problem": {
-    "summary": "Create a CDNA3-specific GEMM task skeleton that records WGMFMA/global-to-LDS staging as the intended extension surface while keeping a portable scalar baseline.",
+    "summary": "Create a CDNA GEMM task skeleton that records MFMA, LDS staging, and Composable Kernel/CK Tile as the intended extension surfaces while keeping a portable scalar baseline.",
     "inputs": [
       "half* A",
       "half* B",
@@ -33,9 +33,9 @@
       "C = A * B with FP32 accumulation"
     ],
     "constraints": [
-      "WGMFMA/global-to-LDS staging path is TODO and should target gfx950 explicitly",
+      "MFMA/LDS-staged path is TODO and should target an explicit gfx target",
       "Composable Kernel/CK Tile is the reference extension path",
-      "Record gfx942 versus gfx950 metadata separately"
+      "Record gfx90a, gfx942, and gfx950 metadata separately when comparing targets"
     ]
   },
   "artifacts": {
@@ -52,13 +52,13 @@
   },
   "benchmarking": {
     "status": "template-only",
-    "operation": "hopper-hgemm-wgmma-tma",
+    "operation": "cdna-hgemm-mfma-lds",
     "required_metrics": [
       "median kernel duration",
       "gflop_per_s",
-      "sm target",
+      "gfx target",
       "pipeline stages",
-      "tma descriptor metadata",
+      "LDS staging metadata",
       "baseline_versions"
     ],
     "recommended_shapes": [
@@ -69,6 +69,6 @@
   "license": "Project seed example",
   "curation": {
     "status": "template-only",
-    "notes": "This skeleton exists so agents do not mix CDNA3 WGMFMA/global-to-LDS staging claims into generic rocWMMA tasks. No GPU benchmarking is attached."
+    "notes": "This skeleton exists so agents do not mix target-specific MFMA/LDS claims into generic rocWMMA tasks. No GPU benchmarking is attached."
   }
 }

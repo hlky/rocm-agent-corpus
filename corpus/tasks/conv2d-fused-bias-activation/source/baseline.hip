@@ -9,7 +9,7 @@
 namespace {
 
 __global__ void conv2d_fused_bias_activation_baseline_kernel() {
-  // TODO: implement the baseline CUDA path and preserve this task's contract.
+  // TODO: implement the baseline HIP path and preserve this task's contract.
 }
 
 }  // namespace

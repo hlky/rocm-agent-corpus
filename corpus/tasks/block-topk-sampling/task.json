@@ -48,7 +48,7 @@
   },
   "verification": {
     "status": "port-pending-rocm-run",
-    "method": "CUDA harness compares top-k indices, raw top-k values, top-k probabilities, and sampled ids against a CPU reference with deterministic tie handling. Ported from the CUDA corpus; rerun on ROCm hardware before marking passed.",
+    "method": "HIP harness compares top-k indices, raw top-k values, top-k probabilities, and sampled ids against a CPU reference with deterministic tie handling. Ported from the CUDA corpus; rerun on ROCm hardware before marking passed.",
     "tolerances": {
       "topk_index_mismatch_count": 0,
       "sample_mismatch_count": 0,

@@ -20,7 +20,7 @@
       "id": "migraphx-custom-op-fused-op",
       "task_path": "corpus/tasks/migraphx-custom-op-fused-op/task.json",
       "status": "template-only",
-      "topic": "minimal MIGraphX plugin fused op lifecycle and CUDA enqueue kernel",
+      "topic": "minimal MIGraphX plugin fused op lifecycle and HIP enqueue kernel",
       "source_refs": ["amd-migraphx-docs", "amd-migraphx", "amd-rocm-programming-guide"]
     },
     {
@@ -37,7 +37,7 @@
     "gpu_name",
     "gfx_target",
     "driver_version",
-    "cuda_toolkit_version",
+    "rocm_version",
     "compiler_or_library_version",
     "build_or_compile_options",
     "timer_type",

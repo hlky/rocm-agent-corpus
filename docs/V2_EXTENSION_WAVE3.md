@@ -22,9 +22,12 @@ directory.
 | `implicit-gemm-convolution` | Convolution | MIOpen, Composable Kernel convolution, MIGraphX | implicit-GEMM conv versus direct/staged baseline |
 | `depthwise-separable-convolution` | Convolution | MIOpen, MIGraphX, framework kernels | depthwise fusion and channel-pack sensitivity |
 | `normalization-backward` | Transformer training | PyTorch, Transformer Engine, Triton | dgamma/dbeta and dx reduction timing |
-| `multi-tensor-adamw` | Optimizers | PyTorch foreach/fused, Apex-style fused RDNA3m, bitsandbytes | tensor-list launch amortization |
-| `splitk-reduction-gemm` | GEMM/Tensor Core | hipBLASLt, Composable Kernel, Triton | split-K partial reduction boundary |
-| `cdna-mfma-gemm` / `gfx942-cdna3-mfma-lab` | CDNA3 Matrix Core | Composable Kernel/CK Tile CDNA3 kernels | MFMA/WGMFMA and global-to-LDS staging boundary |
+| `multi-tensor-adamw` | Optimizers | PyTorch foreach/fused, Apex-style fused Adam, bitsandbytes | tensor-list launch amortization |
+| `splitk-reduction-gemm` | GEMM/Matrix Core | hipBLASLt, Composable Kernel, Triton | split-K partial reduction boundary |
+| `cdna-mfma-gemm` / `gfx942-cdna3-mfma-lab` | CDNA Matrix Core | hipBLASLt, rocBLAS, Composable Kernel/CK Tile | MFMA and LDS-staging boundary |
+| `wave-specialized-mfma-pipeline` | Architecture pipeline | hipBLASLt, Composable Kernel/CK Tile | producer/consumer wave-role MFMA pipeline metadata |
+| `global-to-lds-mfma-gemm` | Architecture GEMM | hipBLASLt, rocBLAS, Composable Kernel/CK Tile | LDS-staged MFMA GEMM versus library baseline |
+| `gfx950-gfx1200-rocm-portability` | Architecture portability | AMD ROCm GPU support, hipcc target list, libraries | CDNA4/RDNA4 compile and dispatch matrix |
 | `miopen-frontend-fusion` | Inference/framework | MIOpen, MIGraphX, custom HIP | op-graph fusion versus handwritten fused op |
 | `vllm-rocm-custom-plugin` | LLM inference | vLLM on ROCm, vLLM, FlashInfer | plugin/kernel boundary for decode-side fusion |
 | `hip-ipc-multiprocess` | Multi-process systems | HIP IPC samples, framework serving | IPC handle setup, ownership, and sync overhead |

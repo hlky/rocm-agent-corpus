@@ -18,7 +18,7 @@ Status key:
 | --- | --- | --- |
 | hipBLAS/rocBLAS/hipBLASLt | GEMM, batched GEMM, grouped GEMM, GEMM epilogues, TF32/FP16/BF16/FP8/INT8 | scaffolded |
 | hipCUB/rocPRIM/hipCUB/rocThrust | reduce, scan, segmented reduce, histogram, radix sort, select/top-k | measured seeds for reduction, scan, histogram; remaining families scaffolded |
-| Composable Kernel/CK Tile | custom epilogues, CK Tile layouts, grouped GEMM, CDNA3/CDNA4/RDNA4 global-to-LDS staging/WGMFMA paths | scaffolded |
+| Composable Kernel/CK Tile | custom epilogues, CK Tile layouts, grouped GEMM, CDNA3/CDNA4/RDNA4 global-to-LDS staging/MFMA paths | scaffolded |
 | MIGraphX | plugins, dynamic shapes, precision, tactic selection, engine/runtime timing | scaffolded |
 | vLLM on ROCm | KV cache ops, logits/top-k/sampling, quant/dequant, RMSNorm/LayerNorm, batching | scaffolded |
 | Triton | HIP C++ competitor pairs for ML kernels and generated-code inspection | scaffolded |
@@ -42,13 +42,12 @@ Status key:
 
 | Lab | Target Coverage | Status |
 | --- | --- | --- |
-| `gfx90a` CDNA2 datacenter | A100-like paths, TF32, global-to-LDS staging, Matrix Cores | scaffolded |
+| `gfx90a` CDNA2 datacenter | MFMA, LDS staging, Matrix Cores | scaffolded |
 | `gfx1030` RDNA2 pro/consumer | RX 6000/MI210-adjacent portability checks | scaffolded |
 | `gfx1100` RDNA3 | Radeon 7000 inference paths | scaffolded |
 | `gfx942` CDNA3 portable | MI300-class CDNA3 path | scaffolded |
-| `gfx950` CDNA3 specific | WGMFMA/global-to-LDS staging/cluster features and portability caveats | scaffolded |
-| `gfx950` CDNA4/RDNA4 datacenter | CDNA4/RDNA4 data-center path, exact flags pending hardware | scaffolded |
-| `gfx1200` CDNA4/RDNA4 RTX/workstation | CDNA4/RDNA4 RTX path, exact flags pending hardware | scaffolded |
+| `gfx950` CDNA4 datacenter | exact ROCm/library support pending hardware | scaffolded |
+| `gfx1200` RDNA4 workstation | exact ROCm/library support pending hardware | scaffolded |
 
 Each lab should include compile flags, compatibility notes, Matrix Core paths,
 shared-memory limits, register pressure notes, architecture-specific features,
@@ -77,8 +76,8 @@ known library support status, and measured records per GPU.
 | `pytorch/pytorch` | framework HIP kernels and extension targets | tracked as source, submodule deferred |
 | `bitsandbytes-foundation/bitsandbytes` | quantization kernels and optimizers | scaffolded |
 | `AMD/ROCm/Megatron-LM` | transformer training/inference patterns | scaffolded |
-| `AMD/ROCm/cuda-python` | Python CUDA integration and driver/runtime APIs | scaffolded |
-| `NVlabs/tiny-cuda-nn` | compact high-performance CUDA patterns | scaffolded |
+| `ROCm/rocm-hip-python` | Python HIP integration and driver/runtime APIs | source candidate |
+| `NVlabs/tiny-cuda-nn` | CUDA-first compact-kernel contrast; port before ROCm use | source candidate |
 | `jax-ml/jax` | XLA/Pallas/framework compiler competitor path | tracked as source, submodule deferred |
 
 ## 6. Recommended Next Spine

@@ -7,7 +7,7 @@ rocSHMEM-capable multi-GPU setup.
 ## Evidence Policy
 
 - Say `template-only` for these scaffolds until a multi-GPU harness runs.
-- Say `timing-only` for HIP-event timings without Nsight Systems, Nsight
+- Say `timing-only` for HIP-event timings without rocprofiler/rocprof
   Compute, or transport-level evidence.
 - Say `negative example` when chunking, GPU-initiated enqueue, or another
   attempted optimization loses.

@@ -7,7 +7,7 @@ generality that a framework or serving library must keep.
 
 ## Scope
 
-- Optimizer updates such as RDNA3mW, where separate elementwise launches can be
+- Optimizer updates such as AdamW, where separate elementwise launches can be
   fused into one pass over parameters, gradients, and optimizer state.
 - Decode-side RoPE and KV-cache writes, where a custom kernel can combine
   rotation and cache placement for a known layout.
@@ -24,7 +24,7 @@ scans, and selection.
 
 Record `template-only` for scaffolds with no timing. Record `timing-only` only
 when HIP-event timing exists and hardware/build metadata is attached. Do not
-invent Nsight counter evidence.
+invent rocprofiler/rocprof counter evidence.
 
 ## Custom Kernel Angles
 
@@ -41,7 +41,7 @@ invent Nsight counter evidence.
 
 ## New Seed Tasks
 
-- `corpus/tasks/fused-adamw-update`: multiple simple RDNA3mW stages versus a
+- `corpus/tasks/fused-adamw-update`: multiple simple AdamW stages versus a
   fused scalar/vectorized update.
 - `corpus/tasks/rope-kv-cache-update`: separate rotate and cache-store kernels
   versus a fused RoPE plus KV-cache write.

@@ -49,5 +49,5 @@ struct GemmLtBaselinePlan {
 // 6. Time steady-state `hipblasLtMatmul` separately from descriptor creation
 //    unless end-to-end latency is the task.
 // 7. Record selected algorithm metadata, workspace cap, TF32 policy, epilogue,
-//    CUDA/hipBLASLt versions, and the exact correctness tolerance.
+//    ROCm/hipBLASLt versions, and the exact correctness tolerance.
 

@@ -158,8 +158,9 @@ def make_reference(x: Any, dy: Any, gamma: Any, beta: Any | None, mode: str, eps
 
 
 def make_result(args: argparse.Namespace) -> dict[str, Any]:
-    if not torch.cuda.is_available():
-        raise SystemExit("A PyTorch CUDA/HIP backend is required for Triton baseline timing")
+    torch_rocm_version = getattr(torch.version, "hip", None)
+    if not torch.cuda.is_available() or not torch_rocm_version:
+        raise SystemExit("A PyTorch ROCm/HIP backend exposed through torch.cuda is required for Triton baseline timing")
     if args.dtype != "fp32":
         raise SystemExit("Only fp32 is currently implemented")
 
@@ -219,8 +220,7 @@ def make_result(args: argparse.Namespace) -> dict[str, Any]:
     max_rel_error = max(dx_errors["max_rel_error"], dgamma_errors["max_rel_error"], dbeta_errors["max_rel_error"])
 
     props = torch.cuda.get_device_properties(device)
-    torch_rocm_version = getattr(torch.version, "hip", None)
-    runtime_version = torch_rocm_version or torch.version.cuda or ""
+    runtime_version = torch_rocm_version or ""
     result: dict[str, Any] = {
         "schema_version": "0.1.0",
         "task_id": "normalization-backward",
@@ -251,15 +251,13 @@ def make_result(args: argparse.Namespace) -> dict[str, Any]:
         },
         "framework": {
             "torch_version": torch.__version__,
-            "torch_backend": "rocm" if torch_rocm_version else "cuda",
+            "torch_backend": "rocm",
             "torch_rocm_version": torch_rocm_version,
-            "torch_cuda_version": torch.version.cuda,
-            "rocm_or_cuda_runtime_version": runtime_version,
+            "rocm_runtime_version": runtime_version,
         },
         "device_name": props.name,
         "gfx_target": getattr(props, "gcnArchName", ""),
-        "compute_capability": f"{props.major}.{props.minor}",
-        "rocm_or_cuda_runtime_version": runtime_version,
+        "rocm_runtime_version": runtime_version,
         "abs_tolerance": 0.005,
         "rel_tolerance": 0.005,
         "max_abs_error": max_abs_error,

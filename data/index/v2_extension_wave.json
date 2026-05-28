@@ -6,10 +6,10 @@
   "evidence_policy": {
     "current_label": "template-only",
     "timing_label": "timing-only-measured after HIP-event timing and correctness",
-    "counter_label": "counter-backed-measured only after Nsight report artifacts are attached",
+    "counter_label": "counter-backed-measured only after rocprofiler/rocprof counter artifacts are attached",
     "must_not_claim": [
       "custom win without same-hardware library baseline",
-      "Nsight counter evidence without a report artifact",
+      "profiler-counter evidence without an attached artifact",
       "library comparison without matching dtype, layout, shape, and timing boundary"
     ]
   },
@@ -158,7 +158,7 @@
       "family": "Sparse and structured sparsity",
       "path": "corpus/tasks/structured-sparsity-2to4/task.json",
       "baselines": [
-        "cuSPARSELt when added",
+        "rocSPARSE/Composable Kernel sparse path when added",
         "Composable Kernel sparse",
         "MIGraphX",
         "dense GEMM"
@@ -197,7 +197,6 @@
       "baselines": [
         "PyTorch eager",
         "torch.compile/Inductor",
-        "nvFuser",
         "Triton"
       ],
       "first_evidence_target": "generated-kernel versus handwritten HIP boundary",
@@ -209,7 +208,7 @@
       "path": "corpus/tasks/rocprof-counter-roofline/task.json",
       "baselines": [
         "rocprofiler/rocprof",
-        "Nsight Systems"
+        "rocprofiler/rocprof"
       ],
       "first_evidence_target": "counter-backed artifact template or blocked-counter label",
       "wave": "wave-1"
@@ -256,7 +255,7 @@
       "family": "Sparse and structured sparsity",
       "path": "corpus/tasks/sddmm-sparse-attention-score/task.json",
       "baselines": [
-        "cuSPARSE where applicable",
+        "rocSPARSE where applicable",
         "Composable Kernel sparse",
         "dense masked attention"
       ],
@@ -268,7 +267,7 @@
       "family": "Sparse and structured sparsity",
       "path": "corpus/tasks/spgemm-merge-hash/task.json",
       "baselines": [
-        "cuSPARSE SpGEMM",
+        "rocSPARSE SpGEMM",
         "custom merge path",
         "custom hash path"
       ],
@@ -280,7 +279,7 @@
       "family": "Sparse and structured sparsity",
       "path": "corpus/tasks/sparse-format-conversion/task.json",
       "baselines": [
-        "cuSPARSE conversion APIs",
+        "rocSPARSE conversion APIs",
         "hipCUB sort/scan",
         "rocThrust sort/scan"
       ],
@@ -339,8 +338,8 @@
       "path": "corpus/tasks/amdisa-diff-regression/task.json",
       "baselines": [
         "amdclang++ logs",
-        "cuobjdump",
-        "nvdisasm",
+        "llvm-objdump",
+        "roc-objdump",
         "rocprofiler/rocprof summaries"
       ],
       "first_evidence_target": "register/spill/instruction diff artifact"
@@ -368,7 +367,7 @@
         "Composable Kernel",
         "MIGraphX"
       ],
-      "first_evidence_target": "same-task gfx90a versus gfx1030 comparison"
+      "first_evidence_target": "same-task gfx90a versus gfx942 comparison"
     },
     {
       "wave": "wave-2",
@@ -381,7 +380,43 @@
         "hipBLASLt",
         "MIGraphX"
       ],
-      "first_evidence_target": "gfx942 versus gfx950 WGMFMA/global-to-LDS staging boundary"
+      "first_evidence_target": "gfx942 MFMA/LDS boundary"
+    },
+    {
+      "wave": "wave-2",
+      "id": "wave-specialized-mfma-pipeline",
+      "family": "Architecture-specific extension paths",
+      "path": "corpus/tasks/wave-specialized-mfma-pipeline/task.json",
+      "baselines": [
+        "hipBLASLt",
+        "Composable Kernel/CK Tile",
+        "AMD GCN ISA disassembly"
+      ],
+      "first_evidence_target": "producer/consumer wave-role MFMA pipeline metadata"
+    },
+    {
+      "wave": "wave-2",
+      "id": "global-to-lds-mfma-gemm",
+      "family": "Architecture-specific extension paths",
+      "path": "corpus/tasks/global-to-lds-mfma-gemm/task.json",
+      "baselines": [
+        "hipBLASLt",
+        "rocBLAS",
+        "Composable Kernel/CK Tile"
+      ],
+      "first_evidence_target": "LDS-staged MFMA GEMM versus library baseline"
+    },
+    {
+      "wave": "wave-2",
+      "id": "gfx950-gfx1200-rocm-portability",
+      "family": "Architecture-specific extension paths",
+      "path": "corpus/tasks/gfx950-gfx1200-rocm-portability/task.json",
+      "baselines": [
+        "AMD ROCm GPU support matrix",
+        "hipcc target list",
+        "hipBLASLt/Composable Kernel/MIGraphX"
+      ],
+      "first_evidence_target": "gfx950 and gfx1200 compile/dispatch matrix"
     }
   ],
   "waves": [
@@ -424,7 +459,10 @@
         "amdisa-diff-regression",
         "autotune-parameter-sweep",
         "gfx90a-gfx942-cdna-split",
-        "gfx942-cdna3-mfma-lab"
+        "gfx942-cdna3-mfma-lab",
+        "wave-specialized-mfma-pipeline",
+        "global-to-lds-mfma-gemm",
+        "gfx950-gfx1200-rocm-portability"
       ]
     }
   ]

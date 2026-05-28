@@ -9,7 +9,7 @@
 namespace {
 
 __global__ void radix_sort_key_value_baseline_kernel() {
-  // TODO: implement the baseline CUDA path and preserve this task's contract.
+  // TODO: implement the baseline HIP path and preserve this task's contract.
 }
 
 }  // namespace

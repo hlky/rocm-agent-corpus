@@ -42,7 +42,7 @@
   },
   "verification": {
     "status": "template-only",
-    "method": "TODO: compare against CPU CSR SpMV and cuSPARSE sample-derived oracle where available.",
+    "method": "TODO: compare against CPU CSR SpMV and rocSPARSE sample-derived oracle where available.",
     "tolerances": {
       "max_abs_error": 0.0001
     }
@@ -68,6 +68,6 @@
   "license": "Project seed example",
   "curation": {
     "status": "template-only",
-    "notes": "Template-only CSR SpMV scaffold. The optimized seed is a simple warp-per-row split idea, not a claim against cuSPARSE or production load-balanced SpMV."
+    "notes": "Template-only CSR SpMV scaffold. The optimized seed is a simple warp-per-row split idea, not a claim against rocSPARSE or production load-balanced SpMV."
   }
 }

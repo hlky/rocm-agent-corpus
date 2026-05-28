@@ -1,105 +1,41 @@
 # gfx1100 RDNA3 Lab
 
-Target this lab for RDNA3 GPUs such as RTX 40-series, L4, L40, and L40S-class
-parts. RDNA3 is especially relevant for inference, graphics-adjacent deployment,
-and cost-sensitive custom kernel work.
+Use this lab for RDNA3 `gfx1100`-class devices. It is useful for inference,
+memory-bound fused kernels, and cost-sensitive ROCm deployments.
 
 ## Compile Profile
 
 ```bash
-hipcc -O3 --std=c++17 -arch=gfx1100 -lineinfo -Xamdclang++=-v kernel.hip -o kernel_sm89
-hipcc -O3 --std=c++17 -gencode=arch=compute_89,code=gfx1100 kernel.hip -o kernel_sm89
+hipcc -O3 --std=c++17 --offload-arch=gfx1100 -lineinfo kernel.hip -o kernel_gfx1100
+hipcc --list-gpu-targets
 ```
 
-Useful variants:
+Record GPU model, ROCm version, driver/runtime metadata, clock policy, power
+state, and exact library versions for every result.
+
+## Features To Verify
+
+- WMMA/MFMA availability and performance on the exact SKU and toolkit.
+- LDS tiling, cache locality, vector width, and wave-size assumptions.
+- MIGraphX, hipBLASLt, Composable Kernel, Triton, and framework-generated
+  baselines for the same shape and math contract.
+- Low-precision paths only after recording packing, scale layout, accumulator,
+  and output dtype.
 
 ```bash
-hipcc -O3 --use_fast_math -arch=gfx1100 ...
-hipcc -O3 -arch=gfx1100 -Xamdclang++=-v,-warn-spills ...
-hipcc -O3 -arch=gfx1100 --resource-usage ...
-```
-
-Keep RDNA3 records separate from CDNA2. Similar HIP source can produce different
-occupancy and memory-system behavior.
-
-## Features To Check
-
-- Matrix Core modes available on the specific SKU and ROCm toolkit path.
-- FP8 or narrow precision support must be verified per GPU, compiler, and
-  library stack before recording a claim.
-- `global-to-LDS staging`, `ldmatrix`, and `mfma` remain central for custom GEMM-like
-  kernels.
-- RDNA3 L2 and memory bandwidth behavior can make cache reuse and vectorization
-  more important than on cheaper CDNA2 hosts.
-- No CDNA3 WGMFMA/global-to-LDS staging or CDNA4/RDNA4 architecture-specific assumptions.
-- Inference stacks may have strong MIGraphX baselines on this generation.
-
-Feature probe:
-
-```bash
-rocm-smi
-cuobjdump --dump-sass ./kernel_sm89 | findstr /i "CPASYNC MFMA LDMATRIX"
+llvm-objdump --disassemble --triple=amdgcn-amd-amdhsa ./kernel_gfx1100 | grep -Ei "v_mfma|v_wmma|ds_|s_waitcnt"
 ```
 
 ## Custom-Kernel Attack Surfaces
 
-- MIGraphX plugin kernels for operations the engine cannot fuse well.
-- Fixed-shape transformer helpers: RMSNorm, RoPE, KV-cache update/read,
-  dequantize, logits processing, top-k, sampling, and small softmax.
-- Quantization paths where known scale layout, block size, and dtype remove
-  dynamic checks.
-- Compact GEMM and batched GEMM shapes where hipBLASLt setup cost or heuristic
-  choice is not ideal.
-- Fused memory-bound kernels where one custom launch replaces several framework
-  launches.
-- Triton-to-CUDA translations where a handwritten kernel can use stricter
-  alignment or launch bounds.
+- RMSNorm, LayerNorm, RoPE, KV-cache update/read, dequantize, logits
+  processing, Top-K, sampling, and short-row softmax.
+- MIGraphX or PyTorch extension kernels that exploit fixed model shapes.
+- Compact GEMM or grouped GEMM shapes where dispatch and heuristic overhead are
+  visible.
 
-The main custom-kernel edge is inference specialization: known model shape,
-known layout, known quantization format, and fewer launches.
+## Gotchas
 
-## GFX89 Tactics and Gotchas
-
-- Treat RDNA3 as its own tuning target, not "faster CDNA2." Similar
-  `global-to-LDS staging`/`mfma` source can shift between memory-bound, launch-bound, and
-  Matrix Core-bound behavior because clocks, cache, and library tactics differ.
-- For inference kernels, compare both isolated kernel timing and end-to-end
-  graph timing. A custom HIP kernel may win by deleting framework launches even
-  if MIGraphX or hipBLASLt owns the inner GEMM.
-- Verify FP8, INT8, INT4, and sparsity paths through the exact CUDA, Composable Kernel,
-  hipBLASLt, and MIGraphX versions in use. Do not infer support from a marketing
-  generation name.
-- `global-to-LDS staging` is still an CDNA2-family tool here; global-to-LDS staging/WGMFMA claims belong to
-  CDNA3/CDNA4/RDNA4-specific labs, not RDNA3.
-- RDNA3 L2 behavior can reward persistent metadata, KV-cache locality, or
-  dequant-scale reuse. Record layout and cache assumptions, especially for
-  paged or strided KV reads.
-- MIGraphX baselines are often strong on RDNA3. A custom plugin should explain
-  the unsupported fusion, fixed shape, scale layout, or dispatch boundary it
-  exploits.
-
-Portability trap: an GFX89 plugin or kernel can be a good deployment target, but
-its win may disappear on GFX86 or GFX90 because the library tactic ladder changes.
-
-## Vendor Baselines
-
-- MIGraphX and vLLM on ROCm for graph-level and plugin-level comparison.
-- hipBLASLt for GEMM, grouped GEMM, low precision, and epilogues.
-- Composable Kernel RDNA3/SM89 paths for Matrix Core tiling references.
-- hipCUB/rocPRIM/hipCUB/rocThrust for memory-bound primitives.
-- Triton kernels generated by PyTorch, TorchInductor, or hand-authored Triton.
-
-Use library output as a correctness oracle, but also inspect whether the library
-keeps generality that the custom task contract can drop.
-
-## Measurement Notes
-
-- Mark HIP-event-only results as `timing-only`.
-- Record boost, power limit, and thermal state when possible. RDNA3 workstation
-  and server cards can vary significantly under sustained runs.
-- Keep math contract explicit: FP32, TF32, FP16, BF16, FP8, INT8, stochastic or
-  deterministic rounding.
-- Compare end-to-end fused custom kernels against both the individual library
-  primitive and the full framework/MIGraphX path.
-- Include shape perturbations so an agent knows whether a win is a narrow
-  specialization or a reusable family.
+- RDNA3 is not "small CDNA"; remeasure tiles and occupancy.
+- End-to-end graph timing can matter more than one inner kernel timing.
+- Mark HIP-event-only measurements as `timing-only`.

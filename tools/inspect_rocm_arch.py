@@ -45,8 +45,8 @@ def parse_gfx_targets(rocminfo_text: str) -> list[str]:
 def main() -> int:
     smi = run(["rocm-smi"])
     rocminfo = run(["rocminfo"])
-    hipcc_arch = run(["hipcc", "--list-gpu-arch"])
-    hipcc_code = run(["hipcc", "--list-gpu-code"])
+    hipcc_targets = run(["hipcc", "--list-gpu-targets"])
+    hipcc_help = run(["hipcc", "--help"])
 
     gfx_targets = parse_gfx_targets(rocminfo["stdout"]) if rocminfo["returncode"] == 0 else []
 
@@ -56,8 +56,8 @@ def main() -> int:
         "commands": {
             "rocm_smi": smi,
             "rocminfo": rocminfo,
-            "hipcc_list_gpu_arch": hipcc_arch,
-            "hipcc_list_gpu_code": hipcc_code,
+            "hipcc_list_gpu_targets": hipcc_targets,
+            "hipcc_help": hipcc_help,
         },
         "architecture_index": str(ROOT / "data" / "index" / "gpu_architectures.json"),
     }

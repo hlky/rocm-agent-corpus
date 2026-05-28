@@ -19,7 +19,7 @@
     "pytorch"
   ],
   "problem": {
-    "summary": "Template a producer/consumer CUDA IPC workflow with exported memory handles, event handles, optional P2P access, and explicit synchronization boundaries.",
+    "summary": "Template a producer/consumer HIP IPC workflow with exported memory handles, event handles, optional P2P access, and explicit synchronization boundaries.",
     "inputs": [
       "producer process device allocation",
       "cudaIpcMemHandle_t and cudaIpcEventHandle_t",

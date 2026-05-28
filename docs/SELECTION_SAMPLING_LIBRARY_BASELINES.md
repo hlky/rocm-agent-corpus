@@ -154,11 +154,11 @@ cost explicitly.
 
 Local references:
 
-- `third_party/vllm-rocm/cpp/migraphx_llm/kernels/samplingTopKKernels.hip`
-- `third_party/vllm-rocm/cpp/migraphx_llm/kernels/samplingTopPKernels.hip`
-- `third_party/vllm-rocm/cpp/migraphx_llm/kernels/samplingAirTopPKernels.hip`
-- `third_party/vllm-rocm/cpp/migraphx_llm/kernels/topkLastDim.hip`
-- `third_party/vllm-rocm/docs/source/features/sampling.md`
+- `third_party/vllm/cpp/migraphx_llm/kernels/samplingTopKKernels.hip`
+- `third_party/vllm/cpp/migraphx_llm/kernels/samplingTopPKernels.hip`
+- `third_party/vllm/cpp/migraphx_llm/kernels/samplingAirTopPKernels.hip`
+- `third_party/vllm/cpp/migraphx_llm/kernels/topkLastDim.hip`
+- `third_party/vllm/docs/source/features/sampling.md`
 
 vLLM on ROCm is a serving baseline, not just an isolated kernel collection.
 The top-k sampling path includes staged top-k selection, sampling, runtime

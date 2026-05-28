@@ -32,7 +32,7 @@
     ],
     "constraints": [
       "Template-only; record sparse format, edge ordering, duplicate policy, and block size",
-      "Compare against cuSPARSE/Composable Kernel sparse where feasible",
+      "Compare against rocSPARSE/Composable Kernel sparse where feasible",
       "Do not fold softmax or PV timing into SDDMM-only claims"
     ]
   },

@@ -1,8 +1,8 @@
 #include <hip/hip_runtime.h>
 
 // Template-only scaffold for spgemm-merge-hash.
-// Summary: Compare sparse matrix multiply strategies based on row-wise merge or hash accumulation against cuSPARSE SpGEMM-style planning boundaries.
-// Baseline strategy: Use a simple row-wise expansion with global or temporary accumulation and a CPU/cuSPARSE oracle for final CSR output.
+// Summary: Compare sparse matrix multiply strategies based on row-wise merge or hash accumulation against rocSPARSE SpGEMM-style planning boundaries.
+// Baseline strategy: Use a simple row-wise expansion with global or temporary accumulation and a CPU/rocSPARSE oracle for final CSR output.
 
 namespace {
 

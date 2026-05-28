@@ -6,7 +6,7 @@
 // MIGraphX plugin enqueue sketch.
 //
 // This file intentionally avoids depending on MIGraphX headers so it can be
-// read as a compile-minded CUDA boundary example. A real plugin would implement
+// read as a compile-minded HIP boundary example. A real plugin would implement
 // IPluginV2DynamicExt or the current MIGraphX plugin interface, then call
 // launch_fused_bias_relu_plugin_kernel() from enqueue() using MIGraphX's stream.
 //

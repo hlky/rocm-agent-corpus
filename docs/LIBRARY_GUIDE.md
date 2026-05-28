@@ -1,4 +1,4 @@
-# CUDA Vendor Library Reference Guide
+# ROCm Vendor Library Reference Guide
 
 This is not a "delegate to the library and stop" guide. The corpus goal is to
 help agents write custom kernels that can beat, match, specialize, or extend
@@ -34,7 +34,7 @@ fused custom kernel might beat it, and what architecture features it likely uses
    - Compare against both hipCUB and a deliberately simple educational baseline.
 
 3. FFT, sparse, solvers, images, compression:
-   - Use cuFFT, cuSPARSE, cuSOLVER, NPP, nvJPEG, nvCOMP, or library samples as
+   - Use rocFFT, rocSPARSE, rocSOLVER, MIVisionX, rocJPEG, or library samples as
      reference implementations and performance baselines.
    - Custom work should focus on fusion around the library call, restricted
      formats, fixed sizes, or eliminating data motion.
@@ -59,21 +59,21 @@ fused custom kernel might beat it, and what architecture features it likely uses
 | Composable Kernel/CK Tile | Custom GEMM, Matrix Core kernels, custom epilogues | `docs/COMPOSABLE_KERNEL_EXTENSION_GUIDE.md`, `third_party/composable-kernel` |
 | hipCUB | Device/block/warp primitives | `docs/ROCPRIM_HIPCUB_ROCTHRUST_GUIDE.md`, `docs/ROCPRIM_COMPETITION_TRACK.md`, `docs/SELECTION_SAMPLING_LIBRARY_BASELINES.md`, `third_party/rocm-libraries`, `examples/rocprim` |
 | rocThrust | STL-like GPU algorithms | `third_party/rocm-libraries`, `examples/rocthrust` |
-| cuFFT | FFTs and convolution via FFT | `third_party/rocm-examples` |
-| cuSPARSE | Sparse matrix kernels | `docs/SPARSE_IRREGULAR_KERNEL_GUIDE.md`, `corpus/tasks/csr-spmv-load-balance`, `third_party/rocm-examples` |
-| cuSOLVER | Dense/sparse factorization and solves | `third_party/rocm-examples` |
+| rocFFT | FFTs and convolution via FFT | `third_party/rocm-examples` |
+| rocSPARSE | Sparse matrix kernels | `docs/SPARSE_IRREGULAR_KERNEL_GUIDE.md`, `corpus/tasks/csr-spmv-load-balance`, `third_party/rocm-examples` |
+| rocSOLVER | Dense/sparse factorization and solves | `third_party/rocm-examples` |
 | MIOpen | Neural network primitives | external docs and framework integrations |
 | RCCL | Multi-GPU collectives | `docs/MULTIGPU_GUIDE.md`, `third_party/rccl` |
 | rocSHMEM | GPU-side communication | `docs/MULTIGPU_GUIDE.md`, `third_party/rocshmem` |
 | FlashAttention | Attention optimization reference | `docs/ATTENTION_LIBRARY_BASELINES.md`, `docs/MIOPEN_ATTENTION_GUIDE.md`, `third_party/flash-attention` |
 | MIGraphX | Inference engine build/runtime/plugin deployment | `docs/MIGRAPHX_INFERENCE_GUIDE.md`, `third_party/migraphx` |
-| vLLM on ROCm | LLM inference, plugins, KV cache, serving | `docs/MIGRAPHX_INFERENCE_GUIDE.md`, `docs/ATTENTION_LIBRARY_BASELINES.md`, `docs/SELECTION_SAMPLING_LIBRARY_BASELINES.md`, `docs/QUANTIZATION_LIBRARY_BASELINES.md`, `third_party/vllm-rocm` |
-| OneFlow | Framework HIP operator/runtime patterns | `docs/FRAMEWORK_EXTENSION_GUIDE.md`, `third_party/oneflow` |
+| vLLM on ROCm | LLM inference, plugins, KV cache, serving | `docs/MIGRAPHX_INFERENCE_GUIDE.md`, `docs/ATTENTION_LIBRARY_BASELINES.md`, `docs/SELECTION_SAMPLING_LIBRARY_BASELINES.md`, `docs/QUANTIZATION_LIBRARY_BASELINES.md`, `third_party/vllm` |
+| PyTorch | Framework HIP operator/runtime patterns | `docs/FRAMEWORK_EXTENSION_GUIDE.md`, `third_party/pytorch` |
 | Triton | Python-authored GPU kernels and compiler path | `docs/TRITON_KERNEL_GUIDE.md`, `third_party/triton` |
 | vLLM | Paged attention, sampling, serving scheduler | `docs/ATTENTION_LIBRARY_BASELINES.md`, `docs/SELECTION_SAMPLING_LIBRARY_BASELINES.md`, `third_party/vllm` |
 | FlashInfer | Decode/prefill attention, paged KV, sampling | `docs/ATTENTION_LIBRARY_BASELINES.md`, `docs/SELECTION_SAMPLING_LIBRARY_BASELINES.md`, `third_party/flashinfer` |
 | bitsandbytes | Low-bit matmul/GEMV and optimizers | `docs/QUANTIZATION_LIBRARY_BASELINES.md`, `third_party/bitsandbytes` |
-| Transformer Engine on ROCm | FP8, MXFP8, NVFP4, transformer kernels | `docs/QUANTIZATION_LIBRARY_BASELINES.md`, `third_party/transformer-engine` |
+| Transformer Engine on ROCm | FP8, MXFP8, NVFP4, transformer kernels | `docs/QUANTIZATION_LIBRARY_BASELINES.md`, source manifest entries |
 
 ## Agent Rule
 

@@ -62,7 +62,7 @@ Initial families:
 - histograms, atomics, warp-aggregated atomics, contention microbenchmarks
 - stencil, shared-memory halo, convolution-style neighborhood loads
 - launch overhead, HIP Graphs, persistent-kernel skeletons
-- global-to-LDS staging/global-to-LDS staging educational copies where architecture supports them
+- LDS staging educational copies where architecture supports them
 
 Each task should include:
 
@@ -241,7 +241,7 @@ kernels, and compiler-generated code while preserving them as references.
 
 Target topics:
 
-- PyTorch C++/CUDA extension anatomy and dispatcher overhead
+- PyTorch C++/HIP extension anatomy and dispatcher overhead
 - OneFlow operator/runtime anatomy and where HIP kernels live
 - Triton kernel equivalents for softmax, normalization, matmul fragments,
   reductions, scans, and fused elementwise pipelines

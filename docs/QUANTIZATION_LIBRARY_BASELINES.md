@@ -271,9 +271,9 @@ but label them as deployment wins instead of isolated kernel wins.
 Local references:
 
 - `third_party/migraphx`
-- `third_party/vllm-rocm/examples/quantization/README.md`
-- `third_party/vllm-rocm/cpp/micro_benchmarks/`
-- `third_party/vllm-rocm/cpp/migraphx_llm/plugins/`
+- `third_party/vllm/examples/quantization/README.md`
+- `third_party/vllm/cpp/micro_benchmarks/`
+- `third_party/vllm/cpp/migraphx_llm/plugins/`
 
 ## Transformer Engine on ROCm FP8 And Block-Scaled References
 
@@ -308,9 +308,9 @@ an FP8 or block-scaled task.
 
 Local references:
 
-- `third_party/transformer-engine/README.rst`
-- `third_party/transformer-engine/benchmarks/linear/benchmark_linear.py`
-- `third_party/transformer-engine/benchmarks/linear/benchmark_grouped_linear.py`
+- `source:transformer-engine/README.rst`
+- `source:transformer-engine/benchmarks/linear/benchmark_linear.py`
+- `source:transformer-engine/benchmarks/linear/benchmark_grouped_linear.py`
 
 ## Triton And Framework Baselines
 
@@ -369,7 +369,7 @@ Every measured baseline record should include:
     "gpu_name": "",
     "gfx_target": "",
     "driver_version": "",
-    "cuda_toolkit_version": ""
+    "rocm_version": ""
   },
   "shape": {
     "rows": 4096,
@@ -399,6 +399,6 @@ Every measured baseline record should include:
 }
 ```
 
-No result should claim profiler-counter evidence unless Nsight artifacts are
+No result should claim profiler-counter evidence unless rocprofiler/rocprof artifacts are
 attached. No result should claim a fair low-bit library win or loss until the
 contract fields above are filled in.

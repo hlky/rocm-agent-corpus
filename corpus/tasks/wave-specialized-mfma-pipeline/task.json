@@ -1,0 +1,59 @@
+{
+  "schema_version": "0.1.0",
+  "id": "wave-specialized-mfma-pipeline",
+  "title": "Wave-Specialized MFMA Pipeline",
+  "domain": "architecture-lab",
+  "language": "hip-cpp",
+  "tags": ["cdna", "mfma", "wave-specialization", "lds", "gemm", "composable-kernel", "template-only"],
+  "source_refs": ["amd-hip-programming-guide", "amd-gcn-isa", "amd-hip-lds-memory", "rocm-composable-kernel", "amd-cdna3-tuning-guide"],
+  "problem": {
+    "summary": "Define a ROCm analog for CUDA warp-specialized matrix-pipeline studies: producer and consumer wave roles around LDS staging, MFMA math, barriers, and register pressure, with Composable Kernel and hipBLASLt as baselines.",
+    "inputs": ["half* A", "half* B", "float* C", "int M", "int N", "int K", "pipeline role config"],
+    "outputs": ["C = A * B with FP32 accumulation"],
+    "constraints": [
+      "Template-only; no timing or profiler evidence is claimed",
+      "Do not claim NVIDIA warp-group/TMA behavior; verify AMD MFMA and LDS pipeline behavior with disassembly or library metadata",
+      "Record wave role counts, LDS stage count, barriers, registers, and gfx target",
+      "Compare against hipBLASLt and Composable Kernel/CK Tile before claiming a custom win"
+    ]
+  },
+  "artifacts": {
+    "baseline": "source/baseline.hip",
+    "optimized": "source/optimized.hip",
+    "harness": "source/harness_plan.md",
+    "profiles": [],
+    "results": []
+  },
+  "verification": {
+    "status": "template-only",
+    "method": "Compare against CPU FP32 accumulation and a hipBLASLt or Composable Kernel result for the same shape before timing claims.",
+    "tolerances": { "max_abs_error": 0.05, "max_rel_error": 0.02 }
+  },
+  "benchmarking": {
+    "status": "template-only",
+    "operation": "wave-specialized-mfma-pipeline",
+    "required_metrics": [
+      "median latency",
+      "effective TFLOP/s",
+      "gfx target",
+      "producer waves",
+      "consumer waves",
+      "pipeline stages",
+      "VGPRs/SGPRs per thread",
+      "LDS bytes",
+      "library baseline",
+      "evidence label"
+    ],
+    "recommended_shapes": [
+      "M=4096 N=4096 K=4096 fp16",
+      "M=8192 N=8192 K=8192 fp16",
+      "M=256 N=8192 K=8192 skinny-M",
+      "M=128 N=128 K=8192 latency probe"
+    ]
+  },
+  "license": "Project seed example",
+  "curation": {
+    "status": "template-only",
+    "notes": "Second parity pass analog for CUDA task `warp-specialized-wgmma`. It preserves the competition shape while using ROCm/AMD terminology and evidence gates."
+  }
+}

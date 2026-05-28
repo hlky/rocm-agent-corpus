@@ -2,7 +2,7 @@
 
 // Template-only scaffold for depthwise-separable-convolution.
 // Baseline strategy: run depthwise and optional pointwise stages separately
-// through cuDNN, TensorRT, framework kernels, or simple HIP reference code.
+// through MIOpen, MIGraphX, framework kernels, or simple HIP reference code.
 
 namespace {
 

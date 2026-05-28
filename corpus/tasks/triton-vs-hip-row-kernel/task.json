@@ -1,7 +1,7 @@
 {
   "schema_version": "0.1.0",
   "id": "triton-vs-hip-row-kernel",
-  "title": "Triton vs CUDA Row Kernel Pair",
+  "title": "Triton vs HIP Row Kernel Pair",
   "domain": "framework-kernel",
   "language": "python+hip-cpp",
   "tags": [
@@ -31,7 +31,7 @@
     "constraints": [
       "Record whether Python/Triton dispatch is included in timing",
       "Capture Triton meta-parameters",
-      "CUDA path should not claim a win without identical timing boundary"
+      "HIP path should not claim a win without identical timing boundary"
     ]
   },
   "artifacts": {
@@ -40,7 +40,7 @@
   },
   "verification": {
     "status": "template-only",
-    "method": "Compare Triton and CUDA outputs with a CPU or framework row sum reference.",
+    "method": "Compare Triton and HIP outputs with a CPU or framework row sum reference.",
     "tolerances": {
       "max_abs_error": 0.0001,
       "max_rel_error": 0.0001
@@ -53,7 +53,7 @@
       "median kernel duration",
       "dispatch boundary",
       "Triton block size",
-      "CUDA block size",
+      "HIP block size",
       "hardware_metadata"
     ],
     "recommended_shapes": [

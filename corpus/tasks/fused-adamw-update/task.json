@@ -1,7 +1,7 @@
 {
   "schema_version": "0.1.0",
   "id": "fused-adamw-update",
-  "title": "Fused RDNA3mW Parameter Update",
+  "title": "Fused AdamW Parameter Update",
   "domain": "ml-training",
   "language": "hip-cpp",
   "tags": [
@@ -18,7 +18,7 @@
     "transformer-engine"
   ],
   "problem": {
-    "summary": "Apply one fp32 RDNA3mW update over contiguous parameter, gradient, first-moment, and second-moment arrays. The baseline materializes update stages through multiple simple kernels. The optimized scaffold fuses moment update, bias correction, decoupled weight decay, and parameter writeback with a float4 vector path plus scalar fallback.",
+    "summary": "Apply one fp32 AdamW update over contiguous parameter, gradient, first-moment, and second-moment arrays. The baseline materializes update stages through multiple simple kernels. The optimized scaffold fuses moment update, bias correction, decoupled weight decay, and parameter writeback with a float4 vector path plus scalar fallback.",
     "inputs": [
       "float* params",
       "float* grads",
@@ -38,12 +38,12 @@
       "params updated in place",
       "exp_avg updated in place",
       "exp_avg_sq updated in place",
-      "update_buffer contains the baseline normalized RDNA3m step"
+      "update_buffer contains the baseline normalized AdamW step"
     ],
     "constraints": [
       "fp32 educational scaffold only",
       "contiguous arrays",
-      "decoupled RDNA3mW weight decay",
+      "decoupled AdamW weight decay",
       "bias_correction values are precomputed by the caller",
       "optimized vector path requires 16-byte alignment and falls back to scalar code otherwise"
     ]
@@ -54,7 +54,7 @@
   },
   "verification": {
     "status": "template-only",
-    "method": "TODO: compare params, exp_avg, and exp_avg_sq against a CPU RDNA3mW reference for fixed seeds and multiple alignment offsets.",
+    "method": "TODO: compare params, exp_avg, and exp_avg_sq against a CPU AdamW reference for fixed seeds and multiple alignment offsets.",
     "tolerances": {
       "max_abs_error": 1e-05,
       "max_rel_error": 1e-05

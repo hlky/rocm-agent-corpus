@@ -2,7 +2,7 @@
 
 MIGraphX belongs in this corpus as a deployment competitor, a correctness
 oracle, and an extension surface. It is not a reason to stop looking for custom
-CUDA wins. For inference work, the custom boundary may be a standalone kernel, a
+HIP wins. For inference work, the custom boundary may be a standalone kernel, a
 MIGraphX plugin, a vLLM on ROCm plugin/kernel modification, or a narrower engine
 configuration that exposes why a library tactic wins.
 
@@ -46,8 +46,8 @@ Record for every engine claim:
   NHWC/NCHW, packed low-bit layouts, alignment.
 - Workspace limit, tactic sources, timing cache path, and whether the cache was
   warm or freshly built.
-- Runtime boundary: enqueue-only latency, host preprocessing included, CUDA
-  Graph capture included, or end-to-end serving latency.
+- Runtime boundary: enqueue-only latency, host preprocessing included, HIP Graph
+  capture included, or end-to-end serving latency.
 
 The fair comparison is the same input contract, not the same source graph. A
 custom kernel can win by accepting a fixed sequence length, a fixed batch bucket,
@@ -66,7 +66,7 @@ A plugin must define:
 - Workspace bytes and temporary memory policy.
 - Serialization and versioned plugin fields.
 - Runtime resource initialization and teardown.
-- `enqueue` behavior that launches CUDA work on the MIGraphX-provided stream.
+- `enqueue` behavior that launches HIP work on the MIGraphX-provided stream.
 - Correctness tests outside MIGraphX and engine-level tests inside MIGraphX.
 
 Plugin candidates for this corpus:
@@ -87,7 +87,7 @@ Plugin anti-patterns:
 
 ## `enqueue` Checklist
 
-Before writing the CUDA launch, extract:
+Before writing the HIP launch, extract:
 
 1. Input/output tensor ranks, concrete runtime dimensions, and which dimensions
    may vary across profiles.
@@ -152,9 +152,9 @@ kernel loses, label it a `negative example` and keep the contract metadata.
 ## Submodule Targets
 
 - `third_party/migraphx`: plugin samples, parsers, engine/runtime patterns.
-- `third_party/vllm-rocm`: transformer plugins, attention, KV cache,
+- `third_party/vllm`: transformer plugins, attention, KV cache,
   quantization, batching, serving competitors.
-- `third_party/miopen-frontend`: fused neural-network plan comparisons.
+- `third_party/miopen`: fused neural-network plan comparisons.
 - `third_party/flash-attention`, `third_party/flashinfer`, `third_party/vllm`:
   attention, paging, sampling, and serving baselines.
 - `third_party/composable-kernel`: Matrix Core kernels and epilogue extension paths.

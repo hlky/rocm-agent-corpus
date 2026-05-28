@@ -11,7 +11,7 @@
       "task_id": "rowwise-softmax",
       "record": "data/records/runpod_rtx4000ada_softmax_pytorch_20260525.jsonl",
       "classification": "timing-only-measured",
-      "note": "PyTorch eager torch.softmax(dim=1) versus custom one-block-per-row CUDA on fp32 4096x1024."
+      "note": "PyTorch eager torch.softmax(dim=1) versus custom one-block-per-row HIP on fp32 4096x1024."
     },
     {
       "task_id": "block-topk-sampling",

@@ -2,7 +2,7 @@
 
 This guide tracks template-only HIP C++ tasks for memory-movement kernels that
 agents can compile, validate, and later benchmark. These are scaffolds, not
-measured wins. Do not claim profiler-counter evidence until Nsight artifacts
+measured wins. Do not claim profiler-counter evidence until rocprofiler/rocprof artifacts
 exist; HIP-event-only measurements must be labeled timing-only.
 
 ## Tasks

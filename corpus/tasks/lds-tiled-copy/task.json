@@ -5,10 +5,10 @@
   "domain": "memory-tiling",
   "language": "hip-cpp",
   "tags": [
-    "global-to-LDS staging",
+    "lds",
     "shared-memory",
     "tiling",
-    "ampere",
+    "rocm",
     "template-only",
     "todo"
   ],
@@ -19,7 +19,7 @@
     "amd-rocm-programming-guide"
   ],
   "problem": {
-    "summary": "Compare a direct global-memory tile transform against a shared-memory tiled path intended for global-to-LDS staging replacement on gfx90a+.",
+    "summary": "Compare a direct global-memory tile transform against an LDS-tiled path intended for explicit software-pipelined staging on ROCm GPUs.",
     "inputs": [
       "float* input",
       "float* output",
@@ -30,8 +30,8 @@
       "output contains a copied or lightly transformed row-major matrix"
     ],
     "constraints": [
-      "Actual global-to-LDS staging inline LLVM IR / AMD GCN ISA or libcudacxx path is TODO",
-      "Record sm target and fallback path",
+      "Actual inline AMD GCN ISA or library-assisted LDS staging path is TODO",
+      "Record gfx target and fallback path",
       "Do not claim async-copy benefit without profiler or timing evidence"
     ]
   },
@@ -52,7 +52,7 @@
     "required_metrics": [
       "median kernel duration",
       "effective bandwidth",
-      "sm target",
+      "gfx target",
       "pipeline stages",
       "hardware_metadata"
     ],
@@ -65,6 +65,6 @@
   "license": "Project seed example",
   "curation": {
     "status": "template-only",
-    "notes": "The optimized source is a safe shared-memory staging placeholder with TODO markers for global-to-LDS staging groups and waits."
+    "notes": "The optimized source is a safe LDS staging placeholder with TODO markers for wait/barrier discipline and pipeline stages."
   }
 }

@@ -33,3 +33,19 @@ evidence.
   framework baseline records for Top-K and normalization tasks.
 - Audit older docs that still mention CUDA-origin seed timings and update them
   only after ROCm records exist.
+
+## Second Pass Additions
+
+- Added the missing Apache-2.0 `LICENSE`.
+- Reworked architecture lab docs and indexes around ROCm `gfx` targets,
+  `hipcc --offload-arch`, rocprofiler/rocprof evidence, and AMD disassembly
+  checks instead of CUDA SM/SASS/Nsight terminology.
+- Added explicit ROCm analog tasks for CUDA's warp-specialized/TMA/Blackwell
+  scaffolds:
+  - `wave-specialized-mfma-pipeline`
+  - `global-to-lds-mfma-gemm`
+  - `gfx950-gfx1200-rocm-portability`
+- Renamed the sanitizer scaffold to `rocm-sanitizer-racecheck` so task IDs,
+  paths, and indexes agree.
+- Cleaned navigation to point at actual ROCm submodule candidates and to keep
+  CUDA-origin source references as context rather than ROCm evidence.

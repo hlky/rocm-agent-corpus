@@ -1,6 +1,6 @@
 # Quantization Kernel Guide
 
-This guide defines the quantization and fused dequantization track for the CUDA
+This guide defines the quantization and fused dequantization track for the ROCm
 agent corpus. The goal is to help agents write custom kernels that can beat,
 match, or narrowly specialize beyond generic quantized inference and training
 paths from hipBLASLt, Composable Kernel, bitsandbytes, Transformer Engine on ROCm, vLLM on ROCm,
@@ -187,11 +187,11 @@ decode scheduling.
 - `third_party/bitsandbytes`: practical low-bit quantization and optimizer
   kernels; useful for int8/int4 packing, dequantization, and inference/training
   integration ideas.
-- `third_party/transformer-engine`: FP8 and transformer-layer scale/amax
+- `source:transformer-engine`: FP8 and transformer-layer scale/amax
   reference; use for FP8 and block-scaled transformer paths.
 - `third_party/composable-kernel`: Matrix Core GEMM, CK Tile layouts, int8/FP8 paths, custom
   epilogues, and low-bit extension surfaces.
-- `third_party/vllm-rocm`: LLM inference plugins, quantized linear layers,
+- `third_party/vllm`: LLM inference plugins, quantized linear layers,
   KV cache, batching, and serving-level baselines.
 - `third_party/migraphx`: plugin boundary, engine precision, dynamic shape, and
   deployment baseline.
@@ -217,7 +217,7 @@ decode scheduling.
    - Reuses packed loads, scales, and reductions.
 
 5. Matrix Core or architecture-specific custom path.
-   - Composable Kernel, CK Tile, rocWMMA, MFMA, WGMFMA, global-to-LDS staging, or native low-bit instructions where
+   - Composable Kernel, CK Tile, rocWMMA, MFMA, MFMA, global-to-LDS staging, or native low-bit instructions where
      applicable.
 
 6. Vendor and framework competitors.

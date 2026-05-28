@@ -14,7 +14,7 @@ struct CachedKernel {
   hipFunction_t function;
 };
 
-// Optimized sketch: compile once with hipRTC/nvJitLink, then reuse by exact key.
+// Optimized sketch: compile once with hipRTC/hipRTC cache/link path, then reuse by exact key.
 class SpecializedKernelCache {
  public:
   hipError_t Launch(const SpecializationKey& key,

@@ -172,7 +172,7 @@ The CPU oracle is not a performance baseline.
 
 Recipe:
 
-- Generate `torch.Tensor` inputs on CUDA.
+- Generate `torch.Tensor` inputs on the active PyTorch GPU backend.
 - Warm allocator and optionally preallocate output tensors with `out=`.
 - Run `torch.topk(logits, k, dim=-1, largest=True, sorted=sorted)`.
 - For sampling, run softmax over selected values and either consume a
@@ -181,7 +181,7 @@ Recipe:
 
 Record:
 
-- PyTorch version and CUDA version.
+- PyTorch version and ROCm backend version.
 - Whether `out=` buffers are used.
 - Whether `torch.cuda.synchronize()` wraps timing.
 - Whether `.contiguous()` was needed.
@@ -374,7 +374,7 @@ Minimum fields for Top-K baseline result artifacts:
   "gpu_name": "",
   "gfx_target": "",
   "driver_version": "",
-  "rocm_or_cuda_runtime_version": "",
+  "rocm_runtime_version": "",
   "notes": "template example"
 }
 ```

@@ -17,7 +17,7 @@
     "rocm-rocprim-docs"
   ],
   "problem": {
-    "summary": "Compute an inclusive prefix sum independently for each fixed-size segment of a contiguous float array. The baseline assigns one thread to each segment and scans sequentially. The optimized version assigns one CUDA block to each segment and performs a shared-memory inclusive scan.",
+    "summary": "Compute an inclusive prefix sum independently for each fixed-size segment of a contiguous float array. The baseline assigns one thread to each segment and scans sequentially. The optimized version assigns one HIP thread block to each segment and performs an LDS-backed inclusive scan.",
     "inputs": [
       "float* input",
       "float* output",

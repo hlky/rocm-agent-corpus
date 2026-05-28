@@ -36,7 +36,7 @@
     "gpu_name",
     "gfx_target",
     "driver_version",
-    "cuda_toolkit_version",
+    "rocm_version",
     "compiler_or_framework_version",
     "build_command_or_python_invocation",
     "arch_flags",
@@ -257,11 +257,11 @@
         "topkLastDim AIR TopK paths"
       ],
       "local_references": [
-        "third_party/vllm-rocm/cpp/migraphx_llm/kernels/samplingTopKKernels.hip",
-        "third_party/vllm-rocm/cpp/migraphx_llm/kernels/samplingTopPKernels.hip",
-        "third_party/vllm-rocm/cpp/migraphx_llm/kernels/samplingAirTopPKernels.hip",
-        "third_party/vllm-rocm/cpp/migraphx_llm/kernels/topkLastDim.hip",
-        "third_party/vllm-rocm/docs/source/features/sampling.md"
+        "third_party/vllm/cpp/migraphx_llm/kernels/samplingTopKKernels.hip",
+        "third_party/vllm/cpp/migraphx_llm/kernels/samplingTopPKernels.hip",
+        "third_party/vllm/cpp/migraphx_llm/kernels/samplingAirTopPKernels.hip",
+        "third_party/vllm/cpp/migraphx_llm/kernels/topkLastDim.hip",
+        "third_party/vllm/docs/source/features/sampling.md"
       ],
       "covers": [
         "top-k sampling",

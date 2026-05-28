@@ -9,7 +9,7 @@
 namespace {
 
 __global__ void fused_mlp_swiglu_baseline_kernel() {
-  // TODO: implement the baseline CUDA path and preserve this task's contract.
+  // TODO: implement the baseline HIP path and preserve this task's contract.
 }
 
 }  // namespace

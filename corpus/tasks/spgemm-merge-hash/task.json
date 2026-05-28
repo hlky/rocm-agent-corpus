@@ -18,7 +18,7 @@
     "rocm-rocprim"
   ],
   "problem": {
-    "summary": "Compare sparse matrix multiply strategies based on row-wise merge or hash accumulation against cuSPARSE SpGEMM-style planning boundaries.",
+    "summary": "Compare sparse matrix multiply strategies based on row-wise merge or hash accumulation against rocSPARSE SpGEMM-style planning boundaries.",
     "inputs": [
       "CSR matrix A",
       "CSR matrix B",
@@ -32,7 +32,7 @@
     ],
     "constraints": [
       "Template-only; record symbolic and numeric phases separately",
-      "Compare against cuSPARSE where available",
+      "Compare against rocSPARSE where available",
       "Document memory planning, duplicate column accumulation, and output ordering"
     ]
   },

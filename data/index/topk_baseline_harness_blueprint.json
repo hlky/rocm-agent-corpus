@@ -196,10 +196,11 @@
         "torch.gather",
         "torch.cumsum"
       ],
-      "measured_record": "data/records/runpod_rtx4000ada_topk_pytorch_20260525.jsonl",
+      "historical_cuda_record_not_imported": "data/records/runpod_rtx4000ada_topk_pytorch_20260525.jsonl",
+      "rocm_measured_record": null,
       "must_record": [
         "torch_version",
-        "cuda_version",
+        "rocm_version",
         "sorted_flag",
         "out_buffers_used",
         "contiguous_copy_timed",
@@ -335,7 +336,7 @@
         "LinCombTopKSoftmaxCol"
       ],
       "must_record": [
-        "sm_target",
+        "gfx_target",
         "gemm_m",
         "gemm_n",
         "gemm_k",

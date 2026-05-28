@@ -36,7 +36,7 @@
     "constraints": [
       "Template-only; format contracts and index base must be explicit",
       "Record whether sorting and duplicate coalescing are included",
-      "Compare against cuSPARSE and hipCUB sort/scan pieces where feasible"
+      "Compare against rocSPARSE and hipCUB sort/scan pieces where feasible"
     ]
   },
   "artifacts": {

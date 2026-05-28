@@ -3,7 +3,7 @@
 > ROCm parity note: This file was adapted from `H:/cuda-agent-corpus` on 2026-05-28. CUDA-origin benchmark numbers, source paths, and library names are comparison context only; do not cite them as ROCm evidence. New ROCm measurements must carry AMD hardware, ROCm version, compiler flags, gfx target, and an explicit evidence label.
 
 
-This document extracts CUDA-relevant shapes from the local Diffusers and
+This document extracts ROCm-relevant shapes from the local Diffusers and
 Transformers audit reports under:
 
 - `H:/dinoml_v2_agents/agents/plans/diffusers/*/report.md`

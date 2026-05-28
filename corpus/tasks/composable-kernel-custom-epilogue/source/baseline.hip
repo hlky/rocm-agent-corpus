@@ -9,7 +9,7 @@
 namespace {
 
 __global__ void composable-kernel_custom_epilogue_visitor_baseline_kernel() {
-  // TODO: implement the baseline CUDA path and preserve this task's contract.
+  // TODO: implement the baseline HIP path and preserve this task's contract.
 }
 
 }  // namespace

@@ -211,7 +211,7 @@ Why it might fail:
 
 - hipBLASLt epilogues may not expose enough custom state for true candidate
   lists; Composable Kernel may be the practical route.
-- Register pressure in GEMM epilogue may reduce Tensor Core throughput.
+- Register pressure in GEMM epilogue may reduce Matrix Core throughput.
 - Top-K plus logprob output may still need values for many tokens.
 
 Benchmark gate:
@@ -864,5 +864,5 @@ Benchmark gate:
    classify it as approximate, exact-after-repair, or quality-only.
 
 The best outcome is not necessarily a win. The best outcome is a clean map of
-which ideas deserve CUDA engineering time and which ones should become negative
+which ideas deserve HIP engineering time and which ones should become negative
 examples.

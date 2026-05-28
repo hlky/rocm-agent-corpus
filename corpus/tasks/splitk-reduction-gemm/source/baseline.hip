@@ -1,7 +1,7 @@
 #include <hip/hip_runtime.h>
 
 // Template-only scaffold for splitk-reduction-gemm.
-// Baseline strategy: non-split GEMM or library-selected cuBLASLt/CUTLASS
+// Baseline strategy: non-split GEMM or library-selected cuBLASLt/Composable Kernel
 // algorithm with split_k recorded as one.
 
 namespace {

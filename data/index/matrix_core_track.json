@@ -48,7 +48,7 @@
     "gpu_name",
     "gfx_target",
     "driver_version",
-    "cuda_toolkit_version",
+    "rocm_version",
     "compiler_version",
     "build_command",
     "arch_flags",
@@ -174,7 +174,7 @@
       "id": "rocwmma-hgemm-seed",
       "status": "timing-only-measured-with-hipblaslt-baseline",
       "task_path": "corpus/tasks/rocwmma-mfma-gemm/task.json",
-      "objective": "Provide a CPU reference harness, scalar CUDA baseline, and simple rocWMMA 16x16x16 FP16-input FP32-accumulate custom kernel.",
+      "objective": "Provide a CPU reference harness, scalar HIP baseline, and simple rocWMMA 16x16x16 FP16-input FP32-accumulate custom kernel.",
       "shape_families": [
         "medium-square",
         "rectangular",
@@ -287,7 +287,7 @@
     {
       "id": "fp8-composable-kernel-ck_tile-boundary",
       "status": "planned",
-      "objective": "Study FP8 GEMM through hipBLASLt and Composable Kernel/CK Tile before writing raw CUDA, with scale and amax metadata as first-class fields.",
+      "objective": "Study FP8 GEMM through hipBLASLt and Composable Kernel/CK Tile before writing raw HIP, with scale and amax metadata as first-class fields.",
       "dtypes": [
         "fp8-input-fp32-accumulate",
         "fp8-input-f16-accumulate",
@@ -330,7 +330,7 @@
     {
       "id": "hopper-wgmma-tma",
       "status": "planned",
-      "objective": "Use Composable Kernel/CK Tile to study CDNA3 WGMFMA, global-to-LDS staging, clusters, and gfx950 portability before attempting raw CUDA.",
+      "objective": "Use Composable Kernel/CK Tile to study CDNA3 MFMA, LDS staging, CK Tile layouts, and gfx942 portability before attempting raw HIP.",
       "dtypes": [
         "fp16",
         "bf16",

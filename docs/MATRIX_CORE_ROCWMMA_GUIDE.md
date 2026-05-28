@@ -41,18 +41,18 @@ Use the same problem contract at every rung.
    The harness computes a host FP32 reference from the exact FP16 inputs copied
    to the GPU. This is the correctness oracle, not a speed baseline.
 
-2. Naive CUDA baseline.
+2. Naive HIP baseline.
    One thread computes one output element using scalar half-to-float conversion
    and FP32 accumulation. This teaches indexing, layout, and tolerance.
 
 3. rocWMMA custom kernel.
    One warp computes one 16x16 output tile with `rocwmma::load_matrix_sync`,
    `mma_sync`, and `store_matrix_sync`. This is intentionally simple: no
-   multi-stage pipeline, no `global-to-LDS staging`, no shared-memory swizzle.
+   multi-stage pipeline, no LDS software pipeline, no shared-memory swizzle.
 
 4. Inline `mfma`.
    Use handwritten LLVM IR / AMD GCN ISA only when the instruction shape, register layout,
-   `ldmatrix` path, and target GFX are part of the lesson. Inline MFMA is where
+   operand layout, and target GFX are part of the lesson. Inline MFMA is where
    agents learn what rocWMMA hid, but it is also where portability mistakes become
    easy.
 
@@ -137,8 +137,8 @@ FP16:
 
 BF16:
 
-- Treat as an CDNA2-and-newer Matrix Core path unless the target GPU and CUDA
-  toolkit prove otherwise.
+- Treat as a CDNA2-and-newer Matrix Core path only when the target GPU and ROCm
+  toolkit prove support.
 - Use a separate task or compile-time path because tolerances and conversion
   behavior differ from FP16.
 - Composable Kernel and hipBLASLt are usually better starting references than handwritten
@@ -180,7 +180,7 @@ Inline MFMA work must record:
 - Operand layouts, such as `row.col`.
 - Input, accumulator, and output types.
 - Register packing and lane ownership.
-- Whether `ldmatrix` is used and how shared memory is arranged.
+- How operands are loaded and how LDS/shared memory is arranged.
 - Target architecture and compile flags.
 
 Example instruction family to study for CDNA2-style FP16:
@@ -244,27 +244,26 @@ Shared-memory checklist:
 - Add padding or swizzling to avoid bank conflicts.
 - Verify the row/column mapping after any skew.
 - Use vectorized global loads only when alignment is guaranteed.
-- For CDNA2-style kernels, consider `global-to-LDS staging` after the non-pipelined shared
+- For CDNA-style kernels, consider LDS software pipelining after the non-pipelined shared
   path is correct.
-- For CDNA3 and newer, consider Composable Kernel/CK Tile global-to-LDS staging/WGMFMA examples before
-  hand-rolling descriptor and barrier logic.
+- For CDNA3 and newer, consider Composable Kernel/CK Tile examples before
+  hand-rolling barrier and wait-count logic.
 
 Swizzling is architecture-sensitive. Keep a simple unswizzled version as a
 negative or reference example when a swizzle does not improve timing.
 
 ## Architecture Gotchas
 
-Volta and Turing:
+RDNA2:
 
-- Matrix Cores exist, but available instruction shapes and API support are more
-  limited than CDNA2 and newer GPUs.
-- Use CUDA Samples and Composable Kernel examples as references before adding inline MFMA.
+- Treat Matrix Core support as SKU/toolkit-dependent and verify before claiming it.
+- Use ROCm examples and Composable Kernel examples as references before adding inline MFMA.
 
 CDNA2:
 
-- Distinguish `gfx90a` from `gfx1030` and `sm_87`.
+- Keep `gfx90a` records separate from RDNA targets.
 - TF32 is a separate math contract.
-- `global-to-LDS staging` can matter for shared-memory pipelines.
+- LDS staging can matter for shared-memory pipelines.
 - BF16 support should be checked against the exact GPU and toolkit.
 
 RDNA3:
@@ -276,9 +275,8 @@ RDNA3:
 
 CDNA3:
 
-- WGMFMA, global-to-LDS staging, clusters, and distributed shared memory change the design space.
-- `gfx950` enables architecture-specific paths that are less portable than
-  base `gfx942`.
+- MFMA, LDS staging, CK Tile layouts, and HBM/cache behavior change the design space.
+- Keep `gfx942` records separate from later CDNA4 or suffix-specific targets.
 - Composable Kernel/CK Tile examples are the recommended starting point.
 
 CDNA4/RDNA4:
@@ -297,12 +295,12 @@ The scaffold harness is `harnesses/rocwmma_gemm_benchmark.hip`.
 Example build commands:
 
 ```powershell
-hipcc -std=c++17 -O3 -arch=gfx90a -DVARIANT_BASELINE `
+hipcc -std=c++17 -O3 --offload-arch=gfx90a -DVARIANT_BASELINE `
   harnesses/rocwmma_gemm_benchmark.hip `
   corpus/tasks/rocwmma-mfma-gemm/source/baseline.hip `
   -o build/rocwmma_baseline.exe
 
-hipcc -std=c++17 -O3 -arch=gfx90a -DVARIANT_OPTIMIZED `
+hipcc -std=c++17 -O3 --offload-arch=gfx90a -DVARIANT_OPTIMIZED `
   harnesses/rocwmma_gemm_benchmark.hip `
   corpus/tasks/rocwmma-mfma-gemm/source/optimized.hip `
   -o build/rocwmma_optimized.exe
@@ -318,7 +316,7 @@ Example run shape:
 Every measured record should include:
 
 - GPU name, gfx target, driver, ROCm toolkit, and compiler version.
-- `-arch` or all `-gencode` flags.
+- `--offload-arch` flags.
 - M, N, K, layouts, leading dimensions, dtype, accumulator type, and output
   type.
 - Warmup and measured iterations.

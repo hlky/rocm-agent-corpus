@@ -17,7 +17,7 @@
     "pytorch-nested-api",
     "pytorch-distributions-api"
   ],
-  "scope": "CUDA-relevant public PyTorch APIs, grouped by kernel family rather than every documented symbol.",
+  "scope": "ROCm-relevant public PyTorch APIs, grouped by kernel family rather than every documented symbol.",
   "categories": [
     {
       "id": "tensor_creation_layout",
@@ -69,7 +69,7 @@
     },
     {
       "id": "sparse_fft_random_optimizer",
-      "public_api_examples": ["torch.sparse.mm", "torch.sparse.softmax", "torch.fft.fft", "torch.multinomial", "torch.randperm", "torch.optim.RDNA3mW", "torch._foreach_add"],
+      "public_api_examples": ["torch.sparse.mm", "torch.sparse.softmax", "torch.fft.fft", "torch.multinomial", "torch.randperm", "torch.optim.AdamW", "torch._foreach_add"],
       "kernel_families": ["spmm", "sddmm", "sparse-softmax", "fft", "rng-sampling", "multi-tensor-update"],
       "custom_angles": ["known sparse formats", "fused FFT pre/post transforms", "seeded sampling fusion", "multi-tensor launch amortization"]
     },

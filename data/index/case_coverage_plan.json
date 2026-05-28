@@ -42,8 +42,8 @@
       "reason": "Memory movement catalog now has a scaffold but no measured irregular-access record."
     },
     {
-      "case": "cuSPARSE sparse",
-      "next_artifact": "cuSPARSE baseline for csr-spmv-load-balance",
+      "case": "rocSPARSE sparse",
+      "next_artifact": "rocSPARSE baseline for csr-spmv-load-balance",
       "reason": "Sparse library family now has a scaffold but needs a measured library competitor."
     },
     {
@@ -53,9 +53,9 @@
     }
   ],
   "library_targets": [
-    "CUDA Runtime",
+    "HIP Runtime",
     "rocprofiler/rocprof",
-    "Nsight Systems",
+    "rocprofiler/rocprof",
     "hipBLAS/rocBLAS",
     "hipBLASLt",
     "Composable Kernel",
@@ -75,9 +75,9 @@
     "Transformer Engine on ROCm",
     "RCCL",
     "rocSHMEM",
-    "cuSPARSE",
+    "rocSPARSE",
     "hipRTC",
-    "nvJitLink"
+    "hipRTC cache/link path"
   ],
   "extension_backlog": {
     "status": "v2-proposed",
@@ -118,7 +118,7 @@
         "library_baselines": [
           "rocThrust",
           "hipCUB",
-          "CUDA memory pools",
+          "HIP memory pools",
           "framework tensor copies"
         ]
       },
@@ -134,9 +134,9 @@
           "MIOpen",
           "Composable Kernel conv",
           "MIGraphX",
-          "cuFFT",
+          "rocFFT",
           "hipBLAS/rocBLAS",
-          "cuSOLVER"
+          "rocSOLVER"
         ]
       },
       {
@@ -199,8 +199,8 @@
           "gnn-neighbor-aggregation"
         ],
         "library_baselines": [
-          "cuSPARSE",
-          "cuSPARSELt",
+          "rocSPARSE",
+          "rocSPARSE/Composable Kernel sparse path",
           "Composable Kernel sparse",
           "MIGraphX",
           "Gunrock-like references"
@@ -244,12 +244,12 @@
           "reduce-scatter-overlap",
           "allgather-overlap",
           "alltoall-moe-exchange",
-          "cuda-ipc-multiprocess"
+          "hip-ipc-multiprocess"
         ],
         "library_baselines": [
           "RCCL",
           "rocSHMEM",
-          "CUDA P2P/IPC",
+          "HIP P2P/IPC",
           "framework distributed"
         ]
       },
@@ -263,10 +263,10 @@
         ],
         "library_baselines": [
           "rocprofiler/rocprof",
-          "Nsight Systems",
+          "rocprofiler/rocprof",
           "rocm-sanitizer",
-          "cuobjdump",
-          "nvdisasm",
+          "llvm-objdump",
+          "roc-objdump",
           "nvbench"
         ]
       },
@@ -275,11 +275,11 @@
         "first_cases": [
           "gfx90a-gfx942-cdna-split",
           "gfx942-cdna3-mfma-lab",
-          "sm100-sm120-blackwell-path",
+          "gfx950-gfx1200-rocm-portability",
           "cluster-dsm-workqueue"
         ],
         "library_baselines": [
-          "CUDA tuning guides",
+          "AMD tuning guides",
           "Composable Kernel",
           "hipBLASLt",
           "MIGraphX"

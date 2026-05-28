@@ -27,7 +27,7 @@
     "vllm"
   ],
   "problem": {
-    "summary": "Compute C = A * B for one FP16 GEMM using FP32 accumulation, with A row-major, B column-major, and C row-major. The task teaches the first custom Matrix Core rung: a scalar CUDA baseline, a CPU FP32 reference over the exact FP16 inputs, and a simple rocWMMA 16x16x16 optimized path that future agents can extend with shared-memory staging, inline mfma, Composable Kernel/CK Tile, and fused epilogues.",
+    "summary": "Compute C = A * B for one FP16 GEMM using FP32 accumulation, with A row-major, B column-major, and C row-major. The task teaches the first custom Matrix Core rung: a scalar HIP baseline, a CPU FP32 reference over the exact FP16 inputs, and a simple rocWMMA 16x16x16 optimized path that future agents can extend with shared-memory staging, inline mfma, Composable Kernel/CK Tile, and fused epilogues.",
     "inputs": [
       "half* a: row-major matrix shaped [M, K], leading dimension K",
       "half* b: column-major matrix shaped [K, N], leading dimension K",

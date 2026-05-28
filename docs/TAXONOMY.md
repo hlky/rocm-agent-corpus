@@ -12,14 +12,15 @@ Use these tags consistently so retrieval can find the right examples.
 - `vectorized-load`: use of wider loads or stores such as `float4`.
 - `alignment`: pointer or shape constraints enabling efficient memory access.
 - `register-pressure`: many live values limit occupancy or cause spills.
-- `shared-memory-spill`: CUDA 13+ register spilling into shared memory.
+- `spill-management`: register pressure, local memory traffic, and occupancy
+  tradeoffs.
 
 ## Execution
 
-- `occupancy`: active warps or blocks per GFX.
+- `occupancy`: active waves or blocks per GFX target.
 - `ilp`: instruction-level parallelism.
-- `warp-divergence`: lanes in a warp follow different control paths.
-- `warp-specialization`: different warps perform distinct pipeline roles.
+- `wave-divergence`: lanes in a wave follow different control paths.
+- `wave-specialization`: different waves perform distinct pipeline roles.
 - `launch-config`: block size, grid size, dynamic shared memory, launch bounds.
 - `persistent-kernel`: kernel keeps work resident to reduce launch overhead or
   improve scheduling.
@@ -29,7 +30,7 @@ Use these tags consistently so retrieval can find the right examples.
 - `reduction`: sum, max, min, or other associative reductions.
 - `scan`: prefix operations.
 - `gemm`: matrix multiplication.
-- `tensor-core`: MFMA, rocWMMA, WGMFMA, or library Matrix Core paths.
+- `matrix-core`: MFMA, rocWMMA, or library Matrix Core paths.
 - `cub`: hipCUB primitives.
 - `composable-kernel`: Composable Kernel or CK Tile implementation patterns.
 - `rocthrust`: rocThrust algorithms.
@@ -46,7 +47,7 @@ Use these tags consistently so retrieval can find the right examples.
 
 - Memory coalescing: sectors per request, memory throughput, load/store
   efficiency.
-- Occupancy: achieved occupancy, theoretical occupancy, active warps per GFX.
+- Occupancy: achieved occupancy, theoretical occupancy, active waves per GFX.
 - Register pressure: registers per thread, local memory traffic, spill loads and
   stores.
 - Shared memory: bank conflicts, shared load/store throughput.

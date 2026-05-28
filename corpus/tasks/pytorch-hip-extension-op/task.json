@@ -26,14 +26,14 @@
     "inputs": [
       "Framework tensor X shaped [rows, cols]",
       "optional non-contiguous tensor metadata",
-      "current framework CUDA stream"
+      "current framework GPU stream"
     ],
     "outputs": [
       "Framework tensor Y shaped [rows] with one row sum per row"
     ],
     "constraints": [
       "Template-only scaffold; no framework dispatch timing is claimed",
-      "Reject or explicitly handle non-CUDA, non-float32, and non-contiguous inputs",
+      "Reject or explicitly handle non-GPU, non-float32, and non-contiguous inputs",
       "Record whether timing includes Python dispatch, extension launch, synchronization, compiler warmup, or graph capture"
     ]
   },
@@ -57,7 +57,7 @@
       "median extension latency",
       "dispatch boundary",
       "framework version",
-      "CUDA stream source",
+      "framework GPU stream source",
       "tensor strides",
       "dtype",
       "hardware_metadata"
@@ -71,6 +71,6 @@
   "license": "Project seed example",
   "curation": {
     "status": "template-only",
-    "notes": "Framework extension scaffold for rowwise CUDA work; useful for comparing eager, compiler-generated, Triton, and custom HIP paths."
+    "notes": "Framework extension scaffold for rowwise HIP work; useful for comparing eager, compiler-generated, Triton, and custom HIP paths."
   }
 }

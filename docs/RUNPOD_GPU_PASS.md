@@ -11,8 +11,8 @@ still benefits from a reasonable CPU allocation.
 
 Good first targets:
 
-- Low-cost RTX 30/40-series or L4-class GPUs when available below the requested
-  budget.
+- AMD GPUs with a ROCm-supported `gfx` target and enough memory for the chosen
+  benchmark.
 - At least 4 vCPUs if compiling Composable Kernel-like kernels.
 - 20 GB workspace volume for this scaffold; use more for cloned benchmark repos.
 

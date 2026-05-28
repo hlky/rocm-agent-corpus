@@ -4,7 +4,7 @@ This file defines library-baseline guidance for the
 `online-attention-forward` task. No ROCm timing artifact is currently checked in;
 the default seed shape remains a rerun target for
 `batch=1,heads=4,query=128,key=128,head_dim=64,causal=1`. Do not treat
-CUDA-origin timings as a FlashAttention, MIOpen, Triton, vLLM on ROCm, vLLM, or
+CUDA-origin timings as a FlashAttention, MIOpen, Triton, vLLM on ROCm, or
 FlashInfer win claim.
 
 The goal is to make agents compare attention kernels honestly while still
@@ -53,7 +53,7 @@ timings are compared:
   dispatch, graph capture, JIT/compile, engine build, plan creation, layout
   conversion, QKV packing, KV-cache update, scheduler work, host/device copies,
   or output validation.
-- Evidence label: say `timing-only` for HIP-event timings without Nsight
+- Evidence label: say `timing-only` for HIP-event timings without rocprofiler/rocprof
   counters. Do not invent Matrix Core, occupancy, memory-transaction, or cache
   evidence.
 
@@ -65,7 +65,7 @@ inside the timing boundary, or label the result as a non-equivalent baseline.
 Use this sequence before claiming that a custom attention kernel wins:
 
 1. CPU stable softmax oracle with the exact mask and query-position convention.
-2. Educational CUDA baseline from
+2. Educational HIP baseline from
    `corpus/tasks/online-attention-forward/source/baseline.hip`.
 3. Online-tiled custom seed from
    `corpus/tasks/online-attention-forward/source/optimized.hip`.
@@ -134,7 +134,7 @@ inference, not counter evidence.
 
 Primary references:
 
-- `third_party/miopen-frontend`
+- `third_party/miopen`
 - `docs/MIOPEN_ATTENTION_GUIDE.md`
 - `docs/LIBRARY_GUIDE.md`
 
@@ -193,7 +193,7 @@ Concrete ladder:
 3. Triton fused attention from the local tutorial or a shape-specialized Triton
    kernel. Record block sizes, number of warps, stages, persistent or
    warp-specialized mode, and generated-code inspection if used.
-4. CUDA graph captured framework or Triton path, if the production workload
+4. HIP graph captured framework or Triton path, if the production workload
    captures repeated iterations.
 5. Custom HIP C++ only after the framework/Triton baseline and its dispatch
    boundary are clear.
@@ -214,14 +214,14 @@ Custom attack surface after Triton/framework:
 
 - Lower dispatch overhead for small fixed shapes.
 - Architecture-specific instructions or scheduling not exposed by the compiler.
-- Fusion with surrounding CUDA work that would cross framework op boundaries.
+- Fusion with surrounding HIP work that would cross framework op boundaries.
 - MIGraphX plugin or C++ extension integration where Python JIT is unsuitable.
 
 ## vLLM on ROCm, vLLM, And FlashInfer Decode Ladder
 
 Primary references:
 
-- `third_party/vllm-rocm`
+- `third_party/vllm`
 - `third_party/vllm`
 - `third_party/flashinfer`
 - `docs/MIGRAPHX_INFERENCE_GUIDE.md`
@@ -311,7 +311,7 @@ Concrete ladder:
    the seed suffix-aligned causal rule, or the result is not equivalent.
 3. Batched or strided PV GEMM:
    `output[b,h,q,d] = P[b,h,q,k] * V[b,h,k,d]`.
-4. Optional CUDA graph capture of the three-kernel sequence for repeated fixed
+4. Optional HIP graph capture of the three-kernel sequence for repeated fixed
    shapes.
 5. Optional hipBLASLt algorithm search for QK and PV separately, with workspace,
    compute type, and selected algorithm recorded.

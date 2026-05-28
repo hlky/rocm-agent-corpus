@@ -14,7 +14,7 @@ Use MIOpen when:
 
 Agent workflow:
 
-1. Inspect `third_party/miopen-frontend`.
+1. Inspect `third_party/miopen`.
 2. Build the operation graph first.
 3. Generate engine configs.
 4. Filter configs for workspace, determinism, numeric behavior, and hardware.
@@ -36,7 +36,7 @@ Core ideas:
 Reference paths:
 
 - `third_party/flash-attention`
-- `third_party/miopen-frontend`
+- `third_party/miopen`
 - `third_party/composable-kernel`
 - `third_party/gpu-mode-reference-kernels`
 

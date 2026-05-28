@@ -6,9 +6,8 @@
   "language": "tooling-workflow",
   "tags": [
     "amdisa",
-    "ptx",
-    "cuobjdump",
-    "nvdisasm",
+    "llvm-objdump",
+    "roc-objdump",
     "amdclang++",
     "regression",
     "template-only"
@@ -21,7 +20,7 @@
   "problem": {
     "summary": "Capture codegen regression evidence by recording LLVM IR / AMD GCN ISA, amdclang++ resource usage, register drift, spills, and instruction mix changes.",
     "inputs": [
-      "compiled cubin or executable",
+      "compiled code object or executable",
       "build command",
       "arch flags",
       "baseline artifact",

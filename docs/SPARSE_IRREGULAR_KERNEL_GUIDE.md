@@ -10,10 +10,10 @@ a general library primitive.
 
 - New tasks in this guide are `template-only` until a harness, correctness
   oracle, hardware metadata, and HIP-event timings are attached.
-- Say `timing-only` for HIP-event results without Nsight counters.
+- Say `timing-only` for HIP-event results without rocprofiler/rocprof counters.
 - Say `negative example` when a custom load-balance, dedupe, or sparse traversal
   attempt loses to the baseline.
-- Do not claim cuSPARSE, hipCUB, FlashAttention, Composable Kernel, vLLM, or FlashInfer wins
+- Do not claim rocSPARSE, hipCUB, FlashAttention, Composable Kernel, vLLM, or FlashInfer wins
   from an isolated seed kernel without matching the input contract and timing
   boundary.
 
@@ -21,7 +21,7 @@ a general library primitive.
 
 - hipCUB/rocPRIM/hipCUB/rocThrust: segmented reductions, scans, select/compaction, sort, unique, and
   block or warp collectives.
-- CUDA library samples: sparse library API patterns and correctness contracts
+- ROCm library samples: sparse library API patterns and correctness contracts
   for CSR-style operations.
 - FlashAttention, Composable Kernel, vLLM, and FlashInfer: attention tiling, serving
   layouts, paged/block metadata, and stronger block-sparse competitors.

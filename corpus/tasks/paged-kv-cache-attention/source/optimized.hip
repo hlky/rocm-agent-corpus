@@ -9,7 +9,7 @@
 namespace {
 
 __global__ void paged_kv_cache_attention_optimized_kernel() {
-  // TODO: implement the optimized CUDA path and preserve this task's contract.
+  // TODO: implement the optimized HIP path and preserve this task's contract.
 }
 
 }  // namespace

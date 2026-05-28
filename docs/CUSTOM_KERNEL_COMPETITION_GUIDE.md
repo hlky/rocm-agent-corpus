@@ -86,7 +86,7 @@ Valid losses:
    - Shared-memory tiling.
    - Warp/block-level reductions.
    - Persistent scheduling.
-   - Matrix Core MFMA, WGMFMA, global-to-LDS staging, or `global-to-LDS staging`.
+   - Matrix Core MFMA, MFMA, global-to-LDS staging, or `global-to-LDS staging`.
    - Custom epilogue.
    - Runtime integration: MIGraphX plugin, PyTorch extension, OneFlow op,
      HIP Graph, or Triton kernel.

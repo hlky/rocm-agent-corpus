@@ -260,8 +260,8 @@
         "SortPairsDescending"
       ],
       "local_paths": [
-        "third_party/oneflow/oneflow/user/kernels/top_k_kernel.cu",
-        "third_party/oneflow/oneflow/core/functional/functional_api.yaml"
+        "source:oneflow/oneflow/user/kernels/top_k_kernel.cu",
+        "source:oneflow/oneflow/core/functional/functional_api.yaml"
       ],
       "upstream_urls": [
         "https://github.com/Oneflow-Inc/oneflow"
@@ -295,9 +295,9 @@
         "nvte_fused_topk_with_score_function_forward"
       ],
       "local_paths": [
-        "third_party/transformer-engine/transformer_engine/pytorch/router.py",
-        "third_party/transformer-engine/transformer_engine/common/fused_router/fused_topk_with_score_function.cu",
-        "third_party/transformer-engine/transformer_engine/common/include/transformer_engine/fused_router.h"
+        "source:transformer-engine/transformer_engine/pytorch/router.py",
+        "source:transformer-engine/transformer_engine/common/fused_router/fused_topk_with_score_function.cu",
+        "source:transformer-engine/transformer_engine/common/include/transformer_engine/fused_router.h"
       ],
       "upstream_urls": [
         "https://github.com/NVIDIA/TransformerEngine"

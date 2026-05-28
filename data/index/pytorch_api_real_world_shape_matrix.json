@@ -426,7 +426,7 @@
         "H:/dinoml_v2_agents/agents/plans/transformers/clap/report.md:262",
         "H:/dinoml_v2_agents/agents/plans/transformers/autoformer/report.md:71"
       ],
-      "summary": "Real STFT/log-mel and AutoCorrelation FFT rows exist, but CPU/data-pipeline versus CUDA-runtime ownership must be decided before admission."
+      "summary": "Real STFT/log-mel and AutoCorrelation FFT rows exist, but CPU/data-pipeline versus GPU-runtime ownership must be decided before admission."
     },
     {
       "id": "pt_loss_training_heads",

@@ -31,12 +31,11 @@
         "third_party/composable-kernel",
         "third_party/rocm-libraries",
         "third_party/migraphx",
-        "third_party/vllm-rocm",
         "third_party/triton",
         "third_party/vllm",
         "third_party/flashinfer",
         "third_party/bitsandbytes",
-        "third_party/transformer-engine"
+        "third_party/pytorch"
       ]
     },
     {
@@ -47,9 +46,12 @@
         "data/index/gpu_architectures.json",
         "data/index/architecture_labs.json",
         "third_party/composable-kernel",
-        "third_party/cuda-samples",
+        "third_party/rocm-examples",
         "corpus/tasks/gfx90a-gfx942-cdna-split",
-        "corpus/tasks/gfx942-cdna3-mfma-lab"
+        "corpus/tasks/gfx942-cdna3-mfma-lab",
+        "corpus/tasks/wave-specialized-mfma-pipeline",
+        "corpus/tasks/global-to-lds-mfma-gemm",
+        "corpus/tasks/gfx950-gfx1200-rocm-portability"
       ]
     },
     {
@@ -116,6 +118,8 @@
         "corpus/tasks/warp-reduce-scan-vote",
         "corpus/tasks/lds-tiled-copy",
         "corpus/tasks/cdna-mfma-gemm",
+        "corpus/tasks/wave-specialized-mfma-pipeline",
+        "corpus/tasks/global-to-lds-mfma-gemm",
         "corpus/tasks/inline-mfma-skeleton",
         "corpus/tasks/migraphx-engine-tuning-sweep",
         "corpus/tasks/triton-vs-hip-row-kernel"
@@ -199,6 +203,9 @@
         "corpus/tasks/autotune-parameter-sweep",
         "corpus/tasks/gfx90a-gfx942-cdna-split",
         "corpus/tasks/gfx942-cdna3-mfma-lab",
+        "corpus/tasks/wave-specialized-mfma-pipeline",
+        "corpus/tasks/global-to-lds-mfma-gemm",
+        "corpus/tasks/gfx950-gfx1200-rocm-portability",
         "docs/V2_EXTENSION_WAVE3.md",
         "corpus/tasks/strided-batched-layout-transform",
         "corpus/tasks/packed-layout-transcode",
@@ -224,10 +231,10 @@
         "docs/SELECTION_SAMPLING_LIBRARY_BASELINES.md",
         "docs/QUANTIZATION_LIBRARY_BASELINES.md",
         "docs/MIOPEN_ATTENTION_GUIDE.md",
-        "third_party/oneflow",
+        "third_party/pytorch",
         "third_party/migraphx",
-        "third_party/vllm-rocm",
-        "third_party/miopen-frontend"
+        "third_party/vllm",
+        "third_party/miopen"
       ]
     },
     {

@@ -1,17 +1,18 @@
 # GPU and GFX Architecture Guide
 
-Architecture matters. A kernel that is sensible on CDNA2 may leave CDNA3 or
-CDNA4/RDNA4 features unused, and a kernel using architecture-specific instructions
-may not be portable.
+Architecture matters. A HIP kernel that is sensible on one AMD target can be
+the wrong shape for another because wave size, LDS capacity, Matrix Core paths,
+cache behavior, clocks, and library coverage all move.
 
 ## First Step: Identify the Target
 
 Run:
 
 ```bash
+rocminfo
 rocm-smi
-hipcc --list-gpu-arch
-hipcc --list-gpu-code
+hipcc --version
+hipcc --list-gpu-targets
 ```
 
 This repo also provides:
@@ -20,207 +21,109 @@ This repo also provides:
 python tools/inspect_rocm_arch.py
 ```
 
+Record the reported `gfx` target from `rocminfo`; do not infer it from a GPU
+marketing name.
+
 ## GFX Target Families
 
-| Family | Common GFXs | Agent Notes |
+| Family | Common GFX Targets | Agent Notes |
 | --- | --- | --- |
-| Volta | `sm_70` | Independent thread scheduling, Matrix Cores introduced. |
-| Turing | `sm_75` | Matrix Core evolution, useful baseline for older inference GPUs. |
-| CDNA2 data center | `gfx90a` | A100-class path, `global-to-LDS staging`, TF32, strong Matrix Core baseline. |
-| CDNA2 consumer/pro | `gfx1030` | RTX 30/CUDA-origin A4000/A5000-like path; not identical to A100. |
-| CDNA2 embedded | `sm_87` | Jetson Orin-like path; power and memory constraints matter. |
-| RDNA3 | `gfx1100` | RTX 40/L4/L40S-like path; often excellent inference target. |
-| CDNA3 | `gfx942`, `gfx950` | H100/H200-like path; global-to-LDS staging, WGMFMA, clusters, architecture-specific features. |
-| CDNA4/RDNA4 | `gfx950`, `gfx1200`, suffix variants | New architecture family; verify exact flags and feature suffixes with current CUDA docs and `hipcc`. |
+| CDNA2 | `gfx90a` | MI200-class data-center baseline for MFMA, LDS tiling, hipBLASLt, and Composable Kernel comparisons. |
+| RDNA2 | `gfx1030` | Use as a memory, launch-overhead, and portability target only when the local ROCm stack supports it. |
+| RDNA3 | `gfx1100` | Good fixed-shape inference and memory-bound fusion target; verify WMMA/MFMA and low-precision support per SKU. |
+| CDNA3 | `gfx942` | MI300-class target for MFMA, CK Tile, attention, grouped GEMM, and inference baselines. |
+| CDNA4 | `gfx950` | Data-center target; verify exact ROCm/library support and rerun baselines after upgrades. |
+| RDNA4 | `gfx1200` | Workstation/deployment target; keep records separate from CDNA4. |
+
+Use `data/index/gpu_architectures.json` and `docs/ARCHITECTURE_LABS.md` for
+machine-readable and task-oriented navigation.
 
 ## Compile Flag Discipline
 
-Portable binary example:
+Compile measured kernels with an explicit offload target:
 
 ```bash
-hipcc -O3 -gencode arch=compute_86,code=gfx1030 -gencode arch=compute_86,code=compute_86
-```
-
-Architecture-specific example:
-
-```bash
-hipcc -O3 -arch=gfx950
+hipcc -O3 --std=c++17 --offload-arch=gfx942 -lineinfo kernel.hip -o kernel_gfx942
 ```
 
 Rules:
 
-- Use AMD GCN ISA (`sm_XY`) for the target GPU when benchmarking.
-- Include LLVM IR / AMD GCN ISA (`compute_XY`) when forward compatibility matters.
-- Treat suffix architectures such as `gfx950` or future family-specific
-  variants as less portable; they may enable features unavailable in the base
-  architecture.
-- Record every `-gencode` in result metadata.
+- Record every offload target in result metadata.
+- Keep each `gfx` target as a separate compatibility contract.
+- If the toolkit exposes suffix or family-specific targets, record them as
+  target-specific evidence and provide a portable fallback when deployment needs
+  one.
+- Store `hipcc --version`, `hipcc --list-gpu-targets`, ROCm runtime/driver
+  metadata, GPU model, and library versions.
 
-## Matrix Core and Copy Pipeline Ladder
+## Matrix Core And LDS Ladder
 
-Use the instruction family as part of the task contract, not as decoration.
+Use instruction families as claims only when you have proof.
 
-| Target | Typical Matrix Core path | Data movement path | Agent boundary |
+| Target | Matrix/Compute Path | Data Movement Path | Agent Boundary |
 | --- | --- | --- | --- |
-| `gfx90a` | `mfma`/rocWMMA with `ldmatrix`; TF32, FP16, BF16, INT8/INT4 where supported | `global-to-LDS staging` global-to-shared staging | Warp-level Matrix Core tiles and CTA pipelines. No global-to-LDS staging/WGMFMA. |
-| `gfx1030` | Same programming family as GFX80, but SKU-dependent throughput and memory limits | `global-to-LDS staging`, vectorized global memory, smaller shared-memory budgets than A100-class parts | Re-tune tile sizes; do not import A100 occupancy assumptions. |
-| `gfx1100` | RDNA3 Matrix Core paths through `mfma`/libraries; verify FP8/narrow precision per stack | CDNA2-style async copy plus RDNA3 cache behavior | Strong inference target; compare MIGraphX and hipBLASLt tactics before claiming a custom win. |
-| `gfx942` | Portable CDNA3 compiler/library paths; avoid suffix-only WGMFMA/global-to-LDS staging claims | CDNA3 memory hierarchy without requiring `gfx950` instructions | Establish the portable baseline and fallback. |
-| `gfx950` | WGMFMA warp-group Matrix Core paths, FP8 recipes where supported | global-to-LDS staging bulk tensor movement, `mbarrier`, producer/consumer pipelines | Architecture-specific implementation. Keep separate from `gfx942`. |
-| `gfx950` | CDNA4/RDNA4 Matrix Core families, including low-precision paths exposed by current CUDA/Composable Kernel | CDNA4/RDNA4 memory pipelines; verify exact instruction names with AMD GCN ISA | Data-center CDNA4/RDNA4 records should be revalidated as toolkits mature. |
-| `gfx1200` | RTX CDNA4/RDNA4 Matrix Core paths exposed by the installed stack | RTX/workstation memory and boost-clock behavior | Do not assume GFX100 tuning or library support transfers. |
+| `gfx90a` | MFMA through HIP, rocWMMA, hipBLASLt, or Composable Kernel | LDS tiling, barriers, wait counts, vectorized global memory | CDNA2 data-center baselines and fixed-shape specialization. |
+| `gfx1030` | SKU/toolkit-dependent; verify before claiming | Vectorized memory, LDS tiling, wave-size-sensitive code | Memory-bound and launch-overhead tasks. |
+| `gfx1100` | WMMA/MFMA availability must be verified | LDS/cache behavior plus inference-oriented library paths | Fixed-shape inference and fused memory-bound kernels. |
+| `gfx942` | MFMA and CK Tile/CDNA3 library paths | LDS staging and HBM/cache-aware tiling | Portable CDNA3 records. |
+| `gfx950` | Exact MFMA/WMMA and low-precision support depends on toolkit/library stack | LDS staging, multi-GPU topology, library maturity | CDNA4 data-center records, rerun after upgrades. |
+| `gfx1200` | Exact WMMA/MFMA and low-precision support depends on SKU/toolkit | Workstation clocks, cache behavior, inference libraries | RDNA4 deployment records. |
 
-For custom kernels, this ladder usually becomes:
+Disassembly command:
 
-1. Scalar/CUDA-core baseline for correctness and launch overhead.
-2. Warp-level MFMA or rocWMMA path for CDNA2/RDNA3/CDNA3-portable code.
-3. Composable Kernel/CK Tile-inspired Matrix Core path with custom epilogue.
-4. CDNA3/CDNA4/RDNA4 warp-group path only when the target and binary contract
-   allow architecture-specific code.
+```bash
+llvm-objdump --disassemble --triple=amdgcn-amd-amdhsa ./kernel_gfx942
+```
 
-## Copy Pipeline Boundaries
+Look for `v_mfma`, `v_wmma`, `ds_read`, `ds_write`, `s_waitcnt`,
+`s_barrier`, `global_load`, and `global_store` only when they support a claim.
 
-`global-to-LDS staging`, global-to-LDS staging, and ordinary vectorized loads solve different problems.
+## Copy And Staging Boundaries
 
 - Use ordinary coalesced/vectorized global loads when each element is consumed
-  once, shared-memory reuse is low, or the tile is too small to amortize staging.
-- Use `global-to-LDS staging` on CDNA2/RDNA3 when a CTA repeatedly consumes a global tile from
-  shared memory and can overlap copy groups with math. Track stage count, shared
-  memory, barrier placement, and register pressure.
-- Use global-to-LDS staging on CDNA3-specific and CDNA4/RDNA4-specific paths when tensors are
-  large, regular, multidimensional, and worth descriptor setup plus asynchronous
-  bulk movement. global-to-LDS staging is not a drop-in replacement for every `global-to-LDS staging` tile.
-- Use WGMFMA only when a warp-group schedule is natural for the tile. It changes
-  the register, synchronization, and occupancy problem from a warp-level MFMA
-  kernel.
-- For attention and GEMM, ask whether Composable Kernel already expresses the intended
-  pipeline. A custom kernel should document what it changes: layout, epilogue,
-  shape, masking, quantization, scheduler, or launch boundary.
-
-## Memory Hierarchy and Occupancy Gotchas
-
-- Occupancy is a constraint, not a score. A lower-occupancy Matrix Core kernel
-  can win if it keeps the math pipe fed; a memory-bound row kernel may need more
-  resident CTAs to hide latency.
-- Register count, shared-memory allocation, block size, and cluster shape are
-  architecture-specific. Re-run amdclang++ and occupancy estimates for each GFX.
-- Shared-memory bank conflicts still matter, especially for transposes,
-  reductions, `ldmatrix` layouts, and global-to-LDS staging/WGMFMA staging buffers.
-- L2 behavior is SKU-sensitive. Cache residency, persistent data, and access
-  policy changes should be treated as hypotheses until measured.
-- Vectorized loads require alignment and enough contiguous work. The corpus
-  already contains a `timing-only negative` vectorized SAXPY example; do not
-  assume wider loads are faster.
-- Hosted GPUs may block Nsight counters. In that case, say `timing-only` and
-  describe any AMD GCN ISA-based inference separately from profiler evidence.
+  once or the tile is too small to amortize LDS staging.
+- Use LDS staging when a workgroup repeatedly consumes a global tile and can
+  overlap movement, synchronization, and compute.
+- Use Composable Kernel/CK Tile as a reference before writing a raw MFMA
+  pipeline. A custom kernel should state what it changes: tile shape, layout,
+  scheduler, epilogue, quantization metadata, or dispatch boundary.
+- Do not use NVIDIA-specific terms such as TMA, WGMMA, SASS, or cubin as ROCm
+  evidence. CUDA-origin material is historical context only.
 
 ## Portability Traps
 
-- `gfx90a`, `gfx1030`, and `gfx1100` are not interchangeable even when code compiles
-  unchanged. Shared memory, clocks, cache, and library tactics can change the
-  winning tile.
-- `gfx942` and `gfx950` are separate contracts. Compile `gfx942` for portable
-  CDNA3 records; compile `gfx950` only when the deployment target permits
-  architecture-specific instructions.
-- Do not ship only architecture-specific LLVM IR / AMD GCN ISA when forward compatibility matters.
-  Include an explicit portable fallback cubin/LLVM IR / AMD GCN ISA path and record dispatch logic.
-- CDNA4/RDNA4 target names and suffix variants are toolkit-sensitive. Confirm with
-  `hipcc --list-gpu-arch`, `hipcc --list-gpu-code`, and current AMD/ROCm docs before
-  treating `gfx950a`, `gfx950f`, `gfx1200a`, or similar names as available.
-- Library baselines can improve after CUDA, Composable Kernel, MIGraphX, hipBLASLt, or
-  driver upgrades. Re-run baselines when any of those versions change.
+- `gfx90a`, `gfx1030`, `gfx1100`, `gfx942`, `gfx950`, and `gfx1200` are not
+  interchangeable just because HIP source compiles.
+- A result on one GFX target is not architecture-general truth.
+- Library baselines can change after ROCm, Composable Kernel, MIGraphX,
+  hipBLASLt, Triton, PyTorch, or driver upgrades.
+- Consumer/workstation results need clock, power, and thermal metadata.
+- HIP-event timings without profiler counters are `timing-only`.
 
 ## Architecture-Tuned Claim Checklist
 
-Before claiming a kernel is tuned for an GFX, attach:
+Attach:
 
-- Exact GPU name, gfx target, driver, ROCm toolkit, and library versions.
-- Full compile flags, including every `-gencode`, LLVM IR / AMD GCN ISA fallback, and suffix
-  target.
-- AMD GCN ISA evidence for claimed instruction families: `CPASYNC`, `LDMATRIX`, `MFMA`,
-  `WGMFMA`, `global-to-LDS staging`, `MBARRIER`, or relevant vector/cache instructions.
-- amdclang++ resource output: registers, spills, static and dynamic shared memory.
-- Launch shape: grid, block, cluster shape, stage count, dynamic shared memory,
-  and launch bounds.
-- Math contract: dtype, accumulator, TF32/FP32 distinction, FP8 scale layout,
-  INT8/INT4/NVFP4 packing, rounding, and tolerance.
-- Baseline ladder: naive CUDA, strongest relevant library, and framework/Triton
-  path when applicable.
-- Evidence label: `timing-only`, `counter-backed-measured`,
-  `profile-attempted-blocked`, or `negative example`.
+- GPU name and reported `gfx` target.
+- ROCm toolkit, runtime/driver, hipcc, and library versions.
+- Full compile flags and offload targets.
+- Correctness contract: shape, dtype, layout, math mode, accumulator, tolerance.
+- Vendor baseline: hipBLAS/rocBLAS/hipBLASLt, Composable Kernel, hipCUB,
+  rocPRIM, rocThrust, MIOpen, MIGraphX, vLLM on ROCm, Triton, or framework code.
+- Resource metadata: VGPRs, SGPRs, LDS bytes, spills, block size, grid size,
+  wave-size assumptions, stage count, and launch bounds when available.
+- Disassembly or library metadata for any instruction-family claim.
+- Evidence label: `template-only`, `timing-only`, `counter-backed-measured`,
+  `profile-attempted-blocked`, `negative example`, or `correctness-only`.
 
-## CDNA2
-
-Important themes:
-
-- `global-to-LDS staging` for global-to-shared staging.
-- TF32 Matrix Cores for GEMM-like workloads.
-- L2 residency controls where applicable.
-- Warp-level reductions.
-- Shared-memory/L1 carveout choices.
-
-Agent questions:
-
-- Is the kernel memory-bound and tileable?
-- Would `global-to-LDS staging` reduce register use or latency?
-- Is TF32 acceptable for the accuracy target?
-- Is this `gfx90a` or `gfx1030`? Do not assume A100 behavior on RTX/A-series
-  workstation GPUs.
-
-## RDNA3
-
-Important themes:
-
-- Strong inference GPU family.
-- Similar CUDA programming model to CDNA2 for many kernels.
-- Different cache, clock, and Matrix Core behavior from A100/H100.
-
-Agent questions:
-
-- Is this an L4/L40S/RTX 40 deployment target?
-- Are library kernels already excellent for this shape?
-- Are MIGraphX or hipBLASLt tactics architecture-selected?
-
-## CDNA3
-
-Important themes:
-
-- Tensor Memory Accelerator (global-to-LDS staging).
-- Warp-group MFMA (WGMFMA).
-- Thread block clusters and distributed shared memory.
-- Architecture-specific `gfx950` features.
-
-Agent questions:
-
-- Is the kernel GEMM/attention-like enough to use Composable Kernel CDNA3 kernels?
-- Can global-to-LDS staging replace manual global-to-shared copies?
-- Is WGMFMA available and worth the added complexity?
-- Does the deployment target require portable `gfx942` instead of `gfx950`?
-
-## CDNA4/RDNA4
-
-Important themes:
-
-- New architecture families and family-specific feature flags.
-- New Matrix Core and low-precision paths.
-- Compatibility rules matter; verify with the current CDNA4/RDNA4 compatibility
-  and tuning guides.
-
-Agent questions:
-
-- Is the target data center CDNA4/RDNA4 or RTX/workstation CDNA4/RDNA4?
-- Which exact gfx target does `rocm-smi` report?
-- Does `hipcc --list-gpu-arch` expose a suffix architecture for this target?
-- Are Composable Kernel/hipBLASLt/MIGraphX versions new enough for the GPU?
-
-## GFX-Specific Corpus Metadata
+## Measurement Metadata
 
 Every measured record should include:
 
-- GPU name.
-- Compute capability.
-- Driver version.
-- ROCm toolkit version.
-- `hipcc` architecture flags.
-- Whether the kernel uses architecture-specific instructions.
-- Whether a LLVM IR / AMD GCN ISA fallback was embedded.
+- GPU name and `gfx` target.
+- ROCm toolkit and runtime/driver version.
+- `hipcc` command line and offload target.
+- Library versions and selected algorithm or generated-kernel identity.
+- Hardware state: clocks, power, topology for multi-GPU work.
+- Timing boundary: isolated kernel, library call, framework call, graph replay,
+  or end-to-end application path.

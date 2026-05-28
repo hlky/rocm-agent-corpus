@@ -124,4 +124,4 @@ extending competitors, not permission to abandon the custom path:
 - Using occupancy as a goal instead of a diagnostic.
 - Adding shared memory without proving reuse or coalescing benefit.
 - Ignoring setup costs for tiny kernels.
-- Claiming Nsight evidence when only HIP-event timing exists.
+- Claiming profiler-counter evidence when only HIP-event timing exists.

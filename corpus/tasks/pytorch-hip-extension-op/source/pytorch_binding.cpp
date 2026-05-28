@@ -23,7 +23,7 @@ extern "C" void launch_rowwise_sum_extension(const float* x,
 
 void check_rowwise_input(const TensorSketch& x) {
   if (!x.is_cuda) {
-    throw std::invalid_argument("rowwise extension expects a CUDA tensor");
+    throw std::invalid_argument("rowwise extension expects a GPU tensor");
   }
   if (!x.is_float32) {
     throw std::invalid_argument("rowwise extension expects float32");

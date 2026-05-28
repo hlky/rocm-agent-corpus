@@ -21,7 +21,7 @@ The scaffold contains four data classes:
 
 ## Intended Uses
 
-- Retrieval for CUDA coding agents.
+- Retrieval for HIP/ROCm coding agents.
 - Supervised examples of optimization reasoning.
 - Evaluation tasks for code generation and repair.
 - Regression tests for benchmark harnesses and verification logic.
@@ -57,5 +57,5 @@ pin the source revision and preserve license notices.
 
 The seed tasks are not benchmarked in this workspace. They are examples of the
 record format and should not be used as measured performance data until they are
-run and profiled on a CUDA-capable system.
+run and profiled on a ROCm-capable AMD system.
 

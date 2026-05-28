@@ -157,7 +157,7 @@ cleanly is still high-value corpus material.
 Measure the strongest same-contract baseline before calling a custom result a
 win.
 
-1. CPU or simple CUDA oracle
+1. CPU or simple HIP oracle
    - Defines ties, NaNs, masks, sortedness, and sampled-token behavior.
    - Not a performance target.
 
@@ -245,7 +245,7 @@ Relevant local references:
 - `third_party/flashinfer/include/flashinfer/sampling.cuh`
 - `third_party/flashinfer/include/flashinfer/air_top_p.cuh`
 - `third_party/composable-kernel` for producer-side fusion and epilogue references
-- CUDA-origin TensorRT-LLM, CUB/CCCL, OneFlow, and Transformer Engine source
+- CUDA-origin MIGraphX-LLM, CUB/CCCL, OneFlow, and Transformer Engine source
   paths in `docs/TOPK_IMPLEMENTATION_SURVEY.md` as algorithm contrast only
 
 ## Algorithm Ladder
@@ -433,20 +433,16 @@ Watch:
 
 ### GFX Targets
 
-- `gfx90a`: A100-class CDNA2/RDNA2. Use as an architecture-distinct data-center
-  baseline. `cp.async` exists, but pure Top-K usually streams each logit once,
-  so async shared-memory staging is not automatically useful.
-- `gfx1030`: RDNA2-class consumer/pro target. Re-tune block size and shared-memory
-  use; do not import A100 occupancy assumptions.
+- `gfx90a`: CDNA2 data-center target. Pure Top-K usually streams each logit
+  once, so LDS staging is not automatically useful.
+- `gfx1030`: RDNA2-class target where ROCm support is available. Re-tune block
+  size and LDS use; do not import CDNA occupancy assumptions.
 - `gfx1100`: RDNA3 inference target. Compare MIGraphX/vLLM/FlashInfer paths because
   serving-stack tactics can be strong.
-- `gfx942`: portable CDNA3. Keep it separate from `gfx942` records.
-- `gfx942`: CDNA3-specific TMA/WGMMA suffix target. TMA is more relevant for
-  regular multidimensional tiles than for a single streaming logits row, but it
-  may matter for fused kernels that load structured metadata, page tables, or
-  reused blocks.
-- `gfx950` / CDNA4/RDNA4: verify exact toolkit flags and library support before
-  making suffix-specific claims. Re-run baselines after CUDA, MIGraphX,
+- `gfx942`: CDNA3 target. Keep it separate from CDNA4 and RDNA records.
+- `gfx950` / `gfx1200`: CDNA4/RDNA4 targets. Verify exact toolkit flags and
+  library support before making target-specific claims. Re-run baselines after
+  ROCm, MIGraphX,
   FlashInfer, vLLM, hipCUB, or compiler upgrades.
 
 ### Warp and Block Mechanics
@@ -658,7 +654,7 @@ Exit criteria:
 - Add `gfx90a`, `gfx1100`, `gfx942` or `gfx942`, and CDNA4/RDNA4 `gfx950` or
   available target as hardware allows.
 - Rebuild with exact AMD GCN ISA targets and record LLVM IR / AMD GCN ISA fallback policy.
-- For CDNA3/CDNA4/RDNA4, do not claim TMA/WGMMA relevance unless AMD GCN ISA or source
+- For CDNA3/CDNA4/RDNA4, do not claim MFMA/LDS relevance unless AMD GCN ISA or source
   actually uses those features.
 
 Exit criteria:

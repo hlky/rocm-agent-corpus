@@ -48,6 +48,8 @@ tools/                    Validation, task scaffolding, benchmarking, and enviro
 - `docs/PYTORCH_BASELINE_CHALLENGE.md`: PyTorch-public-API challenge scaffold for ROCm.
 - `docs/ROAD_TO_SOTA_TOPK.md`: Top-K roadmap, baselines, and evidence checklist.
 - `docs/CUDA_ROCM_PARITY_NOTES_20260528.md`: first parity pass against the CUDA corpus.
+- `docs/CUDA_ROCM_TASK_PARITY_MAP.md`: task-by-task CUDA to ROCm equivalence map.
+- `docs/ARCHITECTURE_LABS.md`: ROCm `gfx` target labs and evidence gates.
 - `docs/HIPBLAS_ROCBLAS_GUIDE.md`: hipBLAS/rocBLAS/hipBLASLt baselines.
 - `docs/COMPOSABLE_KERNEL_EXTENSION_GUIDE.md`: Composable Kernel and CK Tile paths.
 - `docs/ROCPRIM_HIPCUB_ROCTHRUST_GUIDE.md`: rocPRIM, hipCUB, and rocThrust primitives.
@@ -59,7 +61,7 @@ tools/                    Validation, task scaffolding, benchmarking, and enviro
 
 The corpus keeps the CUDA corpus task coverage but ports source artifacts and metadata to HIP/ROCm. Seed tasks include memory coalescing, tiled transpose, SAXPY, reductions, softmax, RMSNorm, scans, histograms, small GEMM, attention, top-k sampling, INT4 dequant GEMV, and rocWMMA MFMA GEMM.
 
-Expansion scaffolds cover sparse/irregular workloads, HIP graphs, hipRTC specialization, persistent work queues, global-to-LDS staging, inline MFMA, MIGraphX, PyTorch HIP extensions, RCCL overlap, rocSHMEM queues, real-model PyTorch baseline challenges, and wide-K Top-K experiments.
+Expansion scaffolds cover sparse/irregular workloads, HIP graphs, hipRTC specialization, persistent work queues, LDS-staged MFMA pipelines, inline MFMA, MIGraphX, PyTorch HIP extensions, RCCL overlap, rocSHMEM queues, real-model PyTorch baseline challenges, and wide-K Top-K experiments.
 
 ## Evidence Policy
 

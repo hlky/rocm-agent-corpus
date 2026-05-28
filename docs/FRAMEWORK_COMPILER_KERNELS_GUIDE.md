@@ -10,7 +10,7 @@ baselines and generated-code references, not as a reason to stop.
 - nvFuser: fusion compiler for PyTorch/JIT-style tensor expressions; useful for
   elementwise, normalization, reductions, and pointwise-heavy chains.
 - TorchInductor/Triton: common PyTorch 2.x compiler path; often emits Triton
-  kernels and can outperform naive CUDA extensions by removing dispatch and
+  kernels and can outperform naive HIP extensions by removing dispatch and
   materialized intermediates.
 - XLA and Pallas: JAX/TensorFlow compiler paths; strong for whole-graph shape
   specialization, fusion, and SPMD lowering.
@@ -32,7 +32,7 @@ Before writing HIP C++, extract the generated-kernel contract:
    reductions order, tolerance.
 5. Runtime boundary: compile time, warmup, graph capture, dispatch overhead,
    memory allocation, synchronization.
-6. Generated code: Triton source, LLVM IR / AMD GCN ISA, AMD GCN ISA, launch parameters, register count,
+6. Generated code: Triton source, LLVM IR, AMD GCN ISA, launch parameters, register count,
    shared memory, spills when available.
 7. Fallbacks: unsupported dynamic shape, unsupported dtype/layout, graph break,
    custom call, library call, or eager fallback.
@@ -40,12 +40,12 @@ Before writing HIP C++, extract the generated-kernel contract:
 Only claim architecture behavior when backed by generated LLVM IR / AMD GCN ISA or profiler
 counters. Otherwise use `timing-only`.
 
-## Ways Custom CUDA Can Compete
+## Ways Custom HIP Can Compete
 
 - Accept fewer shapes or one production bucket while the compiler keeps guards.
 - Fuse across a graph break, custom op, layout conversion, or library boundary.
 - Use architecture-specific features the compiler does not emit for this case:
-  `global-to-LDS staging`, global-to-LDS staging, WGMFMA, inline MFMA, warp-specialized reductions, persistent
+  LDS staging, MFMA, inline MFMA, wave-specialized reductions, persistent
   CTAs, or custom memory ordering.
 - Reduce register pressure or shared-memory traffic after inspecting generated
   code.
@@ -76,11 +76,11 @@ For framework workloads, compare in this order when feasible:
 2. Framework compiler output, such as nvFuser, Inductor/Triton, XLA/Pallas, or
    OneFlow fusion.
 3. Handwritten Triton or library baseline.
-4. CUDA extension or standalone HIP kernel.
+4. HIP extension or standalone HIP kernel.
 5. Integration path: MIGraphX plugin, OneFlow op, PyTorch extension, HIP Graph,
    or custom call.
 
-The winner depends on the timing boundary. Kernel-only CUDA may win while
+The winner depends on the timing boundary. Kernel-only HIP may win while
 end-to-end framework timing loses; keep both numbers and label them clearly.
 
 ## Corpus Record Fields
@@ -88,7 +88,7 @@ end-to-end framework timing loses; keep both numbers and label them clearly.
 ```text
 Framework/compiler:
 Framework version and flags:
-GPU/CUDA/compiler:
+GPU/ROCm/compiler:
 Graph/function:
 Shapes/dtypes/layouts:
 Fusion group:

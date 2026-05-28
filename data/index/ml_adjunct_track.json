@@ -5,7 +5,7 @@
   "evidence_policy": {
     "unmeasured_label": "template-only",
     "timed_without_profiler_counters": "timing-only",
-    "profiler_counter_rule": "Do not claim Nsight or hardware-counter evidence unless recorded with hardware and build metadata."
+    "profiler_counter_rule": "Do not claim profiler-counter evidence unless recorded with hardware and build metadata."
   },
   "tasks": [
     {
@@ -13,8 +13,8 @@
       "path": "corpus/tasks/fused-adamw-update",
       "domain": "ml-training",
       "status": "template-only",
-      "baseline": "multiple simple RDNA3mW update stages with a materialized update buffer",
-      "optimized": "single fused RDNA3mW update with float4 vector path and scalar fallback",
+      "baseline": "multiple simple AdamW update stages with a materialized update buffer",
+      "optimized": "single fused AdamW update with float4 vector path and scalar fallback",
       "source_refs": ["amd-rocm-programming-guide", "bitsandbytes", "transformer-engine"],
       "custom_kernel_surface": ["fusion", "vectorized-contiguous-access", "optimizer-state-layout-specialization"]
     },

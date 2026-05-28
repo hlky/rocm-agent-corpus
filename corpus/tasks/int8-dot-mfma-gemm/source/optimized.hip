@@ -9,7 +9,7 @@
 namespace {
 
 __global__ void int8_dp4a_imma_gemm_optimized_kernel() {
-  // TODO: implement the optimized CUDA path and preserve this task's contract.
+  // TODO: implement the optimized HIP path and preserve this task's contract.
 }
 
 }  // namespace

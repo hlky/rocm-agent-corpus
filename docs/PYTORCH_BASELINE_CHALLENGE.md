@@ -148,7 +148,7 @@ copies, random generation, and host-device synchronization are included.
 | `torch_position_scan_rope` | `cumsum`, `arange`, `sin`, `cos`, RoPE/position helpers | `pt_position_scan_rope_rows` | Allegro 3D RoPE apply, Qwen3-VL `cu_seqlens`/M-RoPE, DETR 2D sine position scan | `challenge-admitted` |
 | `torch_conv_codec` | conv/pool/interpolate/unfold/fold | `pt_conv_resample_codec_rows`, `pt_pointwise_cfg_scheduler` | Conv2d/3d islands, patchify/unpatchify | `challenge-admitted` |
 | `torch_sparse_irregular` | sparse APIs, `segment_reduce`, block sparse candidates | `pt_sparse_block_extension` | segmented reduce, format conversion, sparse softmax | `candidate-with-shape` |
-| `torch_optimizer_foreach` | `torch.optim`, `_foreach_*` | none yet | multi-tensor RDNA3mW, norm clipping | `blocked-until-sourced` |
+| `torch_optimizer_foreach` | `torch.optim`, `_foreach_*` | none yet | multi-tensor AdamW, norm clipping | `blocked-until-sourced` |
 
 ## Minimum Result Fields
 

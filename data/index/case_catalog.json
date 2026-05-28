@@ -65,7 +65,7 @@
       ]
     },
     {
-      "section": "System-Level CUDA",
+      "section": "HIP/ROCm Runtime Systems",
       "cases": [
         "launch-overhead",
         "overlap-copy-compute",
@@ -194,8 +194,8 @@
       ],
       "submodules": [
         "third_party/migraphx",
-        "third_party/vllm-rocm",
-        "third_party/miopen-frontend"
+        "third_party/vllm",
+        "third_party/miopen"
       ],
       "status": "guide-example-and-scaffold"
     },
@@ -213,7 +213,7 @@
         "compiler-generated baseline comparison"
       ],
       "submodules": [
-        "third_party/oneflow",
+        "source:oneflow",
         "third_party/triton"
       ],
       "status": "guide-example-and-scaffold"
@@ -229,7 +229,7 @@
       "custom_when": [
         "global-to-LDS staging",
         "global-to-LDS staging",
-        "WGMFMA",
+        "MFMA",
         "architecture-specific Matrix Core path",
         "CDNA4/RDNA4 feature path"
       ],
@@ -349,7 +349,7 @@
         {
           "id": "async-p2p-copy-pack",
           "library_baselines": [
-            "CUDA P2P",
+            "HIP P2P",
             "RCCL point-to-point"
           ],
           "custom_topics": [
@@ -362,7 +362,7 @@
         {
           "id": "memory-pool-allocator",
           "library_baselines": [
-            "CUDA memory pools",
+            "HIP memory pools",
             "framework caching allocators"
           ],
           "custom_topics": [
@@ -391,7 +391,7 @@
           "id": "nvcomp-streaming-decode",
           "library_baselines": [
             "nvCOMP",
-            "CUDA samples"
+            "ROCm examples"
           ],
           "custom_topics": [
             "block framing",
@@ -476,7 +476,7 @@
         {
           "id": "fft-convolution-fusion",
           "library_baselines": [
-            "cuFFT",
+            "rocFFT",
             "MIOpen where applicable"
           ],
           "custom_topics": [
@@ -484,7 +484,7 @@
             "pointwise multiply",
             "batched plans"
           ],
-          "promotion_artifact": "cuFFT-adjacent task"
+          "promotion_artifact": "rocFFT-adjacent task"
         },
         {
           "id": "small-gemv-token-batch",
@@ -504,7 +504,7 @@
           "id": "triangular-solve-small-batch",
           "library_baselines": [
             "hipBLAS/rocBLAS",
-            "cuSOLVER"
+            "rocSOLVER"
           ],
           "custom_topics": [
             "dependency scheduling",
@@ -784,7 +784,7 @@
           "id": "multi-tensor-adamw",
           "library_baselines": [
             "PyTorch foreach/fused optimizers",
-            "Apex-style fused RDNA3m",
+            "Apex-style fused Adam",
             "bitsandbytes"
           ],
           "custom_topics": [
@@ -905,7 +905,7 @@
         {
           "id": "sddmm-sparse-attention-score",
           "library_baselines": [
-            "cuSPARSE",
+            "rocSPARSE",
             "Composable Kernel sparse",
             "graph libraries"
           ],
@@ -919,7 +919,7 @@
         {
           "id": "spgemm-merge-hash",
           "library_baselines": [
-            "cuSPARSE SpGEMM"
+            "rocSPARSE SpGEMM"
           ],
           "custom_topics": [
             "merge/hash strategies",
@@ -931,7 +931,7 @@
         {
           "id": "sparse-format-conversion",
           "library_baselines": [
-            "cuSPARSE",
+            "rocSPARSE",
             "hipCUB sort/scan"
           ],
           "custom_topics": [
@@ -944,7 +944,7 @@
         {
           "id": "bsr-block-sparse-matmul",
           "library_baselines": [
-            "cuSPARSE BSR",
+            "rocSPARSE BSR",
             "Composable Kernel sparse",
             "Triton"
           ],
@@ -958,7 +958,7 @@
         {
           "id": "structured-sparsity-2to4",
           "library_baselines": [
-            "cuSPARSELt",
+            "rocSPARSE/Composable Kernel sparse path",
             "Composable Kernel sparse",
             "MIGraphX"
           ],
@@ -972,7 +972,7 @@
         {
           "id": "gnn-neighbor-aggregation",
           "library_baselines": [
-            "cuSPARSE",
+            "rocSPARSE",
             "Gunrock-like references",
             "framework ops"
           ],
@@ -1080,7 +1080,7 @@
             "barriers",
             "register pressure"
           ],
-          "promotion_artifact": "WGMFMA pipeline task"
+          "promotion_artifact": "MFMA pipeline task"
         },
         {
           "id": "tma-multicast-gemm",
@@ -1195,7 +1195,7 @@
           "id": "onnx-custom-op-bridge",
           "library_baselines": [
             "MIGraphX parser",
-            "ONNX Runtime CUDA EP"
+            "ONNX Runtime ROCm EP"
           ],
           "custom_topics": [
             "shape/type contracts",
@@ -1253,7 +1253,7 @@
         {
           "id": "nvlink-p2p-staging",
           "library_baselines": [
-            "CUDA P2P",
+            "HIP P2P",
             "RCCL"
           ],
           "custom_topics": [
@@ -1278,9 +1278,9 @@
           "promotion_artifact": "RDMA boundary guide/task"
         },
         {
-          "id": "cuda-ipc-multiprocess",
+          "id": "hip-ipc-multiprocess",
           "library_baselines": [
-            "CUDA IPC samples",
+            "HIP IPC samples",
             "framework serving"
           ],
           "custom_topics": [
@@ -1288,12 +1288,12 @@
             "synchronization",
             "memory ownership"
           ],
-          "promotion_artifact": "CUDA IPC task"
+          "promotion_artifact": "HIP IPC task"
         },
         {
           "id": "mig-mps-contention",
           "library_baselines": [
-            "CUDA MPS",
+            "ROCm multi-tenant deployment",
             "MIG deployment docs"
           ],
           "custom_topics": [
@@ -1312,7 +1312,7 @@
           "id": "rocprof-counter-roofline",
           "library_baselines": [
             "rocprofiler/rocprof",
-            "Nsight Systems"
+            "rocprofiler/rocprof"
           ],
           "custom_topics": [
             "occupancy",
@@ -1338,8 +1338,8 @@
         {
           "id": "amdisa-diff-regression",
           "library_baselines": [
-            "cuobjdump",
-            "nvdisasm",
+            "llvm-objdump",
+            "roc-objdump",
             "amdclang++ logs"
           ],
           "custom_topics": [
@@ -1393,7 +1393,7 @@
         {
           "id": "occupancy-register-pressure",
           "library_baselines": [
-            "CUDA occupancy API",
+            "HIP occupancy API",
             "rocprofiler/rocprof"
           ],
           "custom_topics": [
@@ -1411,7 +1411,7 @@
         {
           "id": "sm75-turing-fallback",
           "library_baselines": [
-            "CUDA samples",
+            "ROCm examples",
             "MIGraphX",
             "hipBLASLt"
           ],
@@ -1420,7 +1420,7 @@
             "older Matrix Core path",
             "inference fallback"
           ],
-          "promotion_artifact": "sm_75 lab"
+          "promotion_artifact": "gfx1030 lab"
         },
         {
           "id": "gfx90a-gfx942-cdna-split",
@@ -1462,15 +1462,15 @@
           "custom_topics": [
             "gfx942 versus gfx950",
             "global-to-LDS staging",
-            "WGMFMA",
+            "MFMA",
             "clusters"
           ],
           "promotion_artifact": "CDNA3 lab"
         },
         {
-          "id": "sm100-sm120-blackwell-path",
+          "id": "gfx950-gfx1200-rocm-portability",
           "library_baselines": [
-            "current CUDA",
+            "current ROCm",
             "Composable Kernel",
             "hipBLASLt",
             "MIGraphX"
@@ -1485,7 +1485,7 @@
         {
           "id": "dpx-dynamic-programming",
           "library_baselines": [
-            "CUDA samples",
+            "ROCm examples",
             "domain libraries where applicable"
           ],
           "custom_topics": [
@@ -1498,7 +1498,7 @@
         {
           "id": "cluster-dsm-workqueue",
           "library_baselines": [
-            "CUDA cooperative groups",
+            "HIP cooperative groups",
             "Composable Kernel CDNA3 examples"
           ],
           "custom_topics": [

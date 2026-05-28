@@ -41,7 +41,7 @@
       "optional selected-count or threshold metadata for partition/radix paths"
     ],
     "constraints": [
-      "Template-only; no timing or correctness evidence is claimed until a CUDA harness and result artifacts are attached",
+      "Template-only; no timing or correctness evidence is claimed until a HIP harness and result artifacts are attached",
       "Do not reuse the block-topk-sampling k<=8 fused-sampling result as a wide-k claim",
       "Record sortedness, tie policy, NaN policy, mask policy, k/n ratio, output materialization, temporary storage, and allocation timing boundary",
       "Compare against hipCUB DeviceTopK for unsorted membership, hipCUB DeviceRadixSort or rocThrust sort for sorted/full-sort contracts, PyTorch torch.topk for framework baseline, and FlashInfer/vLLM/vLLM on ROCm where the operation is sampling-facing",

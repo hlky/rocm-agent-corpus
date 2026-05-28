@@ -8,7 +8,7 @@ This guide covers the template-only promotion path for three integration tasks:
 
 These tasks are not measured claims. Label them `template-only` until a harness
 builds, runs correctness checks, and records HIP-event timing with hardware and
-build metadata. Say `timing-only` for future HIP-event results without Nsight
+build metadata. Say `timing-only` for future HIP-event results without rocprofiler/rocprof
 counter evidence.
 
 ## GEMM Epilogue Fusion

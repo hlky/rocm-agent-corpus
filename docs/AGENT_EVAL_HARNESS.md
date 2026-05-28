@@ -14,7 +14,7 @@ surfaces, and extension surfaces.
 
 The harness should answer five questions for every submitted kernel:
 
-1. Does it compile for the requested GPU architecture and CUDA toolchain?
+1. Does it compile for the requested ROCm GFX target and HIP toolchain?
 2. Does it pass correctness checks across visible and hidden shapes?
 3. Is it faster, slower, or neutral against the relevant baseline?
 4. Which generality did the custom kernel drop to get its result?
@@ -68,7 +68,7 @@ Outputs:
 Status: planned.
 
 Implement a local harness that accepts a task id and submission directory,
-builds the submitted CUDA/C++ code, runs visible correctness tests, and emits a
+builds the submitted HIP/C++ code, runs visible correctness tests, and emits a
 machine-readable attempt record.
 
 Planned commands:
@@ -121,7 +121,7 @@ Planned command:
 python eval/harness/benchmark.py --task <task_id> --submission <submission_dir> --baseline <baseline_id>
 ```
 
-Default evidence label for HIP-event timing without Nsight counters:
+Default evidence label for HIP-event timing without rocprofiler/rocprof counters:
 
 - `timing-only-measured`
 
@@ -278,8 +278,8 @@ substituting a weak baseline.
   "submission_id": "submission-name",
   "hardware_id": "runpod-a4000-example",
   "toolchain": {
-    "cuda": "12.8",
-    "driver": "550.127.08",
+    "rocm": "version-required",
+    "driver_runtime": "version-required",
     "compiler": "hipcc",
     "arch": "gfx1030"
   },

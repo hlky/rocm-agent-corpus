@@ -108,10 +108,9 @@
       "properties": {
         "gpu_name": {"type": "string"},
         "gfx_target": {"type": "string"},
-        "compute_capability": {"type": "string"},
         "driver_version": {"type": "string"},
         "hip_visible_devices": {"type": "string"},
-        "cuda_visible_devices": {"type": "string"}
+        "rocr_visible_devices": {"type": "string"}
       },
       "additionalProperties": false
     },
@@ -121,8 +120,7 @@
       "properties": {
         "pytorch_version": {"type": "string"},
         "rocm_version": {"type": "string"},
-        "rocm_or_cuda_runtime_version": {"type": "string"},
-        "cuda_toolkit_version": {"type": "string"},
+        "rocm_runtime_version": {"type": "string"},
         "compiler": {"type": "string"},
         "build_command_or_python_invocation": {"type": "string"}
       },

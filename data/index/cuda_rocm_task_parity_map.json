@@ -1,0 +1,37 @@
+{
+  "schema_version": "0.1.0",
+  "source_repo": "H:/cuda-agent-corpus",
+  "target_repo": "H:/rocm-agent-corpus",
+  "policy": [
+    "Identical IDs preserve the same problem contract.",
+    "Renamed IDs are ROCm-native equivalents for CUDA-specific hardware, runtime, or library paths.",
+    "CUDA-origin results are not ROCm evidence."
+  ],
+  "renamed_equivalents": {
+    "compute-sanitizer-racecheck": "rocm-sanitizer-racecheck",
+    "cp-async-tiled-copy": "lds-tiled-copy",
+    "cuda-graphs-launch-overhead": "hip-graphs-launch-overhead",
+    "cuda-ipc-multiprocess": "hip-ipc-multiprocess",
+    "cudnn-frontend-fusion": "miopen-frontend-fusion",
+    "cutlass-custom-epilogue-visitor": "composable-kernel-custom-epilogue",
+    "hopper-wgmma-tma-gemm": "cdna-mfma-gemm",
+    "inline-mma-sync-skeleton": "inline-mfma-skeleton",
+    "int8-dp4a-imma-gemm": "int8-dot-mfma-gemm",
+    "nccl-overlap-allreduce": "rccl-overlap-allreduce",
+    "nsight-counter-roofline": "rocprof-counter-roofline",
+    "nvrtc-specialized-kernel-cache": "hiprtc-specialized-kernel-cache",
+    "nvshmem-queue": "rocshmem-queue",
+    "pytorch-oneflow-extension-op": "pytorch-hip-extension-op",
+    "sass-diff-regression": "amdisa-diff-regression",
+    "sm80-sm86-ampere-split": "gfx90a-gfx942-cdna-split",
+    "sm90a-hopper-wgmma-tma": "gfx942-cdna3-mfma-lab",
+    "sm100-sm120-blackwell-path": "gfx950-gfx1200-rocm-portability",
+    "tensorrt-engine-tactic-sweep": "migraphx-engine-tuning-sweep",
+    "tensorrt-llm-custom-plugin": "vllm-rocm-custom-plugin",
+    "tensorrt-plugin-fused-op": "migraphx-custom-op-fused-op",
+    "tma-multicast-gemm": "global-to-lds-mfma-gemm",
+    "triton-vs-cuda-row-kernel": "triton-vs-hip-row-kernel",
+    "warp-specialized-wgmma": "wave-specialized-mfma-pipeline",
+    "wmma-tensorcore-gemm": "rocwmma-mfma-gemm"
+  }
+}

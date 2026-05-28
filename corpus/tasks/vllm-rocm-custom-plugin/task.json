@@ -33,7 +33,7 @@
     ],
     "constraints": [
       "Template-only; no vLLM on ROCm, FlashInfer, vLLM, or custom plugin win is claimed",
-      "Plugin enqueue must use the provided CUDA stream and avoid allocation or synchronization",
+      "Plugin enqueue must use the provided framework GPU stream and avoid allocation or synchronization",
       "Record model, vLLM on ROCm version, batching policy, KV-cache policy, precision, and timing boundary"
     ]
   },

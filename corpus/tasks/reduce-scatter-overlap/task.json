@@ -31,7 +31,7 @@
       "timing/timeline metadata"
     ],
     "constraints": [
-      "Template-only; no overlap claim without multi-GPU timing or Nsight Systems timeline",
+      "Template-only; no overlap claim without multi-GPU timing or rocprofiler/rocprof timeline evidence",
       "Record rank count, topology, transport, chunking, stream priorities, and dependency edges",
       "Compare phase-separated and overlapped variants"
     ]

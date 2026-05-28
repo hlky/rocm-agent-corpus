@@ -55,8 +55,9 @@ def make_input(torch: Any, rows: int, cols: int, device: Any) -> Any:
 
 def make_result(args: argparse.Namespace) -> dict[str, Any]:
     torch = load_torch()
-    if not torch.cuda.is_available():
-        raise SystemExit("A PyTorch CUDA/HIP backend is required for PyTorch baseline timing")
+    torch_rocm_version = getattr(torch.version, "hip", None)
+    if not torch.cuda.is_available() or not torch_rocm_version:
+        raise SystemExit("A PyTorch ROCm/HIP backend exposed through torch.cuda is required for PyTorch baseline timing")
     if args.rows <= 0 or args.cols <= 0 or args.warmup < 0 or args.iters <= 0:
         raise SystemExit("Require rows > 0, cols > 0, warmup >= 0, and iters > 0")
 
@@ -94,8 +95,7 @@ def make_result(args: argparse.Namespace) -> dict[str, Any]:
     byte_count = args.rows * args.cols * 4
     effective_gib_per_s = (2.0 * byte_count / (1024.0 * 1024.0 * 1024.0)) / (median_ms / 1000.0)
     props = torch.cuda.get_device_properties(device)
-    torch_rocm_version = getattr(torch.version, "hip", None)
-    runtime_version = torch_rocm_version or torch.version.cuda or ""
+    runtime_version = torch_rocm_version or ""
 
     result: dict[str, Any] = {
         "schema_version": "0.1.0",
@@ -122,16 +122,14 @@ def make_result(args: argparse.Namespace) -> dict[str, Any]:
         "framework": {
             "name": "pytorch",
             "torch_version": torch.__version__,
-            "torch_backend": "rocm" if torch_rocm_version else "cuda",
+            "torch_backend": "rocm",
             "torch_rocm_version": torch_rocm_version,
-            "torch_cuda_version": torch.version.cuda,
-            "rocm_or_cuda_runtime_version": runtime_version,
+            "rocm_runtime_version": runtime_version,
             "cudnn_version": torch.backends.cudnn.version(),
         },
         "device_name": props.name,
         "gfx_target": getattr(props, "gcnArchName", ""),
-        "compute_capability": f"{props.major}.{props.minor}",
-        "rocm_or_cuda_runtime_version": runtime_version,
+        "rocm_runtime_version": runtime_version,
         "captured_at": datetime.now(timezone.utc).isoformat(),
         "source_artifact": "tools/run_rowwise_softmax_pytorch_baseline.py",
         "run_command": [sys.executable, str(Path(__file__).relative_to(ROOT)), *sys.argv[1:]],

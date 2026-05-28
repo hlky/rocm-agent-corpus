@@ -9,7 +9,7 @@
 namespace {
 
 __global__ void int8_dp4a_imma_gemm_baseline_kernel() {
-  // TODO: implement the baseline CUDA path and preserve this task's contract.
+  // TODO: implement the baseline HIP path and preserve this task's contract.
 }
 
 }  // namespace

@@ -151,7 +151,7 @@
       "id": "miopen-frontend-sdpa",
       "name": "MIOpen scaled dot-product attention",
       "primary_source_paths": [
-        "third_party/miopen-frontend",
+        "third_party/miopen",
         "docs/MIOPEN_ATTENTION_GUIDE.md",
         "docs/LIBRARY_GUIDE.md"
       ],
@@ -202,7 +202,7 @@
         "Run framework eager SDPA and record the selected backend.",
         "Run framework compiled SDPA and separate compile time from steady-state runtime.",
         "Run a Triton fused-attention kernel with block sizes, warps, stages, and persistence options recorded.",
-        "Optionally compare a CUDA graph captured framework or Triton path for repeated fixed shapes.",
+        "Optionally compare a HIP graph captured framework or Triton path for repeated fixed shapes.",
         "Move to HIP C++ after dispatch, JIT, and backend boundaries are clear."
       ],
       "must_match": [
@@ -220,7 +220,7 @@
       ],
       "custom_followups": [
         "lower dispatch overhead for small fixed shapes",
-        "architecture-specific CUDA scheduling",
+        "architecture-specific HIP scheduling",
         "fusion across framework op boundaries",
         "MIGraphX plugin or C++ extension integration"
       ]
@@ -229,7 +229,7 @@
       "id": "decode-paged-kv-serving",
       "name": "vLLM on ROCm, vLLM, and FlashInfer decode or paged KV",
       "primary_source_paths": [
-        "third_party/vllm-rocm",
+        "third_party/vllm",
         "third_party/vllm",
         "third_party/flashinfer",
         "docs/MIGRAPHX_INFERENCE_GUIDE.md"
@@ -321,7 +321,7 @@
         "Run batched or strided QK GEMM to materialize scores.",
         "Apply scale, mask, and rowwise softmax with the seed suffix-aligned causal rule.",
         "Run batched or strided PV GEMM to produce output.",
-        "Optionally capture the sequence in a CUDA graph for repeated fixed shapes.",
+        "Optionally capture the sequence in a HIP graph for repeated fixed shapes.",
         "Optionally run hipBLASLt algorithm search for QK and PV separately and record selected algorithms."
       ],
       "must_match": [
@@ -348,7 +348,7 @@
     }
   ],
   "evidence_policy": {
-    "timing_only_label": "Use timing-only when results are HIP-event or framework timings without Nsight counters.",
+    "timing_only_label": "Use timing-only when results are HIP-event or framework timings without rocprofiler/rocprof counters.",
     "negative_example_label": "Use negative example when an attempted optimization or custom path does not improve speed.",
     "must_not_claim": [
       "rocprofiler/rocprof counter evidence unless profiler artifacts were collected",
@@ -366,7 +366,7 @@
     "gpu_name",
     "gfx_target",
     "driver_version",
-    "cuda_toolkit_version",
+    "rocm_version",
     "library_versions",
     "compiler_version",
     "arch_flags",

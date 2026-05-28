@@ -53,8 +53,9 @@ def load_torch() -> Any:
 
 def make_result(args: argparse.Namespace) -> dict[str, Any]:
     torch, F = load_torch()
-    if not torch.cuda.is_available():
-        raise SystemExit("A PyTorch CUDA/HIP backend is required for PyTorch baseline timing")
+    torch_rocm_version = getattr(torch.version, "hip", None)
+    if not torch.cuda.is_available() or not torch_rocm_version:
+        raise SystemExit("A PyTorch ROCm/HIP backend exposed through torch.cuda is required for PyTorch baseline timing")
 
     if args.dtype != "fp32":
         raise SystemExit("Only fp32 is currently implemented")
@@ -109,8 +110,7 @@ def make_result(args: argparse.Namespace) -> dict[str, Any]:
     passed = finite_dx and finite_dgamma and finite_dbeta
 
     props = torch.cuda.get_device_properties(device)
-    torch_rocm_version = getattr(torch.version, "hip", None)
-    runtime_version = torch_rocm_version or torch.version.cuda or ""
+    runtime_version = torch_rocm_version or ""
     baseline_id = (
         "pytorch-eager-layernorm-autograd"
         if args.mode == "layernorm"
@@ -153,17 +153,15 @@ def make_result(args: argparse.Namespace) -> dict[str, Any]:
         "framework": {
             "name": "pytorch",
             "torch_version": torch.__version__,
-            "torch_backend": "rocm" if torch_rocm_version else "cuda",
+            "torch_backend": "rocm",
             "torch_rocm_version": torch_rocm_version,
-            "torch_cuda_version": torch.version.cuda,
-            "rocm_or_cuda_runtime_version": runtime_version,
+            "rocm_runtime_version": runtime_version,
             "cudnn_version": torch.backends.cudnn.version(),
             "backend": baseline_id,
         },
         "device_name": props.name,
         "gfx_target": getattr(props, "gcnArchName", ""),
-        "compute_capability": f"{props.major}.{props.minor}",
-        "rocm_or_cuda_runtime_version": runtime_version,
+        "rocm_runtime_version": runtime_version,
         "captured_at": datetime.now(timezone.utc).isoformat(),
         "source_artifact": "tools/run_normalization_pytorch_baseline.py",
         "run_command": [sys.executable, str(Path(__file__).relative_to(ROOT)), *sys.argv[1:]],

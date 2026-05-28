@@ -2,7 +2,7 @@
   "schema_version": "0.1.0",
   "track_id": "system-low-level-kernels",
   "guide": "docs/SYSTEM_LOW_LEVEL_KERNEL_GUIDE.md",
-  "mission": "Expand system-level and low-level CUDA coverage with template-only tasks for launch overhead, overlap, runtime specialization, persistent scheduling, warp primitives, async copy, architecture-specific Matrix Core paths, MIGraphX tactics, and Triton-vs-CUDA comparisons.",
+  "mission": "Expand system-level and low-level ROCm coverage with template-only tasks for launch overhead, overlap, runtime specialization, persistent scheduling, wave/warp primitives, LDS staging, architecture-specific Matrix Core paths, MIGraphX tactics, and Triton-vs-HIP comparisons.",
   "evidence_policy": {
     "current_status": "template-only",
     "must_say": [
@@ -11,8 +11,8 @@
       "negative example when an attempted optimization loses"
     ],
     "must_not_claim": [
-      "Nsight counter evidence without profiler artifacts",
-      "WGMFMA/global-to-LDS staging/global-to-LDS staging benefit without source and GFX metadata",
+      "profiler-counter evidence without profiler artifacts",
+      "MFMA/LDS staging benefit without source and GFX metadata",
       "MIGraphX or Triton win without identical timing boundary"
     ]
   },
@@ -51,13 +51,13 @@
       "id": "lds-tiled-copy",
       "task_path": "corpus/tasks/lds-tiled-copy/task.json",
       "status": "template-only",
-      "topic": "async-copy tiled staging"
+      "topic": "LDS tiled staging"
     },
     {
       "id": "cdna-mfma-gemm",
       "task_path": "corpus/tasks/cdna-mfma-gemm/task.json",
       "status": "template-only",
-      "topic": "CDNA3 WGMFMA/global-to-LDS staging GEMM skeleton"
+      "topic": "CDNA MFMA/LDS staging GEMM skeleton"
     },
     {
       "id": "inline-mfma-skeleton",
@@ -81,7 +81,7 @@
       "id": "rocm-sanitizer-racecheck",
       "task_path": "corpus/tasks/rocm-sanitizer-racecheck/task.json",
       "status": "template-only",
-      "topic": "sanitizer-driven CUDA correctness workflow"
+      "topic": "sanitizer-driven ROCm correctness workflow"
     },
     {
       "id": "amdisa-diff-regression",
@@ -102,7 +102,7 @@
     "gpu_name",
     "gfx_target",
     "driver_version",
-    "cuda_toolkit_version",
+    "rocm_version",
     "compiler_or_library_version",
     "build_or_compile_options",
     "timer_type",

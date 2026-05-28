@@ -38,12 +38,13 @@ Read:
 4. `docs/V2_EXTENSION_PROMOTION_WAVE.md`
 5. `docs/V2_EXTENSION_WAVE3.md`
 6. `data/index/v2_extension_wave.json`
-7. `docs/INITIAL_TRACKING_LIST.md`
-8. `docs/CORPUS_EXPANSION_STAGES.md`
-9. `docs/GEMM_COMPETITION_TRACK.md`
-10. `docs/ROCPRIM_COMPETITION_TRACK.md`
-11. `docs/ARCHITECTURE_LABS.md`
-12. `docs/AGENT_EVAL_HARNESS.md`
+7. `docs/CUDA_ROCM_TASK_PARITY_MAP.md`
+8. `docs/INITIAL_TRACKING_LIST.md`
+9. `docs/CORPUS_EXPANSION_STAGES.md`
+10. `docs/GEMM_COMPETITION_TRACK.md`
+11. `docs/ROCPRIM_COMPETITION_TRACK.md`
+12. `docs/ARCHITECTURE_LABS.md`
+13. `docs/AGENT_EVAL_HARNESS.md`
 
 Question: "How do I turn a PyTorch op or subgraph into a ROCm challenge?"
 
@@ -105,7 +106,7 @@ Read:
 7. `docs/FRAMEWORK_EXTENSION_GUIDE.md`
 8. `docs/FRAMEWORK_COMPILER_KERNELS_GUIDE.md`
 9. `docs/TRITON_KERNEL_GUIDE.md`
-10. `third_party/migraphx`, `third_party/vllm`, `third_party/oneflow`,
+10. `third_party/migraphx`, `third_party/vllm`, `third_party/pytorch`,
    `third_party/triton`
 11. Return to `docs/AGENT_GUIDE.md` and identify the custom kernel boundary:
    plugin, fused op, fixed-shape kernel, extension op, or HIP replacement.
@@ -152,11 +153,11 @@ Read:
 | `hiprtc-specialized-kernel-cache` | Runtime compilation and specialization cache | template-only |
 | `persistent-work-queue` | Persistent CTA work queues | template-only |
 | `warp-reduce-scan-vote` | Warp shuffle, scan, and vote primitives | template-only |
-| `lds-tiled-copy` | Async-copy tiled staging | template-only |
-| `cdna-mfma-gemm` | CDNA3 WGMFMA/global-to-LDS staging GEMM boundary | template-only |
+| `lds-tiled-copy` | LDS tiled staging | template-only |
+| `cdna-mfma-gemm` | CDNA MFMA/LDS GEMM boundary | template-only |
 | `inline-mfma-skeleton` | Inline LLVM IR / AMD GCN ISA MFMA skeleton | template-only |
 | `migraphx-engine-tuning-sweep` | MIGraphX engine/tactic/timing-cache sweep | template-only |
-| `triton-vs-hip-row-kernel` | Triton compiler baseline versus CUDA row kernel | template-only |
+| `triton-vs-hip-row-kernel` | Triton compiler baseline versus HIP row kernel | template-only |
 | `fused-adamw-update` | Fused optimizer update versus staged elementwise passes | template-only |
 | `multi-tensor-adamw` | Multi-tensor optimizer launch amortization | template-only |
 | `rope-kv-cache-update` | Fused RoPE and KV-cache write | template-only |
@@ -184,7 +185,7 @@ Read:
 | `splitk-reduction-gemm` | Split-K GEMM partial reductions | template-only |
 | `composable-kernel-custom-epilogue` | Composable Kernel custom epilogue visitor | template-only |
 | `pytorch-inductor-generated-kernel` | Framework compiler generated-kernel baseline | template-only |
-| `rocprof-counter-roofline` | Nsight counter/roofline evidence scaffold | template-only |
+| `rocprof-counter-roofline` | rocprofiler/rocprof counter and roofline evidence scaffold | template-only |
 | `select-filter-compact` | hipCUB/rocThrust select and stream compaction | template-only |
 | `groupby-reduce-by-key` | Grouped aggregation and reduce-by-key | template-only |
 | `unique-run-length-encode` | Unique values and run-length counts | template-only |
@@ -204,8 +205,11 @@ Read:
 | `rocm-sanitizer-racecheck` | ROCm sanitizer/debugger correctness workflow | template-only |
 | `amdisa-diff-regression` | LLVM IR / AMD GCN ISA/codegen regression evidence | template-only |
 | `autotune-parameter-sweep` | Reproducible autotuning sweep | template-only |
-| `gfx90a-gfx942-cdna-split` | CDNA2 gfx90a versus gfx1030 lab | template-only |
-| `gfx942-cdna3-mfma-lab` | CDNA3 gfx942 versus gfx950 WGMFMA/global-to-LDS staging lab | template-only |
+| `gfx90a-gfx942-cdna-split` | CDNA2 gfx90a versus CDNA3 gfx942 lab | template-only |
+| `gfx942-cdna3-mfma-lab` | CDNA3 gfx942 MFMA/LDS lab | template-only |
+| `wave-specialized-mfma-pipeline` | Producer/consumer wave-role MFMA pipeline scaffold | template-only |
+| `global-to-lds-mfma-gemm` | LDS-staged MFMA GEMM boundary | template-only |
+| `gfx950-gfx1200-rocm-portability` | CDNA4 versus RDNA4 ROCm portability path | template-only |
 
 ## Submodule Map
 
@@ -213,27 +217,21 @@ Read:
 | --- | --- |
 | `third_party/composable-kernel` | GEMM/Matrix Core competitor internals, CK Tile layouts, tile pipelines, custom epilogues |
 | `third_party/rocm-libraries` | hipCUB, rocThrust, libcudacxx competitors and reusable block/warp primitives |
-| `third_party/cuda-samples` | HIP runtime, driver, memory, graphs, cooperative groups examples |
+| `third_party/rocm` | ROCm umbrella repository and release/source navigation |
 | `third_party/rocm-examples` | Library baselines, correctness oracles, and API examples for comparison |
-| `third_party/nvbench` | Kernel microbenchmark harness patterns |
+| `third_party/rocblas-examples` | rocBLAS and hipBLAS usage examples |
 | `third_party/kernelbench` | LLM CUDA generation benchmark and task format |
 | `third_party/gpu-mode-lectures` | Teaching material and notebooks |
 | `third_party/gpu-mode-reference-kernels` | Competitive/reference kernel tasks |
-| `third_party/miopen-frontend` | MIOpen plan construction, attention competitors, and fusion boundaries |
+| `third_party/miopen` | MIOpen kernels, graph/fusion references, and convolution/attention baselines |
 | `third_party/rccl` | Multi-GPU collective communication |
 | `third_party/rocshmem` | GPU-initiated one-sided multi-GPU communication |
 | `third_party/flash-attention` | IO-aware attention kernels and online softmax reference |
 | `third_party/migraphx` | MIGraphX plugin boundaries, parsers, samples, engine/runtime competitor patterns |
-| `third_party/vllm-rocm` | LLM inference kernels, plugins, KV cache, batching, serving competitors |
-| `third_party/oneflow` | Framework internals, HIP operator patterns, and extension integration targets |
 | `third_party/triton` | Python-authored GPU kernel competitors, sketches, and compiler lowering examples |
-| `third_party/transformer-engine` | Transformer kernels, FP8 paths, normalization and framework integration references |
 | `third_party/vllm` | LLM serving, paged attention, KV cache, scheduling competitors |
 | `third_party/flashinfer` | Inference attention, sampling, paged KV, decode/prefill references |
 | `third_party/bitsandbytes` | Quantization, low-bit kernels, optimizer references |
-| `third_party/tiny-cuda-nn` | Compact fully-fused CUDA neural kernels |
-| `third_party/cuda-python` | Python CUDA integration and harness tooling reference |
-| `third_party/megatron-lm` | Transformer training/inference integration and parallelism patterns |
 | `third_party/pytorch` | Fusion compiler and generated-kernel competitor references |
 
 ## Competitor Guides
@@ -270,7 +268,7 @@ documented extension plan.
 | Matrix Core/rocWMMA | `docs/MATRIX_CORE_ROCWMMA_GUIDE.md` | rocWMMA, inline MFMA, Composable Kernel/CK Tile, and epilogue tasks |
 | Memory Movement | `docs/MEMORY_MOVEMENT_KERNEL_GUIDE.md` | Gather/scatter, stencil, AoS/SoA, coalescing, and halo tasks |
 | Sparse/Irregular | `docs/SPARSE_IRREGULAR_KERNEL_GUIDE.md` | Segmented reductions, CSR SpMV, embeddings, graph frontiers, sparse attention |
-| System/Low-Level | `docs/SYSTEM_LOW_LEVEL_KERNEL_GUIDE.md` | Graphs, overlap, hipRTC, persistent queues, warp primitives, global-to-LDS staging, WGMFMA, MIGraphX/Triton |
+| System/Low-Level | `docs/SYSTEM_LOW_LEVEL_KERNEL_GUIDE.md` | Graphs, overlap, hipRTC, persistent queues, wave primitives, LDS staging, MFMA, MIGraphX/Triton |
 | ML Adjunct | `docs/ML_ADJUNCT_KERNEL_GUIDE.md` | Optimizer updates, RoPE/KV-cache updates, and MoE routing |
 | Integration/Epilogue | `docs/INTEGRATION_EPILOGUE_TASK_GUIDE.md` | GEMM epilogues, MIGraphX plugins, and framework extension operators |
 | Multi-GPU Tasks | `docs/MULTIGPU_TASK_GUIDE.md` | RCCL overlap and rocSHMEM queue templates |
@@ -279,9 +277,8 @@ documented extension plan.
 
 ## Evidence Labels
 
-- `counter-backed-measured`: timing plus profiler counters.
-- `template-only`: HIP-event timing and correctness, no counters.
-- `template-only`: a valid optimization attempt that did not
-  improve performance.
+- `counter-backed-measured`: timing plus attached rocprofiler/rocprof counter artifacts.
+- `timing-only`: HIP-event or framework timing and correctness, no counters.
+- `negative example`: a valid optimization attempt that did not improve performance.
 - `profile-attempted-blocked`: profiler was attempted but counters were blocked.
 - `template-only`: code and metadata only.

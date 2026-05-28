@@ -29,7 +29,7 @@
     "gpu_name",
     "gfx_target",
     "driver_version",
-    "cuda_toolkit_version",
+    "rocm_version",
     "compiler_version",
     "build_command",
     "arch_flags",

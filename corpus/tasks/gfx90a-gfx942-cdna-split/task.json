@@ -1,15 +1,15 @@
 {
   "schema_version": "0.1.0",
   "id": "gfx90a-gfx942-cdna-split",
-  "title": "SM80 GFX86 CDNA2 Split Lab",
+  "title": "gfx90a versus gfx942 CDNA Split Lab",
   "domain": "architecture-lab",
   "language": "architecture-workflow",
   "tags": [
-    "ampere",
-    "sm80",
-    "sm86",
-    "global-to-LDS staging",
-    "tf32",
+    "cdna2",
+    "cdna3",
+    "gfx90a",
+    "gfx942",
+    "mfma",
     "architecture",
     "template-only"
   ],
@@ -21,9 +21,9 @@
     "amd-rocm-programming-guide"
   ],
   "problem": {
-    "summary": "Separate CDNA2 data-center gfx90a assumptions from consumer/pro gfx1030 behavior for global-to-LDS staging, TF32, cache, and library tactic comparisons.",
+    "summary": "Separate CDNA2 gfx90a assumptions from CDNA3 gfx942 behavior for MFMA, LDS, cache, and library tactic comparisons.",
     "inputs": [
-      "same task built for gfx90a and gfx1030",
+      "same task built for gfx90a and gfx942",
       "hardware metadata",
       "compile flags",
       "library versions"
@@ -34,7 +34,7 @@
       "portability notes"
     ],
     "constraints": [
-      "Template-only; do not generalize gfx90a A100 behavior to gfx1030 GPUs",
+      "Template-only; do not generalize one CDNA generation to the other without measurements",
       "Record exact GPU model, gfx target, clocks, and arch flags",
       "Compare same code path and shape suite where possible"
     ]
@@ -58,14 +58,14 @@
       "arch flags",
       "driver",
       "ROCm toolkit",
-      "TF32 policy",
-      "global-to-LDS staging used",
+      "math mode",
+      "MFMA/LDS staging used",
       "median latency",
       "library algorithm",
       "profile status"
     ],
     "recommended_shapes": [
-      "memory global-to-LDS staging tile",
+      "LDS-staged memory tile",
       "rocWMMA/HGEMM",
       "attention prefill/decode"
     ]
@@ -73,6 +73,6 @@
   "license": "Project seed example",
   "curation": {
     "status": "template-only",
-    "notes": "Promoted from the v2 extension backlog as wave 2. No performance, correctness, or profiler evidence is claimed yet."
+    "notes": "Promoted from the v2 extension backlog as wave 2 and cleaned in the second parity pass. No performance, correctness, or profiler evidence is claimed yet."
   }
 }

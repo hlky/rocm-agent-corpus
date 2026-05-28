@@ -1,7 +1,7 @@
 {
   "schema_version": "0.1.0",
   "id": "multi-tensor-adamw",
-  "title": "Multi Tensor RDNA3mW Update",
+  "title": "Multi Tensor AdamW Update",
   "domain": "ml-training",
   "language": "hip-cpp",
   "tags": [
@@ -21,7 +21,7 @@
     "amd-rocm-programming-guide"
   ],
   "problem": {
-    "summary": "Apply RDNA3mW updates across a tensor list, competing with PyTorch foreach/fused optimizers and bitsandbytes-style fused optimizer paths by amortizing launch overhead and handling mixed tensor sizes.",
+    "summary": "Apply AdamW updates across a tensor list, competing with PyTorch foreach/fused optimizers and bitsandbytes-style fused optimizer paths by amortizing launch overhead and handling mixed tensor sizes.",
     "inputs": [
       "float** params",
       "float** grads",
@@ -56,7 +56,7 @@
   },
   "verification": {
     "status": "template-only",
-    "method": "Compare every tensor against a CPU or PyTorch RDNA3mW reference for fixed seeds, varied tensor sizes, empty tensors, and alignment offsets.",
+    "method": "Compare every tensor against a CPU or PyTorch AdamW reference for fixed seeds, varied tensor sizes, empty tensors, and alignment offsets.",
     "tolerances": {
       "max_abs_error": 1e-05,
       "max_rel_error": 1e-05

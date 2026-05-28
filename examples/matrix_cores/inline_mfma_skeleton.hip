@@ -25,7 +25,7 @@ __device__ void mma_sync_m16n8k16_placeholder(MmaSyncM16N8K16F16F32Registers* re
   // mfma.aligned.m16n8k16.row.col.f32.f16.f16.f32
   //
   // The real implementation must bind the register operands exactly as
-  // required by the LLVM IR / AMD GCN ISA ISA for the target architecture. Leaving this as a
+  // required by the AMD GCN ISA for the target architecture. Leaving this as a
   // no-op prevents agents from mistaking an incomplete register map for a
   // benchmarkable kernel.
   asm volatile("" : "+f"(regs->c[0]), "+f"(regs->c[1]), "+f"(regs->c[2]), "+f"(regs->c[3]));

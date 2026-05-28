@@ -1,7 +1,7 @@
 {
   "schema_version": "0.1.0",
   "id": "rocprof-counter-roofline",
-  "title": "Nsight Counter Roofline Evidence Scaffold",
+  "title": "rocprofiler/rocprof Counter Roofline Evidence Scaffold",
   "domain": "profiling",
   "language": "profiling-workflow",
   "tags": [

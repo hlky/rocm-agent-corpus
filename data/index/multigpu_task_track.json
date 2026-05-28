@@ -12,7 +12,7 @@
     ],
     "must_not_claim": [
       "communication overlap from source structure alone",
-      "Nsight counter evidence without profiler artifacts",
+      "profiler-counter evidence without profiler artifacts",
       "RCCL or rocSHMEM wins without matching rank count, topology, and timing boundary"
     ]
   },
@@ -84,7 +84,7 @@
     "gpu_name",
     "gfx_target",
     "driver_version",
-    "cuda_toolkit_version",
+    "rocm_version",
     "compiler_or_library_version",
     "build_or_compile_options",
     "rank_or_pe_count",

@@ -32,7 +32,7 @@
       "GEMM output with requested accumulator/output policy"
     ],
     "constraints": [
-      "Template-only; verify exact format and CUDA/Composable Kernel/Transformer Engine on ROCm support before compiling",
+      "Template-only; verify exact ROCm format, Composable Kernel, and Transformer Engine on ROCm support before compiling",
       "Record scale block shape and packing order",
       "Do not claim CDNA4/RDNA4-specific behavior on non-CDNA4/RDNA4 hardware"
     ]

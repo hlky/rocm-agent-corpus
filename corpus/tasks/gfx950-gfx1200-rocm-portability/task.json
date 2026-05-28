@@ -1,0 +1,57 @@
+{
+  "schema_version": "0.1.0",
+  "id": "gfx950-gfx1200-rocm-portability",
+  "title": "gfx950 versus gfx1200 ROCm Portability Path",
+  "domain": "architecture-lab",
+  "language": "architecture-workflow",
+  "tags": ["gfx950", "gfx1200", "cdna4", "rdna4", "portability", "architecture", "template-only"],
+  "source_refs": ["amd-rocm-gpu-support", "amd-rocm-programming-guide", "amd-cdna4-tuning-guide", "amd-hip-programming-guide", "rocm-composable-kernel"],
+  "problem": {
+    "summary": "Document the ROCm portability split between CDNA4-class gfx950 and RDNA4-class gfx1200 targets, including compile flags, feature probes, library baselines, and custom-kernel fallback dispatch.",
+    "inputs": ["GPU model and reported gfx target", "hipcc target list and compile flags", "library version metadata", "candidate kernels with portable and target-specific paths"],
+    "outputs": ["compile and dispatch matrix for gfx950 and gfx1200", "timing/profile evidence placeholders", "portability notes"],
+    "constraints": [
+      "Template-only; no gfx950 or gfx1200 timing, ISA, or profiler-counter evidence is claimed",
+      "Verify exact architecture flags with the installed ROCm toolkit before using target-specific paths",
+      "Keep data-center and workstation/deployment evidence separate"
+    ]
+  },
+  "artifacts": {
+    "baseline": "source/baseline_plan.md",
+    "optimized": "source/optimized_plan.md",
+    "harness": "source/evidence_checklist.md",
+    "profiles": [],
+    "results": []
+  },
+  "verification": {
+    "status": "template-only",
+    "method": "Compile the portable baseline and each target-specific candidate with explicit offload targets, then attach task-specific correctness checks before timing claims.",
+    "tolerances": {}
+  },
+  "benchmarking": {
+    "status": "template-only",
+    "operation": "gfx950-gfx1200-rocm-portability",
+    "required_metrics": [
+      "GPU model",
+      "gfx target",
+      "ROCm version",
+      "hipcc offload target",
+      "library versions",
+      "portable fallback present",
+      "compiler resource output",
+      "instruction evidence status",
+      "hardware metadata"
+    ],
+    "recommended_shapes": [
+      "GEMM M=N=K=4096 fp16/bf16/fp8 when supported",
+      "decode attention batch=16 heads=32 head_dim=128",
+      "memory tile copy 256MiB aligned and strided",
+      "Top-K logits batch=1024 vocab=32768 k=4"
+    ]
+  },
+  "license": "Project seed example",
+  "curation": {
+    "status": "template-only",
+    "notes": "Second parity pass analog for CUDA task `sm100-sm120-blackwell-path`, rewritten for ROCm GFX targets and evidence rules."
+  }
+}

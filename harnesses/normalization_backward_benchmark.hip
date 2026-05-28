@@ -380,7 +380,6 @@ int main(int argc, char** argv) {
             << "  \"timer_scope\": \"HIP events include dgamma/dbeta reset and backward kernels; allocation and host-device setup are excluded\",\n"
             << "  \"device_name\": \"" << prop.name << "\",\n"
             << "  \"gfx_target\": \"" << prop.gcnArchName << "\",\n"
-            << "  \"compute_capability\": \"" << prop.major << "." << prop.minor << "\",\n"
             << "  \"rows\": " << rows << ",\n"
             << "  \"cols\": " << cols << ",\n"
             << "  \"epsilon\": " << epsilon << ",\n"

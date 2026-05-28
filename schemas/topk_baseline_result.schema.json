@@ -27,7 +27,7 @@
     "launch_count",
     "gpu_name",
     "driver_version",
-    "rocm_or_cuda_runtime_version"
+    "rocm_runtime_version"
   ],
   "properties": {
     "schema_version": { "type": "string" },
@@ -128,11 +128,9 @@
     "launch_count": { "type": "integer", "minimum": 0 },
     "gpu_name": { "type": "string" },
     "gfx_target": { "type": "string" },
-    "compute_capability": { "type": "string" },
     "driver_version": { "type": "string" },
     "rocm_version": { "type": "string" },
-    "rocm_or_cuda_runtime_version": { "type": "string" },
-    "cuda_toolkit_version": { "type": "string" },
+    "rocm_runtime_version": { "type": "string" },
     "compiler_or_framework_version": { "type": "string" },
     "build_command_or_python_invocation": { "type": "string" },
     "correctness_hash": { "type": "string" },

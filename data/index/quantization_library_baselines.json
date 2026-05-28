@@ -425,9 +425,9 @@
         "negative-example"
       ],
       "local_references": [
-        "third_party/vllm-rocm/examples/quantization/README.md",
-        "third_party/vllm-rocm/cpp/micro_benchmarks",
-        "third_party/vllm-rocm/cpp/migraphx_llm/plugins",
+        "third_party/vllm/examples/quantization/README.md",
+        "third_party/vllm/cpp/micro_benchmarks",
+        "third_party/vllm/cpp/migraphx_llm/plugins",
         "docs/MIGRAPHX_INFERENCE_GUIDE.md"
       ],
       "notes": [
@@ -473,9 +473,9 @@
         "not-applicable"
       ],
       "local_references": [
-        "third_party/transformer-engine/README.rst",
-        "third_party/transformer-engine/benchmarks/linear/benchmark_linear.py",
-        "third_party/transformer-engine/benchmarks/linear/benchmark_grouped_linear.py"
+        "source:transformer-engine/README.rst",
+        "source:transformer-engine/benchmarks/linear/benchmark_linear.py",
+        "source:transformer-engine/benchmarks/linear/benchmark_grouped_linear.py"
       ],
       "notes": [
         "For fused-int4-dequant-gemv, Transformer Engine on ROCm should usually be labeled not-applicable unless the task is reframed as FP8 or block-scaled.",
@@ -585,7 +585,7 @@
     "gpu_name",
     "gfx_target",
     "driver_version",
-    "cuda_toolkit_version",
+    "rocm_version",
     "library_versions",
     "build_command",
     "rows",
@@ -609,7 +609,7 @@
   ],
   "evidence_policy": {
     "no_gpu_status": "guidance-only-no-gpu",
-    "cuda_event_without_counters": "timing-only",
+    "hip_event_without_counters": "timing-only",
     "must_not_claim": [
       "rocprofiler/rocprof counters unless profiler artifacts are attached",
       "fair direct low-bit library comparison when packing, scale layout, zero-point layout, accumulator dtype, output dtype, epilogue, tolerance, or timing boundary differ",

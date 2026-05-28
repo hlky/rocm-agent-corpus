@@ -3,7 +3,7 @@ def torch_rowwise_sum_baseline(x):
     import torch
 
     if not x.is_cuda:
-        raise ValueError("expected a CUDA tensor")
+        raise ValueError("expected a GPU tensor")
     if x.dtype is not torch.float32:
         raise ValueError("expected float32")
     return torch.sum(x, dim=1)
@@ -14,7 +14,7 @@ def oneflow_rowwise_sum_baseline(x):
     import oneflow as flow
 
     if not x.is_cuda:
-        raise ValueError("expected a CUDA tensor")
+        raise ValueError("expected a GPU tensor")
     if x.dtype is not flow.float32:
         raise ValueError("expected float32")
     return flow.sum(x, dim=1)

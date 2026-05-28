@@ -13,7 +13,7 @@ productive route for GPU kernel optimization, especially in ML workloads.
 
 ## Compare Against HIP C++ When
 
-- You need low-level control over `global-to-LDS staging`, global-to-LDS staging, WGMFMA, inline LLVM IR / AMD GCN ISA, or exact
+- You need low-level control over LDS staging, MFMA, inline LLVM IR / AMD GCN ISA, or exact
   memory ordering.
 - Register pressure or instruction scheduling must be inspected at AMD GCN ISA level.
 - The kernel is used inside MIGraphX/Composable Kernel/plugin infrastructure.
@@ -21,8 +21,8 @@ productive route for GPU kernel optimization, especially in ML workloads.
 
 ## Corpus Tasks to Add
 
-- Triton SAXPY versus CUDA SAXPY.
-- Triton rowwise softmax versus CUDA rowwise softmax.
+- Triton SAXPY versus HIP SAXPY.
+- Triton rowwise softmax versus HIP rowwise softmax.
 - Triton matmul versus hipBLAS/rocBLAS/Composable Kernel.
 - Triton layernorm and RMSNorm.
 - Triton fused attention educational kernel.

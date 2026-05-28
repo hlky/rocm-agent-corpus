@@ -14,7 +14,7 @@ Start from the user-visible operator and trace inward:
    error paths.
 3. SBP/distributed placement: split, broadcast, partial-sum behavior, and any
    required collectives or layout conversions.
-4. Kernel dispatch: CPU versus CUDA registration, dtype specialization,
+4. Kernel dispatch: CPU versus HIP registration, dtype specialization,
    architecture guards, and stream access.
 5. HIP implementation: grid/block policy, vectorization, temporary storage,
    atomics, cooperative groups, library calls, and launch count.
@@ -34,7 +34,7 @@ Ask these before proposing a replacement:
   reject?
 - Does SBP introduce communication or copies that dominate kernel time?
 - Is the current HIP op a library wrapper, a generated kernel, or handwritten
-  CUDA?
+  HIP?
 - Can the win come from fusion, fixed segment sizes, known alignment, or fewer
   launches rather than a faster standalone primitive?
 - Does the timing include Python/framework dispatch, graph build, memory

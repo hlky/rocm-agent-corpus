@@ -32,9 +32,9 @@
       "sparse GEMM output"
     ],
     "constraints": [
-      "Template-only; source refs include general CUDA/Composable Kernel/MIGraphX samples until a cuSPARSELt source entry is added",
+      "Template-only; source refs include general CUDA/Composable Kernel/MIGraphX samples until a rocSPARSE/Composable Kernel sparse path source entry is added",
       "Record legal 2:4 pattern and metadata layout",
-      "Compare against dense GEMM and cuSPARSELt/Composable Kernel/MIGraphX where available"
+      "Compare against dense GEMM and rocSPARSE/Composable Kernel sparse path/Composable Kernel/MIGraphX where available"
     ]
   },
   "artifacts": {

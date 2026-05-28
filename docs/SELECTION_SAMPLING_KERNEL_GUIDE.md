@@ -118,14 +118,14 @@ rocPRIM/hipCUB/rocThrust/hipCUB:
 
 vLLM on ROCm:
 
-- `third_party/vllm-rocm/cpp/migraphx_llm/kernels/samplingTopKKernels.hip`
-- `third_party/vllm-rocm/cpp/migraphx_llm/kernels/samplingTopPKernels.hip`
-- `third_party/vllm-rocm/cpp/migraphx_llm/kernels/samplingAirTopPKernels.hip`
-- `third_party/vllm-rocm/cpp/migraphx_llm/kernels/beamSearchKernels.hip`
-- `third_party/vllm-rocm/cpp/migraphx_llm/kernels/topkLastDim.hip`
-- `third_party/vllm-rocm/cpp/migraphx_llm/thop/fusedTopkSoftmax.cpp`
-- `third_party/vllm-rocm/cpp/migraphx_llm/thop/IndexerTopKOp.cpp`
-- `third_party/vllm-rocm/docs/source/features/sampling.md`
+- `third_party/vllm/cpp/migraphx_llm/kernels/samplingTopKKernels.hip`
+- `third_party/vllm/cpp/migraphx_llm/kernels/samplingTopPKernels.hip`
+- `third_party/vllm/cpp/migraphx_llm/kernels/samplingAirTopPKernels.hip`
+- `third_party/vllm/cpp/migraphx_llm/kernels/beamSearchKernels.hip`
+- `third_party/vllm/cpp/migraphx_llm/kernels/topkLastDim.hip`
+- `third_party/vllm/cpp/migraphx_llm/thop/fusedTopkSoftmax.cpp`
+- `third_party/vllm/cpp/migraphx_llm/thop/IndexerTopKOp.cpp`
+- `third_party/vllm/docs/source/features/sampling.md`
 
 vLLM:
 

@@ -34,7 +34,7 @@
     "constraints": [
       "Template-only; report whether compile time, graph capture, and dispatch overhead are included",
       "Generated code must be saved or referenced by hash/path",
-      "Custom CUDA comparison must share dtype/layout/stride semantics"
+      "Custom HIP comparison must share dtype/layout/stride semantics"
     ]
   },
   "artifacts": {

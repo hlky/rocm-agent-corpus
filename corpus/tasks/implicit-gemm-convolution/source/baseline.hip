@@ -1,7 +1,7 @@
 #include <hip/hip_runtime.h>
 
 // Template-only scaffold for implicit-gemm-convolution.
-// Baseline strategy: call cuDNN, CUTLASS implicit GEMM, TensorRT, or framework
+// Baseline strategy: call MIOpen, Composable Kernel implicit GEMM, MIGraphX, or framework
 // convolution for the same descriptor and timing boundary.
 
 namespace {

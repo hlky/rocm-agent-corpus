@@ -3,7 +3,7 @@
   "track_id": "sparse-irregular-kernel-track",
   "status": "template-only",
   "guide": "docs/SPARSE_IRREGULAR_KERNEL_GUIDE.md",
-  "mission": "Expand reductions, sparse, irregular graph, embedding, and block-sparse attention coverage with custom HIP kernel scaffolds that compete honestly against hipCUB/rocPRIM/hipCUB/rocThrust, CUDA library sparse paths, FlashAttention, Composable Kernel, vLLM, and FlashInfer.",
+  "mission": "Expand reductions, sparse, irregular graph, embedding, and block-sparse attention coverage with custom HIP kernel scaffolds that compete honestly against hipCUB/rocPRIM/rocThrust, rocSPARSE, FlashAttention, Composable Kernel, vLLM on ROCm, and FlashInfer.",
   "evidence_policy": {
     "default_status": "template-only",
     "measured_without_profiler": "timing-only",
@@ -19,7 +19,7 @@
     "gpu_name",
     "gfx_target",
     "driver_version",
-    "cuda_toolkit_version",
+    "rocm_version",
     "compiler_version",
     "build_command",
     "arch_flags",
@@ -76,7 +76,7 @@
       "baseline": "one thread per CSR row",
       "custom_strategy": "one warp per row with shuffle reduction",
       "library_baselines": [
-        "cuSPARSE via CUDA library samples",
+        "rocSPARSE examples and documentation",
         "hipCUB warp collectives as parts bin"
       ],
       "candidate_shapes": [
@@ -162,7 +162,7 @@
       "baseline": "one thread per nonzero sampled dot product",
       "custom_strategy": "tile dense feature vectors across sparse edge blocks",
       "library_baselines": [
-        "cuSPARSE where applicable",
+        "rocSPARSE where applicable",
         "Composable Kernel sparse",
         "dense masked attention reference"
       ],
@@ -184,7 +184,7 @@
       "baseline": "row-wise sparse expansion",
       "custom_strategy": "row-length-aware merge or hash accumulators",
       "library_baselines": [
-        "cuSPARSE SpGEMM",
+        "rocSPARSE SpGEMM",
         "custom merge path",
         "custom hash path"
       ],
@@ -206,7 +206,7 @@
       "baseline": "staged library or sort/scan/scatter conversion",
       "custom_strategy": "fused count/prefix/scatter for known formats",
       "library_baselines": [
-        "cuSPARSE conversion APIs",
+        "rocSPARSE conversion APIs",
         "hipCUB sort/scan",
         "rocThrust sort/scan"
       ],

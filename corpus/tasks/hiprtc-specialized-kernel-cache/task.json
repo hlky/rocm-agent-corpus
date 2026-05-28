@@ -17,7 +17,7 @@
     "amd-rocm-programming-guide"
   ],
   "problem": {
-    "summary": "Compare a generic runtime kernel path against a shape-specialized hipRTC/nvJitLink cache design. Source files are concise notes-style C++ scaffolds and do not claim measured compile or run times.",
+    "summary": "Compare a generic runtime kernel path against a shape-specialized hipRTC/hipRTC cache/link path cache design. Source files are concise notes-style C++ scaffolds and do not claim measured compile or run times.",
     "inputs": [
       "kernel key: dtype, shape, architecture, flags",
       "float* input",
@@ -63,6 +63,6 @@
   "license": "Project seed example",
   "curation": {
     "status": "template-only",
-    "notes": "This is a planning scaffold for hipRTC/nvJitLink specialization. Future records must separate JIT overhead from cached execution."
+    "notes": "This is a planning scaffold for hipRTC/hipRTC cache/link path specialization. Future records must separate JIT overhead from cached execution."
   }
 }
