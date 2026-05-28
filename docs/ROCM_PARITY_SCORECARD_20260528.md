@@ -12,7 +12,7 @@ the ROCm corpus, without treating CUDA-origin measurements as ROCm evidence.
 | Architecture guidance | ROCm-native scaffolded | `docs/GPU_GFX_ARCHITECTURE_GUIDE.md`, `docs/ARCHITECTURE_LABS.md`, and `architecture/gfx*/README.md` use `gfx` targets, `hipcc`, rocprofiler/rocprof, and AMD GCN ISA evidence rules |
 | Runtime/library equivalents | scaffolded | HIP Graphs, hipRTC, RCCL, rocSHMEM, MIOpen, MIGraphX, hipBLASLt/rocBLAS, Composable Kernel, rocPRIM/hipCUB/rocThrust |
 | Harness equivalents | scaffolded | HIP harnesses exist for the CUDA seed harness families, but most have not been run on AMD hardware in this repo |
-| Evidence parity | started | `tools/summarize_results.py` reports seven ROCm optimization records, including one near-neutral `timing-only` vectorization result and one INT4 seed-baseline result; counter-backed evidence is still pending |
+| Evidence parity | started | `tools/summarize_results.py` reports ten ROCm optimization records, including tail/awkward-shape sweeps, one near-neutral `timing-only` vectorization result, and INT4 seed-baseline results; counter-backed evidence is still pending |
 
 ## Gate Commands
 
@@ -38,6 +38,7 @@ use `negative example` when a custom HIP optimization loses.
    timing records.
    Add matching quantized library or inference-engine baselines for
    `fused-int4-dequant-gemv` before making broader INT4 claims.
+   Continue awkward-shape and tail-path sweeps for measured seed harnesses.
 2. Add library baseline records for the same shapes:
    hipCUB/rocPRIM, hipBLASLt/rocBLAS, Composable Kernel, MIOpen, and Triton
    where applicable.

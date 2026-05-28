@@ -36,12 +36,14 @@
     "optimized": "source/optimized.hip",
     "results": [
       "results/baseline-16777216-20260528T174821Z.json",
-      "results/optimized-16777216-20260528T174839Z.json"
+      "results/optimized-16777216-20260528T174839Z.json",
+      "results/baseline-16777219-20260528T182600Z.json",
+      "results/optimized-16777219-20260528T182617Z.json"
     ]
   },
   "verification": {
     "status": "passed-gfx1201-timing-only",
-    "method": "Compare against CPU reference for aligned and tail sizes. The 16777216-element gfx1201 HIP runs passed with max_abs_error=0 and bad_count=0.",
+    "method": "Compare against CPU reference for aligned and tail sizes. The 16777216-element and 16777219-element gfx1201 HIP runs passed with max_abs_error=0 and bad_count=0.",
     "tolerances": {
       "max_abs_error": 1e-05
     }
@@ -64,6 +66,6 @@
   "license": "Project seed example",
   "curation": {
     "status": "timing-only-near-neutral",
-    "notes": "Ported from the CUDA corpus on 2026-05-20. On 2026-05-28, AMD Radeon RX 9070 XT gfx1201 HIP-event timing measured 0.33775 ms scalar baseline versus 0.33360 ms float4 optimized for 16777216-element SAXPY, speedup 1.012440x. The timing distributions overlap, so this is near-neutral evidence rather than a broad vectorization win. No rocprofiler/rocprof counters were collected."
+    "notes": "Ported from the CUDA corpus on 2026-05-20. On 2026-05-28, AMD Radeon RX 9070 XT gfx1201 HIP-event timing measured 0.33775 ms scalar baseline versus 0.33360 ms float4 optimized for 16777216-element SAXPY, speedup 1.012440x. A 16777219-element tail-path sweep measured 0.36000 ms scalar versus 0.34020 ms float4 plus scalar tail, speedup 1.058201x. The timing distributions overlap, so this is near-neutral evidence rather than a broad vectorization win. No rocprofiler/rocprof counters were collected."
   }
 }

@@ -63,6 +63,16 @@ Completed first timing-only gfx1201 records:
   GEMV over the one-thread-per-row seed baseline for 4096x4096 group_size=128.
   This is not a vendor-library or inference-engine baseline comparison.
 
+Completed first shape sweeps:
+
+- `vectorized-saxpy`: 1.058201x float4 plus scalar tail over scalar for
+  n=16777219. This remains near-neutral evidence.
+- `fused-int4-dequant-gemv`: 6.360370x for 4096x4097 group_size=128, covering
+  odd-column packing and group-tail metadata. This remains a seed-baseline
+  comparison only.
+- `shared-memory-tiled-transpose`: 7.738806x for non-square 1009x2039 tail
+  tiles.
+
 Blocked in the current Windows venv:
 
 - `rocwmma-mfma-gemm`: scalar HIP baseline passed for 256x256x256, but the

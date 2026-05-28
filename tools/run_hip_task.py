@@ -200,7 +200,8 @@ def main() -> int:
         parsed["captured_at"] = datetime.now(timezone.utc).isoformat()
         parsed["source_artifact"] = source_rel
         parsed["build_command"] = compile_cmd
-        result_path.write_text(json.dumps(parsed, indent=2) + "\n", encoding="utf-8")
+        with result_path.open("w", encoding="utf-8", newline="\n") as handle:
+            handle.write(json.dumps(parsed, indent=2) + "\n")
         print(f"Wrote {result_path}")
 
     return 0

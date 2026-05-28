@@ -143,7 +143,8 @@ def main() -> int:
         parsed["build_command"] = compile_cmd
         parsed["run_command"] = bench_cmd
         parsed["baseline_id"] = baseline_id
-        result_path.write_text(json.dumps(parsed, indent=2) + "\n", encoding="utf-8")
+        with result_path.open("w", encoding="utf-8", newline="\n") as handle:
+            handle.write(json.dumps(parsed, indent=2) + "\n")
         print(f"Wrote {result_path}")
 
     return 0

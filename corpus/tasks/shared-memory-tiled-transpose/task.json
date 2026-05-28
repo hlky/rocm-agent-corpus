@@ -36,12 +36,14 @@
     "optimized": "source/optimized.hip",
     "results": [
       "results/baseline-4096x4096-20260528T181626Z.json",
-      "results/optimized-4096x4096-20260528T181647Z.json"
+      "results/optimized-4096x4096-20260528T181647Z.json",
+      "results/baseline-1009x2039-20260528T182717Z.json",
+      "results/optimized-1009x2039-20260528T182736Z.json"
     ]
   },
   "verification": {
     "status": "passed-gfx1201-timing-only",
-    "method": "Compare output against CPU transpose for square and rectangular matrices. The 4096x4096 gfx1201 HIP runs passed with max_abs_error=0 and bad_count=0.",
+    "method": "Compare output against CPU transpose for square and rectangular matrices. The 4096x4096 and 1009x2039 gfx1201 HIP runs passed with max_abs_error=0 and bad_count=0.",
     "tolerances": {}
   },
   "benchmarking": {
@@ -63,6 +65,6 @@
   "license": "Project seed example",
   "curation": {
     "status": "timing-only",
-    "notes": "Ported from the CUDA corpus on 2026-05-20. On 2026-05-28, AMD Radeon RX 9070 XT gfx1201 HIP-event timing measured 14.53330 ms naive transpose versus 0.65830 ms shared-memory tiled transpose for 4096x4096 fp32, speedup 22.077017x. No rocprofiler/rocprof counters were collected, so bank-conflict and memory-transaction explanations remain expected signals only."
+    "notes": "Ported from the CUDA corpus on 2026-05-20. On 2026-05-28, AMD Radeon RX 9070 XT gfx1201 HIP-event timing measured 14.53330 ms naive transpose versus 0.65830 ms shared-memory tiled transpose for 4096x4096 fp32, speedup 22.077017x. A non-square/tail 1009x2039 sweep measured 0.05185 ms baseline versus 0.00670 ms optimized, speedup 7.738806x. No rocprofiler/rocprof counters were collected, so bank-conflict and memory-transaction explanations remain expected signals only."
   }
 }

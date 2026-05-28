@@ -20,6 +20,14 @@ counters are attached yet.
 | `vectorized-saxpy` | 16777216 fp32 elements | 0.337750 | 0.333600 | 1.012440x | `data/records/vectorized_saxpy_gfx1201_20260528.jsonl` |
 | `fused-int4-dequant-gemv` | 4096x4096 group_size=128 | 0.477550 | 0.087400 | 5.463959x | `data/records/fused_int4_dequant_gemv_gfx1201_20260528.jsonl` |
 
+## Shape Sweep Measurements
+
+| Task | Shape | Baseline ms | Optimized ms | Speedup | Record |
+| --- | --- | ---: | ---: | ---: | --- |
+| `vectorized-saxpy` | 16777219 fp32 elements | 0.360000 | 0.340200 | 1.058201x | `data/records/vectorized_saxpy_tail_gfx1201_20260528.jsonl` |
+| `fused-int4-dequant-gemv` | 4096x4097 group_size=128 | 0.584200 | 0.091850 | 6.360370x | `data/records/fused_int4_dequant_gemv_odd_cols_gfx1201_20260528.jsonl` |
+| `shared-memory-tiled-transpose` | 1009x2039 fp32 transpose | 0.051850 | 0.006700 | 7.738806x | `data/records/shared_memory_tiled_transpose_awkward_gfx1201_20260528.jsonl` |
+
 ## Partial Or Blocked Runs
 
 - `rocwmma-mfma-gemm`: scalar HIP baseline passed for 256x256x256 on gfx1201,

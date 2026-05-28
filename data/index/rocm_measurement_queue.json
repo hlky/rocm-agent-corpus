@@ -56,6 +56,27 @@
       "record": "data/records/rocwmma_mfma_gemm_gfx1201_build_blocked_20260528.jsonl"
     }
   ],
+  "completed_shape_sweeps": [
+    {
+      "task_id": "vectorized-saxpy",
+      "shape": "n=16777219",
+      "hardware_id": "rx9070xt_gfx1201_rocm721_windows_20260528",
+      "record": "data/records/vectorized_saxpy_tail_gfx1201_20260528.jsonl"
+    },
+    {
+      "task_id": "fused-int4-dequant-gemv",
+      "shape": "rows=4096 cols=4097 group_size=128",
+      "hardware_id": "rx9070xt_gfx1201_rocm721_windows_20260528",
+      "record": "data/records/fused_int4_dequant_gemv_odd_cols_gfx1201_20260528.jsonl",
+      "scope": "seed-baseline comparison only; no matching quantized library baseline attached"
+    },
+    {
+      "task_id": "shared-memory-tiled-transpose",
+      "shape": "rows=1009 cols=2039",
+      "hardware_id": "rx9070xt_gfx1201_rocm721_windows_20260528",
+      "record": "data/records/shared_memory_tiled_transpose_awkward_gfx1201_20260528.jsonl"
+    }
+  ],
   "first_library_baseline": {
     "task_id": "rocwmma-mfma-gemm",
     "baseline": "hipblaslt-hgemm",
