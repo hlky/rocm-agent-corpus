@@ -44,7 +44,10 @@
   "artifacts": {
     "baseline": "source/baseline.hip",
     "optimized": "source/optimized.hip",
-    "harness": "../../../harnesses/topk_sampling_benchmark.hip"
+    "harness": "../../../harnesses/topk_sampling_benchmark.hip",
+    "results": [
+      "results/pytorch-eager-1024x32768-k4-t0.8-20260528T172210Z.json"
+    ]
   },
   "verification": {
     "status": "port-pending-rocm-run",
@@ -78,7 +81,7 @@
   },
   "license": "Project seed example",
   "curation": {
-    "status": "ported-seed",
-    "notes": "Ported from the CUDA corpus on 2026-05-20. CUDA-origin timing artifacts were removed; rerun on ROCm hardware before making performance claims."
+    "status": "framework-baseline-timing-only",
+    "notes": "Ported from the CUDA corpus on 2026-05-20. A PyTorch eager ROCm timing-only baseline was captured on AMD Radeon RX 9070 XT gfx1201, but no custom HIP baseline/optimized pair or profiler-counter evidence is attached yet."
   }
 }

@@ -98,6 +98,12 @@ TASK_CONFIG = {
 }
 
 
+def compiler_debug_flags() -> list[str]:
+    if sys.platform.startswith("win"):
+        return ["-gline-tables-only"]
+    return ["-lineinfo"]
+
+
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("task_id", choices=sorted(TASK_CONFIG))
@@ -121,6 +127,14 @@ def run(command: list[str]) -> subprocess.CompletedProcess[str]:
     return subprocess.run(command, check=False, text=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
 
+def parse_json_stdout(stdout: str) -> dict:
+    start = stdout.find("{")
+    end = stdout.rfind("}")
+    if start < 0 or end < start:
+        raise json.JSONDecodeError("no JSON object found in benchmark stdout", stdout, 0)
+    return json.loads(stdout[start : end + 1])
+
+
 def main() -> int:
     args = parse_args()
     if shutil.which("hipcc") is None:
@@ -140,7 +154,7 @@ def main() -> int:
     exe_path = out_dir / exe_name
 
     variant_define = "-DVARIANT_BASELINE" if args.variant == "baseline" else "-DVARIANT_OPTIMIZED"
-    compile_cmd = ["hipcc", "-std=c++17", "-O3", "-lineinfo", variant_define]
+    compile_cmd = ["hipcc", "-std=c++17", "-O3", *compiler_debug_flags(), variant_define]
     compile_cmd.extend(config["defines"])
     if args.arch:
         compile_cmd.append(f"--offload-arch={args.arch}")
@@ -153,6 +167,9 @@ def main() -> int:
         print(compiled.stderr, file=sys.stderr)
     if compiled.returncode != 0:
         return compiled.returncode
+    if not exe_path.exists():
+        print(f"Expected benchmark executable was not created: {exe_path}", file=sys.stderr)
+        return 1
 
     bench = run([str(exe_path), *bench_args])
     if bench.stderr:
@@ -167,7 +184,7 @@ def main() -> int:
         stamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
         shape = config["shape_label"](bench_args)
         result_path = results_dir / f"{args.variant}-{shape}-{stamp}.json"
-        parsed = json.loads(bench.stdout)
+        parsed = parse_json_stdout(bench.stdout)
         parsed["task_id"] = args.task_id
         parsed["captured_at"] = datetime.now(timezone.utc).isoformat()
         parsed["source_artifact"] = source_rel

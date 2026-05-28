@@ -15,6 +15,12 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 
 
+def compiler_debug_flags() -> list[str]:
+    if sys.platform.startswith("win"):
+        return ["-gline-tables-only"]
+    return ["-lineinfo"]
+
+
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
@@ -46,6 +52,14 @@ def run(command: list[str], cwd: Path | None = None) -> subprocess.CompletedProc
     )
 
 
+def parse_json_stdout(stdout: str) -> dict:
+    start = stdout.find("{")
+    end = stdout.rfind("}")
+    if start < 0 or end < start:
+        raise json.JSONDecodeError("no JSON object found in benchmark stdout", stdout, 0)
+    return json.loads(stdout[start : end + 1])
+
+
 def main() -> int:
     args = parse_args()
     if shutil.which("hipcc") is None:
@@ -65,7 +79,7 @@ def main() -> int:
         "hipcc",
         "-std=c++17",
         "-O3",
-        "-lineinfo",
+        *compiler_debug_flags(),
     ]
     if args.arch:
         compile_cmd.append(f"--offload-arch={args.arch}")
@@ -86,6 +100,9 @@ def main() -> int:
         print(compiled.stderr, file=sys.stderr)
     if compiled.returncode != 0:
         return compiled.returncode
+    if not exe_path.exists():
+        print(f"Expected benchmark executable was not created: {exe_path}", file=sys.stderr)
+        return 1
 
     bench_cmd = [
         str(exe_path),
@@ -109,7 +126,7 @@ def main() -> int:
         results_dir.mkdir(exist_ok=True)
         stamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
         result_path = results_dir / f"hipblaslt-{args.m}x{args.n}x{args.k}-{stamp}.json"
-        parsed = json.loads(bench.stdout)
+        parsed = parse_json_stdout(bench.stdout)
         parsed["captured_at"] = datetime.now(timezone.utc).isoformat()
         parsed["source_artifact"] = "harnesses/hipblaslt_hgemm_benchmark.hip"
         parsed["build_command"] = compile_cmd

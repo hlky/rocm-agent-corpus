@@ -52,18 +52,20 @@
     "optimized": "source/optimized.hip",
     "harness": "../../../harnesses/normalization_backward_benchmark.hip",
     "profiles": [],
-    "results": []
+    "results": [
+      "results/pytorch-eager-4096x1024-rmsnorm-20260528T172209Z.json"
+    ]
   },
   "verification": {
-    "status": "template-only",
-    "method": "The HIP harness compares dx, dgamma, and dbeta against a deterministic CPU reference using deterministic inputs and saved-statistic reuse. PyTorch and Triton baseline runners are provided for future ROCm timing, but no ROCm result artifacts are attached yet.",
+    "status": "framework-baseline-timing-only",
+    "method": "The HIP harness compares dx, dgamma, and dbeta against a deterministic CPU reference using deterministic inputs and saved-statistic reuse. A PyTorch eager RMSNorm backward timing-only baseline is attached for gfx1201; custom HIP and Triton comparisons remain pending.",
     "tolerances": {
       "max_abs_error": 0.005,
       "max_rel_error": 0.005
     }
   },
   "benchmarking": {
-    "status": "template-only",
+    "status": "framework-baseline-timing-only",
     "operation": "normalization-backward",
     "required_metrics": [
       "median latency",
@@ -85,7 +87,7 @@
   },
   "license": "Project seed example",
   "curation": {
-    "status": "template-only",
-    "notes": "ROCm parity port from CUDA task `normalization-backward`. This is a template/harness scaffold only; CUDA-origin result artifacts were intentionally not copied, and no ROCm timing, correctness, or profiler-counter evidence is claimed yet. Run on AMD hardware, attach ROCm version, hipcc flags, gfx target, and label HIP-event-only results as timing-only."
+    "status": "framework-baseline-timing-only",
+    "notes": "ROCm parity port from CUDA task `normalization-backward`. A PyTorch eager RMSNorm backward timing-only baseline was captured on AMD Radeon RX 9070 XT gfx1201. Custom HIP and Triton comparisons plus profiler-counter evidence remain pending."
   }
 }
