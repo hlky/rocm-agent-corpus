@@ -110,6 +110,8 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("variant", choices=["baseline", "optimized"])
     parser.add_argument("benchmark_args", nargs="*", help="Arguments forwarded to the benchmark binary")
     parser.add_argument("--arch", default="", help="Optional hipcc arch, e.g. gfx1030")
+    parser.add_argument("--hardware-id", default="", help="Optional hardware metadata id to attach to result JSON")
+    parser.add_argument("--evidence-label", default="timing-only", help="Evidence label for written result JSON")
     parser.add_argument("--write-result", action="store_true")
     return parser.parse_args()
 
@@ -186,6 +188,15 @@ def main() -> int:
         result_path = results_dir / f"{args.variant}-{shape}-{stamp}.json"
         parsed = parse_json_stdout(bench.stdout)
         parsed["task_id"] = args.task_id
+        parsed["evidence_label"] = args.evidence_label
+        if args.arch:
+            parsed["gfx_target"] = args.arch
+        if args.hardware_id:
+            parsed["hardware_id"] = args.hardware_id
+        parsed.setdefault(
+            "timer_scope",
+            "HIP events around the benchmark function call for the selected variant; allocation and host reference work are excluded",
+        )
         parsed["captured_at"] = datetime.now(timezone.utc).isoformat()
         parsed["source_artifact"] = source_rel
         parsed["build_command"] = compile_cmd

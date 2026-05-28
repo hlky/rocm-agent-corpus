@@ -7,8 +7,6 @@
     "python tools/inspect_rocm_arch.py"
   ],
   "first_timing_only_tasks": [
-    "block-reduction-sum",
-    "rowwise-softmax",
     "block-topk-sampling",
     "rocwmma-mfma-gemm"
   ],
@@ -17,6 +15,16 @@
       "task_id": "memory-coalesced-matrix-copy",
       "hardware_id": "rx9070xt_gfx1201_rocm721_windows_20260528",
       "record": "data/records/memory_coalesced_matrix_copy_gfx1201_20260528.jsonl"
+    },
+    {
+      "task_id": "block-reduction-sum",
+      "hardware_id": "rx9070xt_gfx1201_rocm721_windows_20260528",
+      "record": "data/records/block_reduction_sum_gfx1201_20260528.jsonl"
+    },
+    {
+      "task_id": "rowwise-softmax",
+      "hardware_id": "rx9070xt_gfx1201_rocm721_windows_20260528",
+      "record": "data/records/rowwise_softmax_gfx1201_20260528.jsonl"
     }
   ],
   "first_library_baseline": {

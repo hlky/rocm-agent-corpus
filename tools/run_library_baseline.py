@@ -36,6 +36,8 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--workspace-bytes", type=int, default=33_554_432)
     parser.add_argument("--heuristics", type=int, default=16)
     parser.add_argument("--arch", default="", help="Optional hipcc arch, e.g. gfx1030")
+    parser.add_argument("--hardware-id", default="", help="Optional hardware metadata id to attach to result JSON")
+    parser.add_argument("--evidence-label", default="timing-only", help="Evidence label for written result JSON")
     parser.add_argument("--write-result", action="store_true", help="Write JSON output under the task results directory")
     return parser.parse_args()
 
@@ -127,6 +129,15 @@ def main() -> int:
         stamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
         result_path = results_dir / f"hipblaslt-{args.m}x{args.n}x{args.k}-{stamp}.json"
         parsed = parse_json_stdout(bench.stdout)
+        parsed["evidence_label"] = args.evidence_label
+        if args.arch:
+            parsed["gfx_target"] = args.arch
+        if args.hardware_id:
+            parsed["hardware_id"] = args.hardware_id
+        parsed.setdefault(
+            "timer_scope",
+            "HIP events reported by the library baseline harness; allocation and host reference work are excluded",
+        )
         parsed["captured_at"] = datetime.now(timezone.utc).isoformat()
         parsed["source_artifact"] = "harnesses/hipblaslt_hgemm_benchmark.hip"
         parsed["build_command"] = compile_cmd
